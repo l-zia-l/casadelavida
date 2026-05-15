@@ -146,30 +146,49 @@
 @media (max-width: 991px) {
   .cdlv-header__list--left,
   .cdlv-header__item--desktop-only {
-    display: none; /* In a full implementation, this moves into a slide-out drawer */
+    display: none;
   }
 
-  /* Vertical Mobile Menu Implementation */
+  /* Fixed Vertical Mobile Menu Implementation */
   .cdlv-header--menu-open {
-    background-color: var(--color-primary); /* Force solid background when open */
+    background-color: var(--color-primary); 
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   }
 
   .cdlv-header--menu-open .cdlv-header__nav {
-    grid-template-columns: 1fr; /* Stack elements vertically */
-    justify-items: center;
-    padding-bottom: var(--spacing-lg);
+    /* Keep Top Bar intact (3 columns), put dropdown links on row 2 */
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    padding-bottom: var(--spacing-md);
   }
 
+  /* 1. Reset toggle to top-left */
   .cdlv-header--menu-open .cdlv-header__toggle {
-    position: absolute;
-    left: var(--layout-gutter);
-    top: var(--spacing-sm);
+    position: static;
+    grid-column: 1;
+    grid-row: 1;
   }
 
-  .cdlv-header--menu-open .cdlv-header__list {
+  /* 2. Lock Logo to center-top */
+  .cdlv-header--menu-open .cdlv-header__logo-link {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* 3. Lock Cart to right-top */
+  .cdlv-header--menu-open .cdlv-header__list--right {
+    grid-column: 3;
+    grid-row: 1;
+    padding-top: 0;
+  }
+
+  /* 4. Dropdown links take up the full second row */
+  .cdlv-header--menu-open .cdlv-header__list--left {
+    grid-column: 1 / -1; /* Span full width */
+    grid-row: 2;
     display: flex;
     flex-direction: column;
+    align-items: center; /* Center links horizontally */
     width: 100%;
     gap: var(--spacing-sm);
     padding-top: var(--spacing-md);

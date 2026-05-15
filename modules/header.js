@@ -64,7 +64,7 @@ const buildNavList = (links, alignment) => {
         const cartDataAttr = link.isCart ? 'data-cart-toggle="true"' : '';
         
         const content = link.isCart 
-            ? `<i class="fa-solid fa-cart-shopping"></i><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
+            ? `<i class="fa-solid fa-cart-shopping""></i><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
             : sanitizeData(link.label);
         
         return `
