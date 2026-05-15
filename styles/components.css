@@ -143,11 +143,20 @@
   transition: transform var(--transition-base), opacity var(--transition-base);
 }
 
+/* Hide mobile-only duplicates on desktop */
+.cdlv-header__item--mobile-only {
+  display: none;
+}
+
 /* Hide desktop links on mobile */
 @media (max-width: 991px) {
   .cdlv-header__list--left,
   .cdlv-header__item--desktop-only {
     display: none;
+  }
+
+  .cdlv-header__item--mobile-only {
+    display: flex;
   }
 
   /* Fixed Vertical Mobile Menu Implementation */
@@ -195,9 +204,7 @@
     padding-top: var(--spacing-md);
   }
 
-  .cdlv-header--menu-open .cdlv-header__item--desktop-only {
-    display: flex;
-  }
+
 }
 
 /* --- DESKTOP LAYOUT --- */

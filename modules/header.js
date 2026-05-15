@@ -22,9 +22,12 @@ const config = {
     links: {
         left: [
             { label: 'Shop', url: 'shop.html' },
-            { label: 'Rituals', url: 'shop/wellness-boxes.html' }
+            { label: 'Rituals', url: 'shop/wellness-boxes.html' },
+            // Add Account here, flagged for mobile menu only
+            { label: 'Account', url: 'account/index.html', mobileOnly: true } 
         ],
         right: [
+            // Keep Account here, flagged for desktop right side only
             { label: 'Account', url: 'account/index.html', desktopOnly: true },
             { label: 'Cart', url: 'shopping-cart.html', isCart: true }
         ]
@@ -59,16 +62,20 @@ const sanitizeData = (str) => {
  */
 const buildNavList = (links, alignment) => {
     const listItems = links.map(link => {
-        const desktopClass = link.desktopOnly ? 'cdlv-header__item--desktop-only' : '';
+        // Apply visibility classes based on our new config flags
+        let displayClass = '';
+        if (link.desktopOnly) displayClass = 'cdlv-header__item--desktop-only';
+        if (link.mobileOnly) displayClass = 'cdlv-header__item--mobile-only';
+        
         const cartClass = link.isCart ? 'cdlv-header__link--cart' : '';
         const cartDataAttr = link.isCart ? 'data-cart-toggle="true"' : '';
         
         const content = link.isCart 
-            ? `<i class="fa-solid fa-cart-shopping""></i><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
+            ? `<i class="fa-solid fa-cart-shopping"></i><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
             : sanitizeData(link.label);
         
         return `
-            <li class="cdlv-header__item ${desktopClass}">
+            <li class="cdlv-header__item ${displayClass}">
                 <a href="${sanitizeData(link.url)}" class="cdlv-header__link ${cartClass}" ${cartDataAttr}>
                     ${content}
                 </a>
