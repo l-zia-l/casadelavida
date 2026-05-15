@@ -5,14 +5,13 @@
    Dependencies: Uses tokens from globals.css (--color-primary, fluid spacing).
    ========================================================================== */
 
-/* The header container (applied to the parent #global-header by the system)
-   needs fixed positioning to float over the hero section */
+/* The header container needs fixed positioning to float over the hero section */
 #global-header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: var(--z-index-header);
   background-color: transparent;
   transition: background-color var(--transition-base), box-shadow var(--transition-base);
 }
@@ -28,6 +27,9 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   padding: var(--spacing-sm) 0;
+  position: relative;
+  z-index: var(--z-index-header);
+  background-color: inherit;
 }
 
 /* --- LOGO --- */
@@ -38,10 +40,12 @@
   line-height: 0; 
 }
 
+/* Fluid dynamic logo scaling: constantly adjusts to viewport width */
 .cdlv-header__logo-img {
-  height: clamp(32px, 5vw, 50px);
+  height: clamp(1.5rem, 4vw + 0.5rem, 3.5rem);
   width: auto;
   object-fit: contain;
+  transition: height var(--transition-base);
 }
 
 /* --- NAVIGATION LISTS --- */
@@ -122,19 +126,48 @@
   transition: opacity var(--transition-fast);
 }
 
-.cdlv-header__toggle-icon {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
+/* Override any global button hover states to prevent white background */
+#global-header .cdlv-header__toggle:hover {
+  background-color: transparent;
+  box-shadow: none;
+  transform: none;
+  opacity: 0.7;
 }
 
-.cdlv-header__toggle-line {
+/* --- MOBILE DRAWER (Drop-down Menu) --- */
+.cdlv-header__mobile-drawer {
+  position: absolute;
+  top: 100%;
+  left: 0;
   width: 100%;
-  height: 1px;
-  background-color: var(--color-text-dark);
-  transition: transform var(--transition-base), opacity var(--transition-base);
+  background-color: var(--color-primary);
+  padding: var(--spacing-md) var(--layout-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  
+  /* Slide/Fade animation properties */
+  transform: translateY(-20px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-base);
+  z-index: var(--z-index-drawer);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* State when menu is open */
+.is-menu-open .cdlv-header__mobile-drawer {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Format the links inside the mobile drawer */
+.cdlv-header__mobile-drawer .cdlv-header__link {
+  font-size: var(--font-size-h4);
+  font-family: var(--font-family-heading);
+  text-transform: none;
+  padding: var(--spacing-xs) 0;
 }
 
 /* Hide desktop links on mobile */
@@ -155,8 +188,25 @@
     display: none;
   }
   
+  .cdlv-header__mobile-drawer {
+    display: none; 
+  }
+  
   .cdlv-header__list--left,
   .cdlv-header__item--desktop-only {
     display: flex;
   }
+}
+
+/* Screen reader only helper */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

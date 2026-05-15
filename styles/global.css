@@ -64,6 +64,11 @@
   --transition-fast: 150ms var(--ease-professional);
   --transition-base: 300ms var(--ease-professional);
   --transition-slow: 600ms var(--ease-professional);
+
+  /* --- 6. SYSTEM Z-INDEX --- */
+  --z-index-header: 1000;
+  --z-index-drawer: 990;
+  --z-index-overlay: 1050;
 }
 
 /* ==========================================================================
