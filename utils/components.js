@@ -7,7 +7,7 @@
    or execution vulnerabilities.
    ========================================================================== */
 
-const MODULE_PATH = '/components/';
+const MODULE_PATH = '/modules/';
 
 /**
  * Initializes all modules found in the current DOM.

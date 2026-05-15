@@ -33,7 +33,7 @@
   --color-primary: #FAF9F6;
   --color-secondary: #D9AF78;
   --color-accent: #6631AC;
-  --color-neutral: #2596BE;
+  --color-neutral: #25bbbe;
   
   /* Semantic Color Mapping */
   --color-bg-base: var(--color-primary);
