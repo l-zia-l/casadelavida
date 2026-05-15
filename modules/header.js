@@ -107,7 +107,7 @@ const generateHeaderHTML = () => {
 
             <!-- Centered Logo -->
             <a href="${safeLogoUrl}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
-                <img src="${safeLogoSrc}" alt="" aria-hidden="true" class="cdlv-header__logo-img">
+                <img src="${safeLogoSrc}" alt="" aria-hidden="true" class="cdlv-header__logo-img" fetchpriority="high" loading="eager">
                 <span class="cdlv-header__logo-text">${safeLogoText}</span>
             </a>
 
@@ -127,18 +127,20 @@ export function init(element) {
     // 1. Inject the sanitized HTML structure
     element.innerHTML = generateHeaderHTML();
 
-    // 2. Initialize Scroll State Logic (Transparent to Solid)
+    // 2. Initialize Scroll State Logic with rAF Throttling
+    let ticking = false;
     const handleScroll = () => {
-        // Use a 50px threshold before turning solid to account for minor scrolling bounces
-        if (window.scrollY > 50) {
-            element.classList.add('cdlv-header--scrolled');
-        } else {
-            element.classList.remove('cdlv-header--scrolled');
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                element.classList.toggle('cdlv-header--scrolled', window.scrollY > 50);
+                ticking = false;
+            });
+            ticking = true;
         }
     };
 
-    // Attach scroll listener with passive flag for rendering performance
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     
     // Trigger once on load in case the user refreshes mid-page
     handleScroll();

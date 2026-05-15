@@ -44,10 +44,13 @@ and assign it to the `innerHTML` of the target container.
         content="default-src 'self'; 
                  script-src 'self' 'module';
                  img-src 'self' data: https:; 
-                 connect-src 'self' https://*.supabase.co;
-                 frame-src 'self' https://js.stripe.com;">
+                 connect-src 'self' https://*.supabase.co;">
 
   <title>Casa De La Vida</title>
+
+  <link rel="preconnect" href="https://*.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
   <!-- Global Source of Truth -->
   <link rel="stylesheet" href="styles/global.css">
