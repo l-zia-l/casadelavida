@@ -223,6 +223,81 @@ img, video {
 .bg-shift-hover:hover { background-color: var(--color-bg-tranquil); color: var(--color-text-inverse); }
 .bg-shift-hover:hover p, .bg-shift-hover:hover h2 { color: var(--color-text-inverse); }
 
+/* ==========================================================================
+   PROTOTYPE LAYOUT UTILITIES & COMPONENTS
+   ========================================================================== */
+
+/* Header Component */
+.site-header { padding: var(--space-sm) 0; border-bottom: 1px solid rgba(0,0,0,0.05); position: sticky; top: 0; background: var(--color-primary); z-index: 100; }
+.header-inner { display: flex; justify-content: space-between; align-items: center; }
+.brand-logo { font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: 600; }
+.nav-menu { display: flex; gap: var(--space-md); }
+.nav-actions { display: flex; gap: var(--space-sm); align-items: center; }
+
+/* Grid Engines */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-lg); align-items: center; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-md); }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-md); }
+
+/* Hero Big */
+.hero-big {
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  background: url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+}
+.hero-box { background: var(--color-primary); padding: var(--space-lg); max-width: 600px; margin-left: var(--layout-gutter); }
+
+/* Product Cards */
+.product-card { padding: var(--space-sm); text-align: center; position: relative; }
+.product-card .badge-sale { position: absolute; top: var(--space-sm); left: var(--space-sm); background: var(--color-secondary); color: #fff; padding: 0.2rem 0.8rem; font-size: 0.75rem; text-transform: uppercase; z-index: 10;}
+.product-card .img-wrapper { aspect-ratio: 1; margin-bottom: var(--space-sm); background: #f0f0f0; }
+.product-card h4 { font-size: var(--font-size-body); font-family: var(--font-body); margin-bottom: 0.5rem; }
+.product-price { color: var(--color-accent); font-weight: 600; margin-bottom: var(--space-sm); }
+
+/* Post Card (Blog Template) */
+.post-card .post-content { padding: var(--space-md); }
+.post-card h3 { font-size: var(--font-size-h4); }
+
+/* Footer */
+.site-footer { background: #111; color: var(--color-primary); padding-block: var(--space-lg); }
+.site-footer h4, .site-footer p { color: var(--color-primary); }
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); }
+
+/* ==========================================================================
+   EXTRACTED UTILITIES & NEW COMPONENT STYLES
+   ========================================================================== */
+
+/* Spacing & Alignment Utilities */
+.text-center { text-align: center; }
+.mb-lg { margin-bottom: var(--space-lg); }
+.mb-md { margin-bottom: var(--space-md); }
+.w-100 { width: 100%; }
+.max-w-600 { max-width: 600px; margin-inline: auto; }
+.max-w-800 { max-width: 800px; margin-inline: auto; }
+
+/* Flexbox Headers */
+.section-header-flex { display: flex; justify-content: space-between; align-items: center; }
+
+/* Typography & Links */
+.link-underline { text-decoration: underline; }
+.font-heading { font-family: var(--font-heading); }
+.price-original { text-decoration: line-through; color: var(--color-text-muted); margin-right: 0.5rem; }
+
+/* Sections & Cards */
+.bg-light-warm { background-color: #f7f5f0; }
+.card-body { padding: var(--space-md); text-align: center; }
+
+/* Testimonials */
+.testimonial-text { font-style: italic; }
+.testimonial-author { text-transform: uppercase; letter-spacing: 0.05em; margin-top: var(--space-md); }
+
+/* Blog Feed */
+.post-category { font-size: var(--font-size-small); color: var(--color-secondary); text-transform: uppercase; }
+
+/* Newsletter */
+.newsletter-section { background-color: var(--color-primary); border-top: 1px solid rgba(0,0,0,0.05); text-align: center; padding-block: var(--space-lg); }
+.newsletter-form { display: flex; gap: var(--space-sm); margin-top: var(--space-md); justify-content: center; }
 
 /* Add this at the bottom of your stylesheet */
 @media (min-width: 1600px) {
@@ -236,3 +311,4 @@ img, video {
     font-size: 125%; 
   }
 }
+

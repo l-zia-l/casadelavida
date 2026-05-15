@@ -5,48 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Casa de la Vida | Global Wellness</title>
   <link rel="stylesheet" href="styles/global.css">
-  <style>
-    /* ==========================================================================
-       PROTOTYPE LAYOUT UTILITIES & COMPONENTS
-       ========================================================================== */
-    
-    /* Header Component */
-    .site-header { padding: var(--space-sm) 0; border-bottom: 1px solid rgba(0,0,0,0.05); position: sticky; top: 0; background: var(--color-primary); z-index: 100; }
-    .header-inner { display: flex; justify-content: space-between; align-items: center; }
-    .brand-logo { font-family: var(--font-heading); font-size: var(--font-size-h3); font-weight: 600; }
-    .nav-menu { display: flex; gap: var(--space-md); }
-    .nav-actions { display: flex; gap: var(--space-sm); align-items: center; }
-
-    /* Grid Engines */
-    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-lg); align-items: center; }
-    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-md); }
-    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-md); }
-
-    /* Hero Big */
-    .hero-big {
-      min-height: 85vh;
-      display: flex;
-      align-items: center;
-      background: url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
-    }
-    .hero-box { background: var(--color-primary); padding: var(--space-lg); max-width: 600px; margin-left: var(--layout-gutter); }
-
-    /* Product Cards */
-    .product-card { padding: var(--space-sm); text-align: center; position: relative; }
-    .product-card .badge-sale { position: absolute; top: var(--space-sm); left: var(--space-sm); background: var(--color-secondary); color: #fff; padding: 0.2rem 0.8rem; font-size: 0.75rem; text-transform: uppercase; z-index: 10;}
-    .product-card .img-wrapper { aspect-ratio: 1; margin-bottom: var(--space-sm); background: #f0f0f0; }
-    .product-card h4 { font-size: var(--font-size-body); font-family: var(--font-body); margin-bottom: 0.5rem; }
-    .product-price { color: var(--color-accent); font-weight: 600; margin-bottom: var(--space-sm); }
-
-    /* Post Card (Blog Template) */
-    .post-card .post-content { padding: var(--space-md); }
-    .post-card h3 { font-size: var(--font-size-h4); }
-
-    /* Footer */
-    .site-footer { background: #111; color: var(--color-primary); padding-block: var(--space-lg); }
-    .site-footer h4, .site-footer p { color: var(--color-primary); }
-    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); }
-  </style>
 </head>
 <body>
 
@@ -79,25 +37,25 @@
 
     <!-- [COMPONENT: category-3-grid.js] -->
     <section class="container-fluid">
-      <h2 style="text-align: center; margin-bottom: var(--space-lg);">Shop by Intention</h2>
+      <h2 class="text-center mb-lg">Shop by Intention</h2>
       <div class="grid-3">
         <div class="card img-hover-scale">
           <img src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Rest & Recovery">
-          <div style="padding: var(--space-md); text-align: center;">
+          <div class="card-body">
             <h3>Rest & Recovery</h3>
             <a href="#" class="btn btn-outline">Explore</a>
           </div>
         </div>
         <div class="card img-hover-scale">
           <img src="https://images.unsplash.com/photo-1615397323381-42cb36a7eb42?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Focus & Clarity">
-          <div style="padding: var(--space-md); text-align: center;">
+          <div class="card-body">
             <h3>Focus & Clarity</h3>
             <a href="#" class="btn btn-outline">Explore</a>
           </div>
         </div>
         <div class="card img-hover-scale">
           <img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Nourish">
-          <div style="padding: var(--space-md); text-align: center;">
+          <div class="card-body">
             <h3>Nourish</h3>
             <a href="#" class="btn btn-outline">Explore</a>
           </div>
@@ -106,7 +64,7 @@
     </section>
 
     <!-- [COMPONENT: img-right-text-left.js] -->
-    <section style="background-color: #f7f5f0;">
+    <section class="bg-light-warm">
       <div class="container-fluid grid-2">
         <div>
           <h2>The Alchemy of Nature</h2>
@@ -121,9 +79,9 @@
 
     <!-- [COMPONENT: catalog-4-grid.js & product-card.js & product-card-sale.js] -->
     <section class="container-fluid">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
+      <div class="section-header-flex mb-md">
         <h2>Featured Remedies</h2>
-        <a href="#all" style="text-decoration: underline;">View All</a>
+        <a href="#all" class="link-underline">View All</a>
       </div>
       <div class="grid-4">
         <!-- Normal Product -->
@@ -143,8 +101,8 @@
             <img src="https://images.unsplash.com/photo-1608248593842-8021c37c1543?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Rose Serum">
           </div>
           <h4>Radiance Rose Face Oil</h4>
-          <div class="product-price"><span style="text-decoration: line-through; color: var(--color-text-muted); margin-right: 0.5rem;">$68.00</span>$54.00</div>
-          <button class="btn btn-outline" style="width: 100%;">Add to Cart</button>
+          <div class="product-price"><span class="price-original">$68.00</span>$54.00</div>
+          <button class="btn btn-outline w-100">Add to Cart</button>
         </div>
 
         <div class="product-card">
@@ -153,7 +111,7 @@
           </div>
           <h4>Ceremonial Matcha Blend</h4>
           <div class="product-price">$45.00</div>
-          <button class="btn btn-outline" style="width: 100%;">Add to Cart</button>
+          <button class="btn btn-outline w-100">Add to Cart</button>
         </div>
 
         <div class="product-card">
@@ -162,59 +120,59 @@
           </div>
           <h4>Ethical Palo Santo Bundle</h4>
           <div class="product-price">$18.00</div>
-          <button class="btn btn-outline" style="width: 100%;">Add to Cart</button>
+          <button class="btn btn-outline w-100">Add to Cart</button>
         </div>
       </div>
     </section>
 
     <!-- [COMPONENT: testimonials.js & interactive hover shift] -->
-    <section class="bg-shift-hover" style="text-align: center;">
-      <div class="container-fluid" style="max-width: 800px;">
-        <h2 style="font-style: italic;">"The Radiance Face Oil completely transformed my morning routine. It’s not just skincare, it’s a grounding ritual."</h2>
-        <p style="text-transform: uppercase; letter-spacing: 0.05em; margin-top: var(--space-md);">— Elena M., Verified Buyer</p>
+    <section class="bg-shift-hover text-center">
+      <div class="container-fluid max-w-800">
+        <h2 class="testimonial-text">"The Radiance Face Oil completely transformed my morning routine. It’s not just skincare, it’s a grounding ritual."</h2>
+        <p class="testimonial-author">— Elena M., Verified Buyer</p>
       </div>
     </section>
 
     <!-- [COMPONENT: template-blog.js & article-feed.js] -->
     <section class="container-fluid">
-      <h2 style="margin-bottom: var(--space-md);">The Journal</h2>
+      <h2 class="mb-md">The Journal</h2>
       <div class="grid-3">
         <article class="post-card img-hover-scale">
           <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Meditation">
           <div class="post-content">
-            <p style="font-size: var(--font-size-small); color: var(--color-secondary); text-transform: uppercase;">Mindfulness</p>
+            <p class="post-category">Mindfulness</p>
             <h3>5 Minutes to Ground Your Nervous System</h3>
             <p>Simple somatic practices you can do at your desk to reset your cortisol levels.</p>
-            <a href="#" style="text-decoration: underline;">Read More</a>
+            <a href="#" class="link-underline">Read More</a>
           </div>
         </article>
         <article class="post-card img-hover-scale">
           <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Herbs">
           <div class="post-content">
-            <p style="font-size: var(--font-size-small); color: var(--color-secondary); text-transform: uppercase;">Herbalism</p>
+            <p class="post-category">Herbalism</p>
             <h3>The Science of Adaptogens</h3>
             <p>Understanding how Ashwagandha and Rhodiola actually work inside the body.</p>
-            <a href="#" style="text-decoration: underline;">Read More</a>
+            <a href="#" class="link-underline">Read More</a>
           </div>
         </article>
         <article class="post-card img-hover-scale">
           <img src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Bath Ritual">
           <div class="post-content">
-            <p style="font-size: var(--font-size-small); color: var(--color-secondary); text-transform: uppercase;">Ritual</p>
+            <p class="post-category">Ritual</p>
             <h3>Curating the Perfect Evening Wind-Down</h3>
             <p>Transition from the workday to rest with these screen-free sensory transitions.</p>
-            <a href="#" style="text-decoration: underline;">Read More</a>
+            <a href="#" class="link-underline">Read More</a>
           </div>
         </article>
       </div>
     </section>
 
     <!-- [COMPONENT: newsletter-sign-up.js] -->
-    <section style="background-color: var(--color-primary); border-top: 1px solid rgba(0,0,0,0.05); text-align: center;">
-      <div class="container-fluid" style="max-width: 600px;">
+    <section class="newsletter-section">
+      <div class="container-fluid max-w-600">
         <h2>Join Our Community</h2>
         <p>Subscribe to receive 10% off your first order, plus weekly journal entries on modern wellness.</p>
-        <form style="display: flex; gap: var(--space-sm); margin-top: var(--space-md);">
+        <form class="newsletter-form">
           <input type="email" placeholder="Enter your email address" required>
           <button type="submit" class="btn">Subscribe</button>
         </form>
@@ -226,7 +184,7 @@
   <footer class="site-footer">
     <div class="container-fluid footer-grid">
       <div>
-        <h4 style="font-family: var(--font-heading);">Casa de la Vida</h4>
+        <h4 class="font-heading">Casa de la Vida</h4>
         <p>Elevating daily routines into sacred rituals.</p>
       </div>
       <div>
