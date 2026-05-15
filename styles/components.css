@@ -250,6 +250,7 @@
   background-color: var(--color-neutral-bg);
   color: var(--color-text-dark);
   font-family: var(--font-family-body);
+  margin-inline: calc(var(--layout-gutter) * -1);
 }
 
 .cdlv-footer-inner {
@@ -257,6 +258,7 @@
   flex-direction: column;
   gap: var(--spacing-lg);
   padding-block: var(--spacing-lg);
+  padding-inline: var(--layout-gutter);
 }
 
 /* Logo Alignment */
@@ -268,7 +270,6 @@
 
 .cdlv-footer-brand-banner {
   background-color: var(--color-primary);
-  margin-inline: calc(var(--layout-gutter));
   padding-block: var(--spacing-md);
   display: flex;
   justify-content: center;
@@ -347,7 +348,7 @@
 .cdlv-footer-link:hover,
 .cdlv-footer-link:focus-visible {
   opacity: 1;
-  color: var(--color-accent);
+  color: var(--color-secondary);
 }
 
 /* Social & Copyright */
