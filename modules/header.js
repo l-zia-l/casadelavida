@@ -3,7 +3,8 @@
    Architecture: ES Module, Dynamic DOM Injection
    Purpose: Renders the global navigation, manages scroll state, and handles
    mobile menu interactions.
-   Security: 
+   Security & A11y: 
+   - Sanitized inputs, ARIA states, Escape key support.
    - Uses strict HTML entity escaping (`sanitizeData`) to prevent XSS.
    - Fully isolated scope (no global variable leakage).
    - No hardcoded sensitive data.
@@ -23,11 +24,9 @@ const config = {
         left: [
             { label: 'Shop', url: 'shop.html' },
             { label: 'Rituals', url: 'shop/wellness-boxes.html' },
-            // Add Account here, flagged for mobile menu only
             { label: 'Account', url: 'account/index.html', mobileOnly: true } 
         ],
         right: [
-            // Keep Account here, flagged for desktop right side only
             { label: 'Account', url: 'account/index.html', desktopOnly: true },
             { label: 'Cart', url: 'shopping-cart.html', isCart: true }
         ]
@@ -42,14 +41,7 @@ const config = {
  */
 const sanitizeData = (str) => {
     if (typeof str !== 'string') return str;
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#x27;',
-        "/": '&#x2F;',
-    };
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', "/": '&#x2F;' };
     const reg = /[&<>"'/]/ig;
     return str.replace(reg, (match) => (map[match]));
 };
@@ -61,8 +53,10 @@ const sanitizeData = (str) => {
  * @returns {string} - HTML string for the <ul>.
  */
 const buildNavList = (links, alignment) => {
+    // Get current path to determine active page state
+    const currentPath = window.location.pathname;
+
     const listItems = links.map(link => {
-        // Apply visibility classes based on our new config flags
         let displayClass = '';
         if (link.desktopOnly) displayClass = 'cdlv-header__item--desktop-only';
         if (link.mobileOnly) displayClass = 'cdlv-header__item--mobile-only';
@@ -70,13 +64,18 @@ const buildNavList = (links, alignment) => {
         const cartClass = link.isCart ? 'cdlv-header__link--cart' : '';
         const cartDataAttr = link.isCart ? 'data-cart-toggle="true"' : '';
         
+        // A11y: Determine if this link is the currently active page
+        const isCurrentPage = currentPath.includes(link.url) || (currentPath === '/' && link.url === 'index.html');
+        const ariaCurrent = isCurrentPage ? 'aria-current="page"' : '';
+        
+        // A11y: Hide decorative icons from screen readers, rely on visually-hidden text instead
         const content = link.isCart 
-        ? `<img src="assets/icons/cart.svg" alt="Cart" class="cdlv-header__cart-icon"><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
+        ? `<img src="assets/icons/cart.svg" alt="" aria-hidden="true" class="cdlv-header__cart-icon"><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
         : sanitizeData(link.label);
         
         return `
             <li class="cdlv-header__item ${displayClass}">
-                <a href="${sanitizeData(link.url)}" class="cdlv-header__link ${cartClass}" ${cartDataAttr}>
+                <a href="${sanitizeData(link.url)}" class="cdlv-header__link ${cartClass}" ${cartDataAttr} ${ariaCurrent}>
                     ${content}
                 </a>
             </li>
@@ -99,7 +98,7 @@ const generateHeaderHTML = () => {
         <nav class="cdlv-header__nav" aria-label="Primary Navigation">
             <!-- Mobile Menu Toggle -->
             <button class="cdlv-header__toggle" aria-expanded="false" aria-controls="mobile-menu">
-                <img src="assets/icons/bars.svg" alt="" class="cdlv-header__menu-icon">
+                <img src="assets/icons/bars.svg" alt="" aria-hidden="true" class="cdlv-header__menu-icon">
                 <span>Menu</span>
             </button>
 
@@ -108,7 +107,7 @@ const generateHeaderHTML = () => {
 
             <!-- Centered Logo -->
             <a href="${safeLogoUrl}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
-                <img src="${safeLogoSrc}" alt="" class="cdlv-header__logo-img">
+                <img src="${safeLogoSrc}" alt="" aria-hidden="true" class="cdlv-header__logo-img">
                 <span class="cdlv-header__logo-text">${safeLogoText}</span>
             </a>
 
@@ -151,12 +150,8 @@ export function init(element) {
      */
     const closeMobileMenu = () => {
         element.classList.remove('cdlv-header--menu-open');
-        if (menuToggle) {
-            menuToggle.setAttribute('aria-expanded', 'false');
-        }
-        document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', {
-            detail: { isOpen: false }
-        }));
+        if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+        document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', { detail: { isOpen: false } }));
     };
 
     // 3. Initialize Mobile Menu Interaction
@@ -166,23 +161,22 @@ export function init(element) {
             menuToggle.setAttribute('aria-expanded', !isExpanded);
             element.classList.toggle('cdlv-header--menu-open', !isExpanded);
             
-            document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', {
-                detail: { isOpen: !isExpanded }
-            }));
+            document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', { detail: { isOpen: !isExpanded } }));
         });
     }
 
-    // 4. Clean-up Logic for Screen Resizing/Zooming
-    // This matches your CSS breakpoint (992px)
-    const desktopBreakpoint = window.matchMedia('(min-width: 992px)');
-
-    const handleBreakpointChange = (e) => {
-        // If we just crossed over into desktop width, force the menu closed
-        if (e.matches) {
+    // A11y: Close menu on Escape key and return focus to the toggle button
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && element.classList.contains('cdlv-header--menu-open')) {
             closeMobileMenu();
+            if (menuToggle) menuToggle.focus();
         }
+    });
+
+    const desktopBreakpoint = window.matchMedia('(min-width: 992px)');
+    const handleBreakpointChange = (e) => {
+        if (e.matches) closeMobileMenu();
     };
 
-    // Use the modern addEventListener for MediaQueryList
     desktopBreakpoint.addEventListener('change', handleBreakpointChange);
 }

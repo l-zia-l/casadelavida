@@ -29,12 +29,12 @@
 
 :root {
   /* --- 1. BRAND PALETTE --- */
-  --color-primary: #FFFFFF; /* Clean, premium foundation */
-  --color-secondary: #D9AF78; /* Gold/Honey - Wellness boxes */
-  --color-accent: #6631AC; /* Deep Lavender/Purple - Sophisticated touch */
-  --color-neutral-bg: #2596BE; /* Calming Blue - Tranquil UX */
-  --color-text-dark: #1A1A1A; /* Accessible high-contrast text */
-  --color-text-light: #FFFFFF; /* Accessible light text */
+  --color-primary: #FFFFFF; 
+  --color-secondary: #D9AF78; 
+  --color-accent: #6631AC; 
+  --color-neutral-bg: #2596BE; 
+  --color-text-dark: #1A1A1A; 
+  --color-text-light: #FFFFFF; 
 
   /* --- 2. TYPOGRAPHY --- */
   --font-family-heading: 'Playfair Display', serif;
@@ -43,7 +43,7 @@
   --font-weight-regular: 400;
   --letter-spacing-wide: 0.02em;
 
-  /* Fluid Typography Scale (Mobile First -> Ultra-wide) */
+  /* Fluid Typography Scale */
   --font-size-h1: clamp(2.5rem, 7vw + 1rem, 8.5rem); 
   --font-size-h2: clamp(2rem, 5vw + 1rem, 6.5rem); 
   --font-size-h3: clamp(1.5rem, 3.5vw + 1rem, 4.5rem); 
@@ -60,12 +60,11 @@
   --spacing-xl: clamp(6rem, 12vw, 12rem);
 
   /* --- 3.5. ICONOGRAPHY --- */
-  --icon-size-base: 24px;
   --logo-height-base: clamp(3rem, 6.5vw, 5.5rem);
   --icon-size-base: clamp(1.25rem, 2.5vw, 1.875rem);
 
   /* --- 4. CORE AESTHETIC --- */
-  --radius-strict: 0px; /* Modern, minimalist, high-contrast professional look */
+  --radius-strict: 0px; 
 
   /* --- 5. MOTION & INTERACTION DNA --- */
   --ease-professional: cubic-bezier(0.4, 0, 0.2, 1);
@@ -74,9 +73,7 @@
   --transition-slow: 600ms var(--ease-professional);
 }
 
-/* ==========================================================================
-   GLOBAL RESET
-   ========================================================================== */
+/* GLOBAL RESET */
 
 *,
 *::before,
@@ -88,7 +85,7 @@
 
 html {
   scroll-behavior: smooth;
-  font-size: 100%; /* Base 16px */
+  font-size: 100%; 
   -webkit-text-size-adjust: 100%;
 }
 
@@ -100,29 +97,21 @@ body {
   color: var(--color-text-dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
-  /* Layout scaffolding for sticky footers and fluid content */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   font-display: swap;
 }
 
-/* Ensure dynamic main wrappers stretch to fill vertical space */
-main {
-  flex: 1;
-}
+main { flex: 1; }
 
-/* ==========================================================================
-   TYPOGRAPHY SCAFFOLDING
-   ========================================================================== */
-
+/* TYPOGRAPHY SCAFFOLDING */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-heading);
   line-height: 1.2;
-  font-weight: 400; /* Playfair Display works best at normal/lighter weights */
+  font-weight: 400; 
   margin-bottom: var(--spacing-sm);
-  color: var(--color-accent); /* Deep Lavender base for headings */
+  color: var(--color-accent); 
 }
 
 h1 { font-size: var(--font-size-h1); }
@@ -138,40 +127,27 @@ a {
   transition: color var(--transition-fast);
 }
 
-/* ==========================================================================
-   LAYOUT CONTAINERS
-   ========================================================================== */
-
-/* No Max-Width container policy */
+/* LAYOUT CONTAINERS */
 .container {
   width: min(90vw, 1600px);
   margin-inline: auto;
 }
 
-/* Fluid edge-to-edge container */
 .container-fluid {
   width: 100%;
   padding-inline: var(--layout-gutter);
 }
 
-/* ==========================================================================
-   MOTION STANDARDS & INTERACTIONS
-   ========================================================================== */
-
-/* Standard Element Transitions */
+/* MOTION STANDARDS & INTERACTIONS */
 a, button, input, select, textarea {
   transition: all var(--transition-base);
-  border-radius: var(--radius-strict); /* Enforce strict boxes */
+  border-radius: var(--radius-strict); 
 }
 
-/* Interactive Hover States */
-button:hover, 
-.btn:hover,
-.card:hover {
+button:hover, .btn:hover, .card:hover {
   transform: translateY(-2px);
 }
 
-/* Media/Image Interactions */
 img, video {
   max-width: 100%;
   height: auto;
@@ -184,16 +160,9 @@ img, video {
   transform: scale(1.03);
 }
 
-/* Structural Entry Animations */
 @keyframes fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .animate-enter {
@@ -205,17 +174,12 @@ img, video {
   color: var(--color-text-light);
 }
 
-/* ==========================================================================
-   ACCESSIBILITY & SCALABILITY UTILITIES
-   ========================================================================== */
-
-/* Global focus states for keyboard navigation clarity */
+/* ACCESSIBILITY & SCALABILITY UTILITIES */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 4px;
 }
 
-/* Screen-reader utility for visually hiding structural elements without dropping them from the DOM */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -228,19 +192,16 @@ img, video {
   border: 0;
 }
 
-/* ==========================================================================
-   ULTRA-WIDE SCREEN ADJUSTMENTS
-   ========================================================================== */
+/* ULTRA-WIDE SCREEN ADJUSTMENTS */
+@media (min-width: 1600px) { html { font-size: 110%; } }
+@media (min-width: 2000px) { html { font-size: 125%; } }
 
-/* Scale up the base root font-size on ultra-wide displays to maintain proportion */
-@media (min-width: 1600px) {
-  html {
-    font-size: 110%;
-  }
-}
-
-@media (min-width: 2000px) {
-  html {
-    font-size: 125%;
+/* REDUCED MOTION (ACCESSIBILITY) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
