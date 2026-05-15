@@ -25,10 +25,9 @@
 
 .cdlv-header__nav {
   display: grid;
-  /* Mobile default: Menu Button | Logo (Centered) | Cart */
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-xs) 0;
 }
 
 /* --- LOGO --- */
