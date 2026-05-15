@@ -222,3 +222,17 @@ img, video {
 .bg-shift-hover { transition: background-color var(--duration-slow) var(--ease-standard); }
 .bg-shift-hover:hover { background-color: var(--color-bg-tranquil); color: var(--color-text-inverse); }
 .bg-shift-hover:hover p, .bg-shift-hover:hover h2 { color: var(--color-text-inverse); }
+
+
+/* Add this at the bottom of your stylesheet */
+@media (min-width: 1600px) {
+  html {
+    font-size: 110%; /* Bumps the baseline up, making all rem units larger */
+  }
+}
+
+@media (min-width: 2000px) {
+  html {
+    font-size: 125%; 
+  }
+}
