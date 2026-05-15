@@ -56,6 +56,9 @@
   --spacing-lg: clamp(4rem, 8vw, 8rem);
   --spacing-xl: clamp(6rem, 12vw, 12rem);
 
+  /* --- 3.5. ICONOGRAPHY --- */
+  --icon-size-base: 24px;
+
   /* --- 4. CORE AESTHETIC --- */
   --radius-strict: 0px; /* Modern, minimalist, high-contrast professional look */
 

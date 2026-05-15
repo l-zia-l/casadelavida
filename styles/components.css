@@ -71,20 +71,18 @@
   position: relative;
 }
 
-/* Strict underline hover effect */
-.cdlv-header__link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0%;
-  height: 1px;
-  background-color: var(--color-accent);
-  transition: width var(--transition-fast);
+/* Targets the actual SVG image file */
+.cdlv-header__cart-icon {
+  width: var(--icon-size-base);
+  height: var(--icon-size-base);
+  object-fit: contain; 
+  display: block;
+  transition: transform var(--transition-fast);
 }
 
-.cdlv-header__link:hover::after {
-  width: 100%;
+/* Optional: Keep the hover scale effect */
+.cdlv-header__link--cart:hover .cdlv-header__cart-icon {
+  transform: scale(1.1);
 }
 
 /* --- CART ICON SPECIAL STYLES --- */
