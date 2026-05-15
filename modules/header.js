@@ -60,12 +60,17 @@ const sanitizeData = (str) => {
 const buildNavList = (links, alignment) => {
     const listItems = links.map(link => {
         const desktopClass = link.desktopOnly ? 'cdlv-header__item--desktop-only' : '';
+        const cartClass = link.isCart ? 'cdlv-header__link--cart' : '';
         const cartDataAttr = link.isCart ? 'data-cart-toggle="true"' : '';
+        
+        const content = link.isCart 
+            ? `<i class="fa-solid fa-cart-shopping"></i><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
+            : sanitizeData(link.label);
         
         return `
             <li class="cdlv-header__item ${desktopClass}">
-                <a href="${sanitizeData(link.url)}" class="cdlv-header__link" ${cartDataAttr}>
-                    ${sanitizeData(link.label)}
+                <a href="${sanitizeData(link.url)}" class="cdlv-header__link ${cartClass}" ${cartDataAttr}>
+                    ${content}
                 </a>
             </li>
         `;
@@ -81,6 +86,7 @@ const buildNavList = (links, alignment) => {
 const generateHeaderHTML = () => {
     const safeLogoText = sanitizeData(config.logo.text);
     const safeLogoUrl = sanitizeData(config.logo.url);
+    const safeLogoSrc = sanitizeData(config.logo.src);
     
     return `
         <nav class="cdlv-header__nav" aria-label="Primary Navigation">
@@ -98,9 +104,7 @@ const generateHeaderHTML = () => {
 
             <!-- Centered Logo -->
             <a href="${safeLogoUrl}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
-                ${safeLogoText}
-                <!-- Uncomment to use image logo -->
-                <!-- <img src="${sanitizeData(config.logo.src)}" alt="${safeLogoText}" class="cdlv-header__logo-img"> -->
+                <img src="${safeLogoSrc}" alt="${safeLogoText}" class="cdlv-header__logo-img">
             </a>
 
             <!-- Right Navigation (Account & Cart) -->
@@ -137,15 +141,43 @@ export function init(element) {
 
     // 3. Initialize Mobile Menu Interaction
     const menuToggle = element.querySelector('.cdlv-header__toggle');
+    /**
+     * Resets the mobile menu state to closed.
+     */
+    const closeMobileMenu = () => {
+        element.classList.remove('cdlv-header--menu-open');
+        if (menuToggle) {
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
+        document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', {
+            detail: { isOpen: false }
+        }));
+    };
+
+    // 3. Initialize Mobile Menu Interaction
     if (menuToggle) {
         menuToggle.addEventListener('click', () => {
             const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
             menuToggle.setAttribute('aria-expanded', !isExpanded);
+            element.classList.toggle('cdlv-header--menu-open', !isExpanded);
             
-            // Dispatch a custom event so a separate mobile-drawer module can listen and open
             document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', {
                 detail: { isOpen: !isExpanded }
             }));
         });
     }
+
+    // 4. Clean-up Logic for Screen Resizing/Zooming
+    // This matches your CSS breakpoint (992px)
+    const desktopBreakpoint = window.matchMedia('(min-width: 992px)');
+
+    const handleBreakpointChange = (e) => {
+        // If we just crossed over into desktop width, force the menu closed
+        if (e.matches) {
+            closeMobileMenu();
+        }
+    };
+
+    // Use the modern addEventListener for MediaQueryList
+    desktopBreakpoint.addEventListener('change', handleBreakpointChange);
 }

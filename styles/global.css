@@ -92,6 +92,17 @@ body {
   color: var(--color-text-dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Layout scaffolding for sticky footers and fluid content */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-display: swap;
+}
+
+/* Ensure dynamic main wrappers stretch to fill vertical space */
+main {
+  flex: 1;
 }
 
 /* ==========================================================================
@@ -150,7 +161,6 @@ button:hover,
 .btn:hover,
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
 }
 
 /* Media/Image Interactions */
@@ -180,6 +190,34 @@ img, video {
 
 .animate-enter {
   animation: fade-in-up var(--transition-slow) forwards;
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+}
+
+/* ==========================================================================
+   ACCESSIBILITY & SCALABILITY UTILITIES
+   ========================================================================== */
+
+/* Global focus states for keyboard navigation clarity */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* Screen-reader utility for visually hiding structural elements without dropping them from the DOM */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ==========================================================================

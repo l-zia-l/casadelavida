@@ -87,6 +87,30 @@
   width: 100%;
 }
 
+/* --- CART ICON SPECIAL STYLES --- */
+
+/* Targets the specific cart link */
+.cdlv-header__link--cart {
+  font-size: 1.2rem; /* Make the icon slightly more prominent than text */
+  color: var(--color-text-dark);
+}
+
+/* Disable the underline for the cart icon */
+.cdlv-header__link--cart::after {
+  display: none;
+}
+
+/* Purple hover state for the icon */
+.cdlv-header__link--cart:hover {
+  color: var(--color-accent);
+  transform: scale(1.1); /* Subtle scale effect since there's no underline */
+}
+
+/* Ensure the icon color transition matches the rest of the nav */
+.cdlv-header__link--cart i {
+  transition: color var(--transition-fast);
+}
+
 /* --- MOBILE CONTROLS --- */
 .cdlv-header__toggle {
   background: none;
@@ -123,6 +147,36 @@
   .cdlv-header__list--left,
   .cdlv-header__item--desktop-only {
     display: none; /* In a full implementation, this moves into a slide-out drawer */
+  }
+
+  /* Vertical Mobile Menu Implementation */
+  .cdlv-header--menu-open {
+    background-color: var(--color-primary); /* Force solid background when open */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .cdlv-header--menu-open .cdlv-header__nav {
+    grid-template-columns: 1fr; /* Stack elements vertically */
+    justify-items: center;
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .cdlv-header--menu-open .cdlv-header__toggle {
+    position: absolute;
+    left: var(--layout-gutter);
+    top: var(--spacing-sm);
+  }
+
+  .cdlv-header--menu-open .cdlv-header__list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-md);
+  }
+
+  .cdlv-header--menu-open .cdlv-header__item--desktop-only {
+    display: flex;
   }
 }
 
