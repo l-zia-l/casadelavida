@@ -71,22 +71,39 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 500;
+    position: relative;
+    padding-bottom: 4px;
 }
 
-.cdlv-header__nav-link:hover {
-    color: var(--color-secondary);
+.cdlv-header__nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 1px;
+    background-color: var(--color-text-main);
+    transition: width var(--duration-base) var(--ease-standard);
+}
+
+.cdlv-header__nav-link:hover::after {
+    width: 100%;
 }
 
 /* Center Logo */
 .cdlv-header__logo {
-    display: block;
-    height: clamp(1.5rem, 2vw + 1rem, 2.5rem); 
-    width: auto;
-    object-fit: contain;
+    display: flex;
+    align-items: center;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    transition: color var(--duration-base) var(--ease-standard);
+}
+
+.cdlv-header__logo img {
+    display: block;
+    height: clamp(1.2rem, 2vw + 0.5rem, 2rem); 
+    width: auto;
+    object-fit: contain;
 }
 
 /* Utilities (Right Side) */
