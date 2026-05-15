@@ -42,9 +42,7 @@ and assign it to the `innerHTML` of the target container.
   <!-- Content Security Policy (CSP) -->
   <meta http-equiv="Content-Security-Policy" 
         content="default-src 'self'; 
-                 script-src 'self' 'module'; 
-                 style-src 'self' 'unsafe-inline' https://kit.fontawesome.com;
-                 font-src 'self' https://kit.fontawesome.com;
+                 script-src 'self' 'module';
                  img-src 'self' data: https:; 
                  connect-src 'self' https://*.supabase.co;
                  frame-src 'self' https://js.stripe.com;">
@@ -57,7 +55,6 @@ and assign it to the `innerHTML` of the target container.
   <link rel="stylesheet" href="styles/components.css">
 
   <!-- External Resources -->
-  <script src="https://kit.fontawesome.com/2a8bcd658f.js" crossorigin="anonymous"></script>
 
   <!-- Central Hub Utility Scripts (ES Modules) -->
   <script type="module" src="utils/auth.js" defer></script>

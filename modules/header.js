@@ -71,8 +71,8 @@ const buildNavList = (links, alignment) => {
         const cartDataAttr = link.isCart ? 'data-cart-toggle="true"' : '';
         
         const content = link.isCart 
-            ? `<i class="fa-solid fa-cart-shopping"></i><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
-            : sanitizeData(link.label);
+        ? `<img src="assets/icons/cart.svg" alt="Cart" class="cdlv-header__cart-icon"><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
+        : sanitizeData(link.label);
         
         return `
             <li class="cdlv-header__item ${displayClass}">
