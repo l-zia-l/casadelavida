@@ -12,14 +12,14 @@
  * Centralized data for easy editing without touching DOM traversal logic.
  */
 const config = {
-    logoSrc: "/assets/images/logo_small.png",
+    logoSrc: "assets/images/logo_small.png",
     logoAlt: "Casa De La Vida Logo",
     leftLinks: [
-        { label: "Shop", url: "/shop.html" },
-        { label: "Rituals", url: "/blog.html" }
+        { label: "Shop", url: "shop.html" },
+        { label: "Rituals", url: "blog.html" }
     ],
     rightLinks: [
-        { label: "Account", url: "/auth/login.html" }
+        { label: "Account", url: "auth/login.html" }
     ],
     cartLabel: "Cart"
 };
@@ -66,7 +66,7 @@ const generateTemplate = () => {
             </nav>
 
             <!-- Center Logo -->
-            <a href="/index.html" class="cdlv-header__logo">
+            <a href="index.html" class="cdlv-header__logo">
             <img src="${sanitizeText(config.logoSrc)}" alt="${sanitizeText(config.logoAlt)}" class="cdlv-header__logo-img" />
             </a>
 
