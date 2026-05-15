@@ -58,6 +58,8 @@
 
   /* --- 3.5. ICONOGRAPHY --- */
   --icon-size-base: 24px;
+  --logo-height-base: clamp(3rem, 6.5vw, 5.5rem);
+  --icon-size-base: clamp(1.25rem, 2.5vw, 1.875rem);
 
   /* --- 4. CORE AESTHETIC --- */
   --radius-strict: 0px; /* Modern, minimalist, high-contrast professional look */

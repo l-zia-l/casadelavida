@@ -99,10 +99,7 @@ const generateHeaderHTML = () => {
         <nav class="cdlv-header__nav" aria-label="Primary Navigation">
             <!-- Mobile Menu Toggle -->
             <button class="cdlv-header__toggle" aria-expanded="false" aria-controls="mobile-menu">
-                <span class="cdlv-header__toggle-icon">
-                    <span class="cdlv-header__toggle-line"></span>
-                    <span class="cdlv-header__toggle-line"></span>
-                </span>
+                <img src="assets/icons/bars.svg" alt="" class="cdlv-header__menu-icon">
                 <span>Menu</span>
             </button>
 
