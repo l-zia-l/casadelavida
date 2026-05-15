@@ -45,7 +45,6 @@
 
   /* Layout Geometry */
   --radius-strict: 0px;
-  --layout-max-width: 1600px;
   --layout-gutter: 5vw;
 
   /* Motion & Interaction */
@@ -103,8 +102,8 @@ p:last-child { margin-bottom: 0; }
    4. LAYOUT UTILITIES & GRIDS
    -------------------------------------------------------------------------- */
 .container-fluid {
-  width: min(100% - (var(--layout-gutter) * 2), var(--layout-max-width));
-  margin-inline: auto;
+  width: 100%;
+  padding-inline: var(--layout-gutter);
 }
 
 section { 
