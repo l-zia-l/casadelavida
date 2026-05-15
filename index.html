@@ -43,9 +43,10 @@ and assign it to the `innerHTML` of the target container.
   <meta http-equiv="Content-Security-Policy" 
         content="default-src 'self'; 
                  script-src 'self' 'module'; 
-                 style-src 'self' 'unsafe-inline'; 
+                 style-src 'self' 'unsafe-inline' https://kit.fontawesome.com;
+                 font-src 'self' https://kit.fontawesome.com;
                  img-src 'self' data: https:; 
-                 connect-src 'self' https://*.supabase.co https://api.stripe.com; 
+                 connect-src 'self' https://*.supabase.co;
                  frame-src 'self' https://js.stripe.com;">
 
   <title>Casa De La Vida</title>
