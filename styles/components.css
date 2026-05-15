@@ -227,7 +227,7 @@
 
 /* Hides the entire header navigation on extreme micro-screens to prevent UI breaking.
    Note: Standard CSS does not support variables in media queries yet. */
-@media (max-width: 319px) {
+@media (max-width: 240px) {
   #global-header {
     display: none !important;
   }
