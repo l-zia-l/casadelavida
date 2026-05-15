@@ -29,15 +29,14 @@
   --font-body: 'Montserrat', sans-serif;
 
   /* Fluid Typography Scale */
---font-size-h1: clamp(2.5rem, 7vw + 1rem, 8.5rem);
+  --font-size-h1: clamp(2.5rem, 7vw + 1rem, 8.5rem);
   --font-size-h2: clamp(2rem, 5vw + 1rem, 6.5rem);
   --font-size-h3: clamp(1.5rem, 3.5vw + 1rem, 4.5rem);
   --font-size-h4: clamp(1.25rem, 2.5vw + 0.8rem, 3.25rem);
   
-  /* Increased the vw growth rate and the maximum limit for body text */
+  /* Body Text Scale */
   --font-size-body: clamp(1rem, 1.6vw + 0.5rem, 2.25rem);
   --font-size-small: clamp(0.875rem, 1.2vw + 0.5rem, 1.5rem);
-  
   
   /* Fluid Spacing Scale */
   --space-xs: clamp(0.5rem, 1vw, 0.75rem);
@@ -148,7 +147,9 @@ button, .btn {
   color: var(--color-text-inverse);
   border: none;
   cursor: pointer;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color var(--duration-fast) var(--ease-standard),
               transform var(--duration-fast) var(--ease-standard);
 }
@@ -201,21 +202,35 @@ img, video {
   object-fit: cover; 
 }
 
-.img-hover-scale { overflow: hidden; }
-.img-hover-scale img { transition: transform var(--duration-slow) var(--ease-standard); }
+.img-hover-scale { overflow: hidden; display: block; }
+.img-hover-scale img { transition: transform var(--duration-slow) var(--ease-standard); width: 100%; }
 .img-hover-scale:hover img { transform: scale(1.05); }
 
-/* Card Foundations */
+/* Card Foundations & Flex Normalization */
 .card, .product-card, .post-card {
   background: var(--color-primary);
   border: 1px solid rgba(0,0,0,0.05);
   transition: transform var(--duration-base) var(--ease-standard), 
               box-shadow var(--duration-base) var(--ease-standard);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .card:hover, .product-card:hover, .post-card:hover { 
   transform: translateY(-4px); 
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
+}
+
+.card-body, .post-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Allows the content area to expand and push the button down */
+}
+
+.card-body .btn, .post-content .link-underline {
+  margin-top: auto;
+  align-self: flex-start;
 }
 
 /* Utility Animations */
@@ -234,11 +249,6 @@ img, video {
 .nav-menu { display: flex; gap: var(--space-md); }
 .nav-actions { display: flex; gap: var(--space-sm); align-items: center; }
 
-/* Grid Engines */
-.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-lg); align-items: center; }
-.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-md); }
-.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-md); }
-
 /* Hero Big */
 .hero-big {
   min-height: 85vh;
@@ -254,6 +264,7 @@ img, video {
 .product-card .img-wrapper { aspect-ratio: 1; margin-bottom: var(--space-sm); background: #f0f0f0; }
 .product-card h4 { font-size: var(--font-size-body); font-family: var(--font-body); margin-bottom: 0.5rem; }
 .product-price { color: var(--color-accent); font-weight: 600; margin-bottom: var(--space-sm); }
+.product-card .btn { margin-top: auto; } /* Normalizes buttons at the bottom */
 
 /* Post Card (Blog Template) */
 .post-card .post-content { padding: var(--space-md); }
@@ -286,7 +297,7 @@ img, video {
 
 /* Sections & Cards */
 .bg-light-warm { background-color: #f7f5f0; }
-.card-body { padding: var(--space-md); text-align: center; }
+.card-body { padding: var(--space-md); text-align: center; align-items: center; } /* aligns button cleanly in center */
 
 /* Testimonials */
 .testimonial-text { font-style: italic; }
@@ -298,11 +309,50 @@ img, video {
 /* Newsletter */
 .newsletter-section { background-color: var(--color-primary); border-top: 1px solid rgba(0,0,0,0.05); text-align: center; padding-block: var(--space-lg); }
 .newsletter-form { display: flex; gap: var(--space-sm); margin-top: var(--space-md); justify-content: center; }
+.newsletter-form input { flex: 1; } /* Allow input to stretch */
 
-/* Add this at the bottom of your stylesheet */
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .header-inner {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  
+  .nav-menu {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+
+  .hero-box {
+    margin: 0 var(--layout-gutter); /* Restores layout gutter on mobile */
+    max-width: 100%;
+  }
+
+  .section-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+  
+  .card-body { 
+    align-items: stretch; /* Buttons full width on mobile cards */ 
+  }
+}
+
+@media (max-width: 480px) {
+  .newsletter-form {
+    flex-direction: column;
+  }
+}
+
+/* Scaling monitors */
 @media (min-width: 1600px) {
   html {
-    font-size: 110%; /* Bumps the baseline up, making all rem units larger */
+    font-size: 110%; 
   }
 }
 
@@ -311,4 +361,3 @@ img, video {
     font-size: 125%; 
   }
 }
-
