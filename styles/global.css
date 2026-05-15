@@ -1,33 +1,13 @@
 /* ==========================================================================
    CASA DE LA VIDA - GLOBAL DESIGN SYSTEM (globals.css)
    Role: Source of Truth & Base Architectural Foundation
-   ==========================================================================
-
-   [BRAND DNA]
-   Primary:      #FAF9F6 (Off-white) - Premium foundation / Surface
-   Secondary:    #D9AF78 (Gold/Honey) - Herbal/wellness accent
-   Accent:       #6631AC (Deep Lavender) - Sophisticated feminine touch
-   Neutral/Bg:   #2596BE (Calming Blue) - Tranquil background states
-   Corners:      0px (Strict, modern, minimalist geometry)
-   
-   [FLUID SCALING ENGINE (THE MATH)]
-   We use CSS `clamp(min, fluid, max)` to avoid rigid breakpoints.
-   The fluid value is typically calculated as `calc(minSize + (maxSize - minSize) * ((100vw - 320px) / (1600 - 320)))`.
-   For simplicity and performance, we map vw units directly combined with rem bases 
-   to ensure the scale naturally expands from mobile (320px) to ultra-wide (1600px+).
-
-   [HOW TO USE THIS FILE]
-   1. Never hardcode colors, fonts, or padding in component files (e.g., `header.js`, `catalog-2-grid.js`).
-      Always reference `var(--color-...)`, `var(--font-...)`, or `var(--space-...)`.
-   2. Use the `.container-fluid` utility for all main layout wrappers to inherit the `min(90vw, 1600px)` logic.
-   3. Rely on base element tags for standard text; only add classes when deviating from the fluid hierarchy.
    ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
 /* --------------------------------------------------------------------------
    1. DESIGN TOKENS & FLUID VARIABLES
    -------------------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
-
 :root {
   /* Color Palette */
   --color-primary: #FAF9F6;
@@ -38,17 +18,17 @@
   /* Semantic Color Mapping */
   --color-bg-base: var(--color-primary);
   --color-bg-tranquil: var(--color-neutral);
-  --color-text-main: #1A1A1A; /* High contrast against off-white */
+  --color-text-main: #1A1A1A; 
   --color-text-muted: #4A4A4A;
   --color-text-inverse: var(--color-primary);
   --color-interactive: var(--color-accent);
-  --color-interactive-hover: #4B2480; /* Darker lavender */
+  --color-interactive-hover: #4B2480; 
 
   /* Typography Families */
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Montserrat', sans-serif;
 
-  /* Fluid Typography Scale (Mobile -> Desktop) */
+  /* Fluid Typography Scale */
   --font-size-h1: clamp(2.5rem, 4vw + 1rem, 4.5rem);
   --font-size-h2: clamp(2rem, 3vw + 1rem, 3.5rem);
   --font-size-h3: clamp(1.5rem, 2vw + 1rem, 2.5rem);
@@ -68,9 +48,8 @@
   --layout-max-width: 1600px;
   --layout-gutter: 5vw;
 
-  /* Motion & Interaction DNA */
+  /* Motion & Interaction */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-entry: cubic-bezier(0.0, 0, 0.2, 1);
   --duration-fast: 200ms;
   --duration-base: 300ms;
   --duration-slow: 600ms;
@@ -83,7 +62,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  border-radius: var(--radius-strict) !important; /* Enforce strict 0px geometry system-wide */
+  border-radius: var(--radius-strict) !important; 
 }
 
 html {
@@ -99,7 +78,6 @@ body {
   font-size: var(--font-size-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 /* --------------------------------------------------------------------------
@@ -118,46 +96,44 @@ h2 { font-size: var(--font-size-h2); }
 h3 { font-size: var(--font-size-h3); }
 h4 { font-size: var(--font-size-h4); }
 
-p {
-  margin-bottom: var(--space-sm);
-  color: var(--color-text-muted);
-}
-
-p:last-child {
-  margin-bottom: 0;
-}
+p { margin-bottom: var(--space-sm); color: var(--color-text-muted); }
+p:last-child { margin-bottom: 0; }
 
 /* --------------------------------------------------------------------------
-   4. LAYOUT UTILITIES
+   4. LAYOUT UTILITIES & GRIDS
    -------------------------------------------------------------------------- */
-/* The "No Max-Width" Container Policy */
 .container-fluid {
   width: min(100% - (var(--layout-gutter) * 2), var(--layout-max-width));
   margin-inline: auto;
 }
 
-section {
-  padding-block: var(--space-section);
-  position: relative;
+section { 
+  padding-block: var(--space-section); 
+  position: relative; 
 }
 
-/* Mobile-Specific Section Snapping */
-@media (max-width: 768px) {
-  html {
-    scroll-snap-type: y proximity;
-  }
-  
-  section {
-    scroll-snap-align: start;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+/* Core Grid Engines */
+.grid-2 { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+  gap: var(--space-lg); 
+  align-items: center; 
+}
+
+.grid-3 { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+  gap: var(--space-md); 
+}
+
+.grid-4 { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+  gap: var(--space-md); 
 }
 
 /* --------------------------------------------------------------------------
-   5. MOTION & INTERACTION STANDARDS
+   5. INTERACTION & COMPONENTS
    -------------------------------------------------------------------------- */
 /* Buttons */
 button, .btn {
@@ -170,82 +146,77 @@ button, .btn {
   color: var(--color-text-inverse);
   border: none;
   cursor: pointer;
+  display: inline-block;
   transition: background-color var(--duration-fast) var(--ease-standard),
               transform var(--duration-fast) var(--ease-standard);
 }
 
-button:hover, .btn:hover {
-  background-color: var(--color-interactive-hover);
-  transform: translateY(-2px);
+button:hover, .btn:hover { 
+  background-color: var(--color-interactive-hover); 
+  transform: translateY(-2px); 
+}
+
+.btn-outline { 
+  background-color: transparent; 
+  border: 1px solid var(--color-text-main); 
+  color: var(--color-text-main); 
+}
+
+.btn-outline:hover { 
+  background-color: var(--color-text-main); 
+  color: var(--color-primary); 
 }
 
 /* Links */
-a {
+a { 
   color: inherit; 
-  text-decoration: none;
-  transition: opacity var(--duration-fast) var(--ease-standard);
+  text-decoration: none; 
+  transition: opacity var(--duration-fast) var(--ease-standard); 
 }
 
-a:hover {
-  opacity: 0.8; 
-}
+a:hover { opacity: 0.8; }
 
-/* Form Fields */
+/* Forms */
 input, textarea, select {
   font-family: var(--font-body);
   width: 100%;
   padding: var(--space-sm);
   border: 1px solid var(--color-text-muted);
   background: transparent;
-  transition: border-color var(--duration-fast) var(--ease-standard),
-              box-shadow var(--duration-fast) var(--ease-standard);
 }
 
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: var(--color-interactive);
-  box-shadow: 0 0 0 1px var(--color-interactive);
+input:focus, textarea:focus, select:focus { 
+  outline: none; 
+  border-color: var(--color-interactive); 
+  box-shadow: 0 0 0 1px var(--color-interactive); 
 }
 
-/* Media & Images */
-img, video {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
+/* Media & Animations */
+img, video { 
+  max-width: 100%; 
+  height: auto; 
+  display: block; 
+  object-fit: cover; 
 }
 
-.img-hover-scale {
-  overflow: hidden;
-}
+.img-hover-scale { overflow: hidden; }
+.img-hover-scale img { transition: transform var(--duration-slow) var(--ease-standard); }
+.img-hover-scale:hover img { transform: scale(1.05); }
 
-.img-hover-scale img {
-  transition: transform var(--duration-slow) var(--ease-standard);
-}
-
-.img-hover-scale:hover img {
-  transform: scale(1.05);
-}
-
-/* Cards / Non-Semantic Containers */
+/* Card Foundations */
 .card, .product-card, .post-card {
   background: var(--color-primary);
   border: 1px solid rgba(0,0,0,0.05);
-  transition: transform var(--duration-base) var(--ease-standard),
+  transition: transform var(--duration-base) var(--ease-standard), 
               box-shadow var(--duration-base) var(--ease-standard);
 }
 
-.card:hover, .product-card:hover, .post-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+.card:hover, .product-card:hover, .post-card:hover { 
+  transform: translateY(-4px); 
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
 }
 
-/* Subtle Section Background Shifts */
-.bg-shift-hover {
-  transition: background-color var(--duration-slow) var(--ease-standard);
-}
-
-.bg-shift-hover:hover {
-  background-color: var(--color-bg-tranquil);
-  color: var(--color-text-inverse);
-}
+/* Utility Animations */
+.bg-shift-hover { transition: background-color var(--duration-slow) var(--ease-standard); }
+.bg-shift-hover:hover { background-color: var(--color-bg-tranquil); color: var(--color-text-inverse); }
+.bg-shift-hover:hover p, .bg-shift-hover:hover h2 { color: var(--color-text-inverse); }
