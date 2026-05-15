@@ -1,2 +1,65 @@
-<html 5>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ==========================================================================
+       CASA DE LA VIDA - BASE LAYOUT SHELL
+       Architecture: Vanilla HTML/CSS/JS (Modular Fragment Injection)
+       
+       [FRAGMENT INJECTION LOGIC]
+       This file acts as the single-page application (SPA) shell.
+       Do not write page content here. Instead, fetch HTML fragments and inject them 
+       into the `<main id="main-content">` node using Vanilla JS (e.g., Fetch API).
+       
+       Example Injection:
+       fetch('/shop/wellness-boxes.html')
+         .then(res => res.text())
+         .then(html => document.getElementById('main-content').innerHTML = html);
+
+       ========================================================================== -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casa De La Vida</title>
+
+    <!-- [SECURITY] Strict Content Security Policy (CSP) -->
+    <!-- 
+      Allows: Self-hosted assets, Google Fonts (for Playfair/Montserrat), 
+      Stripe (Payments), and Supabase (Auth/Database). 
+      Blocks: Inline scripts and unauthorized external domains.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';  
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+        font-src 'self' https://fonts.gstatic.com; 
+        connect-src 'self' https://*.supabase.co; 
+        img-src 'self' data: https://*;
+    ">
+
+    <!-- [STYLES] Base Architecture & Shared UI -->
+    <link rel="stylesheet" href="/styles/globals.css">
+    <link rel="stylesheet" href="/styles/components.css">
+
+    <!-- [SCRIPTS] Central Hub Utilities (Deferred Module Loading) -->
+    <script type="module" src="/utils/auth.js"></script>
+    <script type="module" src="/utils/cart.js"></script>
+    <script type="module" src="/utils/components.js" defer></script>
+</head>
+<body>
+
+    <!-- ==========================================================================
+         SCAFFOLDING
+         Classes inherit fluid typography, spacing, and the "No Max-Width" policy 
+         defined in :root variables of globals.css.
+         ========================================================================== -->
+
+    <!-- Global Header injected here -->
+    <header id="global-header" class="container-fluid"></header>
+
+    <!-- Dynamic modules and page fragments injected here -->
+    <main id="main-content" class="container-fluid"></main>
+
+    <!-- Global Footer injected here -->
+    <footer id="global-footer" class="container-fluid"></footer>
+
+</body>
 </html>

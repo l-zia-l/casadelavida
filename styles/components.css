@@ -1,0 +1,143 @@
+/* ==========================================================================
+   MODULE: HEADER (.cdlv-header)
+   Architecture: Scoped BEM-style CSS
+   Purpose: Defines the structural, fluid scaling, and state-based styling 
+   for the primary navigation.
+   Design: Transparent default, transitions to solid background on scroll. 
+   Mobile-first approach.
+   ========================================================================== */
+
+.cdlv-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: transparent;
+    padding-block: var(--space-sm);
+    transition: background-color var(--duration-base) var(--ease-standard),
+                padding var(--duration-base) var(--ease-standard),
+                box-shadow var(--duration-base) var(--ease-standard);
+}
+
+.cdlv-header--scrolled {
+    background-color: var(--color-bg-base);
+    padding-block: var(--space-xs);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.cdlv-header__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Mobile Menu Toggle */
+.cdlv-header__menu-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1001; /* Above mobile menu */
+}
+
+.cdlv-header__menu-toggle span {
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-text-main);
+    transition: all var(--duration-fast) var(--ease-standard);
+}
+
+/* Navigation Lists */
+.cdlv-header__nav {
+    display: none; /* Hidden on mobile by default */
+}
+
+.cdlv-header__nav-list {
+    list-style: none;
+    display: flex;
+    gap: var(--space-md);
+}
+
+.cdlv-header__nav-link {
+    font-family: var(--font-body);
+    font-size: var(--font-size-small);
+    color: var(--color-text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+}
+
+.cdlv-header__nav-link:hover {
+    color: var(--color-secondary);
+}
+
+/* Center Logo */
+.cdlv-header__logo {
+    display: block;
+    height: clamp(1.5rem, 2vw + 1rem, 2.5rem); 
+    width: auto;
+    object-fit: contain;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: color var(--duration-base) var(--ease-standard);
+}
+
+/* Utilities (Right Side) */
+.cdlv-header__utils {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.cdlv-header__cart-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-main);
+    font-size: var(--font-size-body);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Mobile Nav Active State */
+.cdlv-header--menu-open .cdlv-header__nav {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: var(--color-bg-base);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.cdlv-header--menu-open .cdlv-header__nav-list {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.cdlv-header--menu-open .cdlv-header__nav-link {
+    font-size: var(--font-size-h4);
+}
+
+/* Desktop Overrides */
+@media (min-width: 1024px) {
+    .cdlv-header__menu-toggle {
+        display: none; /* Hide hamburger */
+    }
+
+    .cdlv-header__nav {
+        display: flex; /* Show left nav */
+    }
+}
