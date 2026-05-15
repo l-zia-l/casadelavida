@@ -17,7 +17,7 @@
 const config = {
     logo: {
         text: 'Casa De La Vida', 
-        src: 'assets/images/logo_small.png', 
+        src: 'assets/images/logo.png', 
         url: 'index.html'
     },
     links: {
