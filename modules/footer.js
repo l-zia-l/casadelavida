@@ -71,8 +71,9 @@ const footerConfig = {
     }
   ],
   socials: [
-    { network: 'Instagram', url: 'https://www.instagram.com/casa_de_la_vida_gh/', svg: '<svg viewBox="0 0 24 24" class="cdlv-footer-social-icon"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>' },
-    { network: 'TikTok', url: 'https://www.tiktok.com/@nurtureher06', svg: '<svg viewBox="0 0 24 24" class="cdlv-footer-social-icon"><path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3V0Z"/></svg>' }
+    // Store only the path to prevent sanitization from stripping the HTML tags
+    { network: 'Instagram', url: 'https://www.instagram.com/casa_de_la_vida_gh/', iconSrc: 'assets/icons/instagram.svg' },
+    { network: 'TikTok', url: 'https://www.tiktok.com/@nurtureher06', iconSrc: 'assets/icons/tiktok.svg' }
   ]
 };
 
@@ -113,21 +114,22 @@ const generateFooterHTML = () => {
     `;
   }).join('');
 
+  // Construct the img tag safely here
   const socialsHTML = footerConfig.socials.map(social => `
     <a href="${sanitizeHTML(social.url)}" class="cdlv-footer-social-link" aria-label="${sanitizeHTML(social.network)}" target="_blank" rel="noopener noreferrer">
-      ${social.svg}
+      <img src="${sanitizeHTML(social.iconSrc)}" alt="${sanitizeHTML(social.network)}" aria-hidden="true" class="cdlv-footer-social-icon">
     </a>
   `).join('');
 
   return `
     <div class="cdlv-footer">
-      <div class="container-fluid cdlv-footer-inner">
-        <div class="cdlv-footer-brand">
-          <div class="cdlv-footer-logo-wrapper">
-             <img src="${sanitizeHTML(footerConfig.logo.src)}" alt="${sanitizeHTML(footerConfig.logo.alt)}" loading="lazy">
-          </div>
+      <div class="cdlv-footer-brand-banner">
+        <div class="cdlv-footer-logo-wrapper">
+            <img src="${sanitizeHTML(footerConfig.logo.src)}" alt="${sanitizeHTML(footerConfig.logo.alt)}" loading="lazy">
         </div>
-        
+      </div>
+      
+      <div class="cdlv-footer-inner">
         <nav class="cdlv-footer-nav" aria-label="Footer Navigation">
           ${columnsHTML}
         </nav>
@@ -169,16 +171,12 @@ const attachAccordionEvents = (container) => {
   });
 };
 
-// 5. EXPORT INITIALIZER (Updated for Component Registry)
+// 5. EXPORT INITIALIZER
 export const init = (node) => {
   if (!node) {
     console.error('[Footer Module] Initialization failed: No target node provided.');
     return;
   }
-
-  // Inject HTML directly into the dynamically discovered node
   node.innerHTML = generateFooterHTML();
-  
-  // Attach Logic scoped only to this specific node instance
   attachAccordionEvents(node);
 };

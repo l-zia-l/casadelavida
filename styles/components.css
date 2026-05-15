@@ -248,8 +248,7 @@
 
 .cdlv-footer {
   background-color: var(--color-neutral-bg);
-  color: var(--color-text-light);
-  padding-block: var(--spacing-lg);
+  color: var(--color-text-dark);
   font-family: var(--font-family-body);
 }
 
@@ -257,6 +256,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  padding-block: var(--spacing-lg);
 }
 
 /* Logo Alignment */
@@ -266,13 +266,19 @@
   padding-bottom: var(--spacing-md);
 }
 
-.cdlv-footer-logo-wrapper {
+.cdlv-footer-brand-banner {
   background-color: var(--color-primary);
-  padding: var(--spacing-xs);
-  display: inline-flex;
-  align-items: center;
+  margin-inline: calc(var(--layout-gutter));
+  padding-block: var(--spacing-md);
+  display: flex;
   justify-content: center;
-  border-radius: var(--radius-strict);
+  align-items: center;
+}
+
+.cdlv-footer-logo-wrapper img {
+  width: var(--logo-width-base);
+  height: auto;
+  display: block;
 }
 
 .cdlv-footer-logo-wrapper img {
@@ -284,11 +290,11 @@
 .cdlv-footer-nav {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .cdlv-footer-column {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .cdlv-footer-toggle {
@@ -335,12 +341,13 @@
   padding-block: clamp(0.25rem, 0.5vw, 0.5rem);
   font-size: var(--font-size-small);
   opacity: 0.8;
+  color: var(--color-text-dark);
 }
 
 .cdlv-footer-link:hover,
 .cdlv-footer-link:focus-visible {
   opacity: 1;
-  color: var(--color-secondary);
+  color: var(--color-accent);
 }
 
 /* Social & Copyright */
@@ -362,22 +369,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-strict);
-  background-color: transparent;
-  border: 1px solid var(--color-text-light);
+  width: var(--icon-size-base);
+  height: var(--icon-size-base);
 }
 
 .cdlv-footer-social-link:hover {
   background-color: var(--color-text-light);
-  color: var(--color-neutral-bg);
 }
 
 .cdlv-footer-social-icon {
   width: var(--icon-size-base);
   height: var(--icon-size-base);
-  fill: currentColor;
+  object-fit: contain;
+  display: block;
+  transition: transform var(--transition-fast);
 }
 
 .cdlv-footer-legal-text {
