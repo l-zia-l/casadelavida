@@ -61,11 +61,16 @@ const buildNavList = (links, alignment) => {
     const listItems = links.map(link => {
         const desktopClass = link.desktopOnly ? 'cdlv-header__item--desktop-only' : '';
         const cartDataAttr = link.isCart ? 'data-cart-toggle="true"' : '';
+        const linkClass = link.isCart ? 'cdlv-header__link cdlv-header__link--icon' : 'cdlv-header__link';
         
+        const innerContent = link.isCart 
+            ? `<i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span class="sr-only">${sanitizeData(link.label)}</span>`
+            : sanitizeData(link.label);
+
         return `
             <li class="cdlv-header__item ${desktopClass}">
-                <a href="${sanitizeData(link.url)}" class="cdlv-header__link" ${cartDataAttr}>
-                    ${sanitizeData(link.label)}
+                <a href="${sanitizeData(link.url)}" class="${linkClass}" ${cartDataAttr}>
+                    ${innerContent}
                 </a>
             </li>
         `;
@@ -81,26 +86,23 @@ const buildNavList = (links, alignment) => {
 const generateHeaderHTML = () => {
     const safeLogoText = sanitizeData(config.logo.text);
     const safeLogoUrl = sanitizeData(config.logo.url);
+    const safeLogoSrc = sanitizeData(config.logo.src);
     
     return `
         <nav class="cdlv-header__nav" aria-label="Primary Navigation">
             <!-- Mobile Menu Toggle -->
-            <button class="cdlv-header__toggle" aria-expanded="false" aria-controls="mobile-menu">
-                <span class="cdlv-header__toggle-icon">
-                    <span class="cdlv-header__toggle-line"></span>
-                    <span class="cdlv-header__toggle-line"></span>
-                </span>
+            <button class="cdlv-header__toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle Navigation Menu">
+                <span class="cdlv-header__toggle-icon-open" aria-hidden="true"><i class="fa-solid fa-bars"></i></span>
+                <span class="cdlv-header__toggle-icon-close" aria-hidden="true"><i class="fa-solid fa-x"></i></span>
                 <span>Menu</span>
             </button>
 
             <!-- Left Navigation (Desktop) -->
             ${buildNavList(config.links.left, 'left')}
 
-            <!-- Centered Logo -->
+            <!-- Centered Image Logo -->
             <a href="${safeLogoUrl}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
-                ${safeLogoText}
-                <!-- Uncomment to use image logo -->
-                <!-- <img src="${sanitizeData(config.logo.src)}" alt="${safeLogoText}" class="cdlv-header__logo-img"> -->
+                <img src="${safeLogoSrc}" alt="${safeLogoText}" class="cdlv-header__logo-img">
             </a>
 
             <!-- Right Navigation (Account & Cart) -->

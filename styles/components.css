@@ -25,7 +25,6 @@
 
 .cdlv-header__nav {
   display: grid;
-  /* Mobile default: Menu Button | Logo (Centered) | Cart */
   grid-template-columns: auto 1fr auto;
   align-items: center;
   padding: var(--spacing-sm) 0;
@@ -69,6 +68,9 @@
   letter-spacing: 0.1em;
   padding: var(--spacing-xs) 0;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px; 
 }
 
 /* Strict underline hover effect */
@@ -87,9 +89,25 @@
   width: 100%;
 }
 
+/* Icon-specific link adjustments */
+.cdlv-header__link--icon {
+  font-size: clamp(1.2rem, 2vw + 0.5rem, 1.5rem);
+  transition: opacity var(--transition-fast);
+}
+
+.cdlv-header__link--icon:hover {
+  opacity: 0.7;
+}
+
+/* Toggle icon states based on aria-expanded */
+.cdlv-header__toggle-icon-close { display: none; }
+
+.cdlv-header__toggle[aria-expanded="true"] .cdlv-header__toggle-icon-open { display: none; }
+.cdlv-header__toggle[aria-expanded="true"] .cdlv-header__toggle-icon-close { display: block; }
+
 /* --- MOBILE CONTROLS --- */
 .cdlv-header__toggle {
-  background: none;
+  background-color: transparent;
   border: none;
   cursor: pointer;
   display: flex;
@@ -101,6 +119,7 @@
   color: var(--color-text-dark);
   padding: var(--spacing-xs) 0;
   border-radius: var(--radius-strict);
+  transition: opacity var(--transition-fast);
 }
 
 .cdlv-header__toggle-icon {
@@ -122,19 +141,18 @@
 @media (max-width: 991px) {
   .cdlv-header__list--left,
   .cdlv-header__item--desktop-only {
-    display: none; /* In a full implementation, this moves into a slide-out drawer */
+    display: none;
   }
 }
 
 /* --- DESKTOP LAYOUT --- */
 @media (min-width: 992px) {
   .cdlv-header__nav {
-    /* Desktop: Left Links | Logo Center | Right Links */
     grid-template-columns: 1fr auto 1fr;
   }
   
   .cdlv-header__toggle {
-    display: none; /* Hide mobile menu toggle on desktop */
+    display: none;
   }
   
   .cdlv-header__list--left,
