@@ -37,7 +37,7 @@
   flex-direction: column; /* Stacks the image on top of the text */
   justify-content: center;
   align-items: center;
-  gap: 4px; /* Tight spacing between the icon and the words */
+  gap: 1px; /* Tight spacing between the icon and the words */
   text-decoration: none;
 }
 
@@ -218,5 +218,17 @@
   .cdlv-header__list--left,
   .cdlv-header__item--desktop-only {
     display: flex;
+  }
+}
+
+/* ==========================================================================
+   MICRO-SCREEN OVERRIDE (< 320px)
+   ========================================================================== */
+
+/* Hides the entire header navigation on extreme micro-screens to prevent UI breaking.
+   Note: Standard CSS does not support variables in media queries yet. */
+@media (max-width: 319px) {
+  #global-header {
+    display: none !important;
   }
 }
