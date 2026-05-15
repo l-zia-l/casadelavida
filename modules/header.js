@@ -1,4 +1,4 @@
-s/* ==========================================================================
+/* ==========================================================================
    MODULE: HEADER LOGIC (modules/header.js)
    Architecture: ES Module, Dynamic DOM Injection
    Purpose: Renders the global navigation, manages scroll state, and handles
