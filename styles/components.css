@@ -34,9 +34,11 @@
 /* --- LOGO --- */
 .cdlv-header__logo-link {
   display: flex;
+  flex-direction: column; /* Stacks the image on top of the text */
   justify-content: center;
   align-items: center;
-  line-height: 0; 
+  gap: 4px; /* Tight spacing between the icon and the words */
+  text-decoration: none;
 }
 
 .cdlv-header__logo-img {
@@ -44,6 +46,14 @@
   width: auto;
   object-fit: contain;
   transition: height var(--transition-base);
+}
+
+.cdlv-header__logo-text {
+  font-family: var(--font-family-heading); 
+  font-size: var(--font-size-logo-text); 
+  color: var(--color-text-dark);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 /* --- NAVIGATION LISTS --- */

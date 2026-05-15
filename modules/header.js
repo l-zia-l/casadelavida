@@ -108,7 +108,8 @@ const generateHeaderHTML = () => {
 
             <!-- Centered Logo -->
             <a href="${safeLogoUrl}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
-                <img src="${safeLogoSrc}" alt="${safeLogoText}" class="cdlv-header__logo-img">
+                <img src="${safeLogoSrc}" alt="" class="cdlv-header__logo-img">
+                <span class="cdlv-header__logo-text">${safeLogoText}</span>
             </a>
 
             <!-- Right Navigation (Account & Cart) -->
