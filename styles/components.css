@@ -41,8 +41,8 @@
 }
 
 .cdlv-header__logo-img {
-  height: var(--logo-height-base);
-  width: auto;
+  width: var(--logo-width-base);
+  height: auto;
   object-fit: contain;
   transition: height var(--transition-base);
 }

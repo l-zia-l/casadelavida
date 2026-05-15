@@ -60,7 +60,7 @@
   --spacing-xl: clamp(6rem, 12vw, 12rem);
 
   /* --- 3.5. ICONOGRAPHY --- */
-  --logo-height-base: clamp(1.8rem, 4vw, 3.2rem); 
+  --logo-width-base: clamp(6rem, 12vw, 10rem); 
   --icon-size-base: clamp(1.25rem, 2vw, 1.5rem);
 
   /* --- 4. CORE AESTHETIC --- */
