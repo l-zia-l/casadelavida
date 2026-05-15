@@ -1,0 +1,74 @@
+<!--
+================================================================================
+CASA DE LA VIDA - BASE LAYOUT SHELL (base-layout.html)
+================================================================================
+
+[SITEMAP DIRECTORY]
+casa-de-la-vida/
+├── assets/ (fonts/, icons/, images/)
+├── modules/ (header.js, footer.js, catalog-2-grid.js, etc.)
+├── styles/ (globals.css, components.css)
+├── utils/ (auth.js, cart.js, components.js, payments.js)
+├── account/ (index, orders, billing, settings, security, preferences, wishlist, subscriptions)
+├── local-delivery/ (accra.html, tamale.html)
+├── legal/ (privacy-policy, terms-of-service, shipping-and-returns, medical-disclaimer)
+├── blog/ (post_1.html)
+├── shop/ (wellness-boxes, individual-wellness-products, all-accessories)
+│   ├── packages/
+│   ├── products/
+│   └── accessories/
+├── auth/ (sign-up, reset-password, login)
+├── status/ (success, 404, confirmed)
+├── index.html, shop.html, about-us.html, help-center.html, appointments.html, blog.html, shopping-cart.html
+└── sitemap.xml
+
+[FRAGMENT INJECTION PROTOCOL]
+This architecture relies on Vanilla JS to fetch and inject HTML fragments into this shell.
+The `<body>` acts as the fluid canvas.
+- <header id="global-header"> targets the navigation module.
+- <main id="main-content"> targets page-specific views (e.g., shop, blog, cart).
+- <footer id="global-footer"> targets the footer module.
+
+To inject a module, use the ES Module `components.js` to fetch the raw HTML string 
+and assign it to the `innerHTML` of the target container.
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Content Security Policy (CSP) -->
+  <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self'; 
+                 script-src 'self' 'module'; 
+                 style-src 'self' 'unsafe-inline'; 
+                 img-src 'self' data: https:; 
+                 connect-src 'self' https://*.supabase.co https://api.stripe.com; 
+                 frame-src 'self' https://js.stripe.com;">
+
+  <title>Casa De La Vida</title>
+
+  <!-- Global Source of Truth -->
+  <link rel="stylesheet" href="styles/globals.css">
+  <!-- Shared UI Components -->
+  <link rel="stylesheet" href="styles/components.css">
+
+  <!-- Central Hub Utility Scripts (ES Modules) -->
+  <script type="module" src="utils/auth.js" defer></script>
+  <script type="module" src="utils/cart.js" defer></script>
+  <script type="module" src="utils/components.js" defer></script>
+</head>
+
+<body>
+  <!-- Navigation Module Target -->
+  <header id="global-header" class="container-fluid"></header>
+
+  <!-- Page Fragment Target -->
+  <main id="main-content" class="container"></main>
+
+  <!-- Footer Module Target -->
+  <footer id="global-footer" class="container-fluid"></footer>
+</body>
+</html>
