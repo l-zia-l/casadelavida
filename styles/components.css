@@ -117,11 +117,18 @@
     background: transparent;
     border: none;
     color: var(--color-text-main);
-    font-size: var(--font-size-body);
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    padding: 0;
+}
+
+.cdlv-header__cart-btn svg {
+    transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.cdlv-header__cart-btn:hover svg {
+    transform: scale(1.15);
 }
 
 /* Mobile Nav Active State */
