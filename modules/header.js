@@ -2,7 +2,7 @@
    MODULE: HEADER LOGIC (modules/header.js)
    Architecture: ES Module, Dynamic DOM Injection
    Purpose: Renders the global navigation, manages scroll state, and handles
-   mobile menu interactions (including sliding drawer logic).
+   mobile menu interactions.
    Security: 
    - Uses strict HTML entity escaping (`sanitizeData`) to prevent XSS.
    - Fully isolated scope (no global variable leakage).
@@ -39,14 +39,7 @@ const config = {
  */
 const sanitizeData = (str) => {
     if (typeof str !== 'string') return str;
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#x27;',
-        "/": '&#x2F;',
-    };
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', "/": '&#x2F;' };
     const reg = /[&<>"'/]/ig;
     return str.replace(reg, (match) => (map[match]));
 };
@@ -57,7 +50,7 @@ const sanitizeData = (str) => {
  * @param {string} alignment - 'left' or 'right'.
  * @returns {string} - HTML string for the <ul>.
  */
-const buildNavList = (links, alignment) => {
+const buildNavList = (links) => {
     const listItems = links.map(link => {
         const desktopClass = link.desktopOnly ? 'cdlv-header__item--desktop-only' : '';
         const cartDataAttr = link.isCart ? 'data-cart-toggle="true"' : '';
@@ -76,17 +69,14 @@ const buildNavList = (links, alignment) => {
         `;
     }).join('');
 
-    return `<ul class="cdlv-header__list cdlv-header__list--${alignment}">${listItems}</ul>`;
+    return `<ul class="cdlv-header__list">${listItems}</ul>`;
 };
 
 /**
  * Builds the combined list of links specifically for the mobile dropdown drawer.
- * Excludes the cart, as the cart icon remains in the top grid on mobile.
  */
 const buildMobileDrawerList = () => {
-    // Combine left and right links, filter out the cart
     const allLinks = [...config.links.left, ...config.links.right].filter(link => !link.isCart);
-    
     return allLinks.map(link => `
         <a href="${sanitizeData(link.url)}" class="cdlv-header__link">
             ${sanitizeData(link.label)}
@@ -105,23 +95,28 @@ const generateHeaderHTML = () => {
     
     return `
         <nav class="cdlv-header__nav" aria-label="Primary Navigation">
-            <!-- Mobile Menu Toggle -->
-            <button class="cdlv-header__toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle Navigation Menu">
-                <span class="cdlv-header__toggle-icon-open" aria-hidden="true"><i class="fa-solid fa-bars"></i></span>
-                <span class="cdlv-header__toggle-icon-close" aria-hidden="true"><i class="fa-solid fa-x"></i></span>
-                <span>Menu</span>
-            </button>
+            
+            <!-- LEFT GROUP: Menu Toggle & Desktop Links -->
+            <div class="cdlv-header__group cdlv-header__group--left">
+                <button class="cdlv-header__toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle Navigation Menu">
+                    <span class="cdlv-header__toggle-icon-open" aria-hidden="true"><i class="fa-solid fa-bars"></i></span>
+                    <span class="cdlv-header__toggle-icon-close" aria-hidden="true"><i class="fa-solid fa-x"></i></span>
+                </button>
+                ${buildNavList(config.links.left)}
+            </div>
 
-            <!-- Left Navigation (Desktop) -->
-            ${buildNavList(config.links.left, 'left')}
+            <!-- CENTER GROUP: Logo -->
+            <div class="cdlv-header__group cdlv-header__group--center">
+                <a href="${safeLogoUrl}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
+                    <img src="${safeLogoSrc}" alt="${safeLogoText}" class="cdlv-header__logo-img">
+                </a>
+            </div>
 
-            <!-- Centered Image Logo -->
-            <a href="${safeLogoUrl}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
-                <img src="${safeLogoSrc}" alt="${safeLogoText}" class="cdlv-header__logo-img">
-            </a>
+            <!-- RIGHT GROUP: Account & Cart -->
+            <div class="cdlv-header__group cdlv-header__group--right">
+                ${buildNavList(config.links.right)}
+            </div>
 
-            <!-- Right Navigation (Account & Cart) -->
-            ${buildNavList(config.links.right, 'right')}
         </nav>
 
         <!-- Mobile Menu Drawer -->
@@ -138,15 +133,11 @@ const generateHeaderHTML = () => {
 export function init(element) {
     if (!element) return;
 
-    // 1. Inject the sanitized HTML structure
     element.innerHTML = generateHeaderHTML();
 
-    // 2. Initialize Scroll State Logic (Transparent to Solid)
+    // Scroll State Logic
     const handleScroll = () => {
-        // If the mobile menu is open, force the solid background for readability
         if (element.classList.contains('is-menu-open')) return;
-
-        // Use a 50px threshold before turning solid to account for minor scrolling bounces
         if (window.scrollY > 50) {
             element.classList.add('cdlv-header--scrolled');
         } else {
@@ -154,13 +145,10 @@ export function init(element) {
         }
     };
 
-    // Attach scroll listener with passive flag for rendering performance
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Trigger once on load in case the user refreshes mid-page
     handleScroll();
 
-    // 3. Initialize Mobile Menu Interaction
+    // Mobile Menu Interaction
     const menuToggle = element.querySelector('.cdlv-header__toggle');
     const mobileDrawer = element.querySelector('.cdlv-header__mobile-drawer');
 
@@ -168,21 +156,16 @@ export function init(element) {
         menuToggle.addEventListener('click', () => {
             const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
             
-            // Toggle ARIA states
             menuToggle.setAttribute('aria-expanded', String(!isExpanded));
             mobileDrawer.setAttribute('aria-hidden', String(isExpanded));
-            
-            // Toggle CSS interaction class on the root element
             element.classList.toggle('is-menu-open', !isExpanded);
 
-            // Force header solid when opening the menu so the dropdown looks connected
             if (!isExpanded) {
                 element.classList.add('cdlv-header--scrolled');
             } else {
-                handleScroll(); // Re-evaluate scroll position when closing
+                handleScroll();
             }
             
-            // Dispatch a custom event for other modules to listen to if needed
             document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', {
                 detail: { isOpen: !isExpanded }
             }));

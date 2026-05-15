@@ -22,14 +22,37 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
+/* 
+   GRID FIX: 3 columns (Left Group, Logo Group, Right Group). 
+   This ensures elements never wrap to a new row on mobile. 
+*/
 .cdlv-header__nav {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: var(--spacing-sm) 0;
   position: relative;
   z-index: var(--z-index-header);
   background-color: inherit;
+}
+
+/* Layout Groups */
+.cdlv-header__group {
+  display: flex;
+  align-items: center;
+}
+
+.cdlv-header__group--left {
+  justify-content: flex-start;
+  gap: var(--spacing-md);
+}
+
+.cdlv-header__group--center {
+  justify-content: center;
+}
+
+.cdlv-header__group--right {
+  justify-content: flex-end;
 }
 
 /* --- LOGO --- */
@@ -54,14 +77,6 @@
   display: flex;
   gap: var(--spacing-md);
   align-items: center;
-}
-
-.cdlv-header__list--left {
-  justify-content: flex-start;
-}
-
-.cdlv-header__list--right {
-  justify-content: flex-end;
 }
 
 .cdlv-header__link {
@@ -105,7 +120,6 @@
 
 /* Toggle icon states based on aria-expanded */
 .cdlv-header__toggle-icon-close { display: none; }
-
 .cdlv-header__toggle[aria-expanded="true"] .cdlv-header__toggle-icon-open { display: none; }
 .cdlv-header__toggle[aria-expanded="true"] .cdlv-header__toggle-icon-close { display: block; }
 
@@ -118,15 +132,14 @@
   align-items: center;
   gap: var(--spacing-xs);
   font-family: var(--font-family-body);
-  font-size: var(--font-size-small);
-  text-transform: uppercase;
+  font-size: var(--font-size-h4); /* Larger touch target for the icon */
   color: var(--color-text-dark);
-  padding: var(--spacing-xs) 0;
+  padding: var(--spacing-xs);
   border-radius: var(--radius-strict);
   transition: opacity var(--transition-fast);
 }
 
-/* Override any global button hover states to prevent white background */
+/* Override any global button hover states */
 #global-header .cdlv-header__toggle:hover {
   background-color: transparent;
   box-shadow: none;
@@ -146,7 +159,6 @@
   flex-direction: column;
   gap: var(--spacing-md);
   
-  /* Slide/Fade animation properties */
   transform: translateY(-20px);
   opacity: 0;
   visibility: hidden;
@@ -155,14 +167,12 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
 }
 
-/* State when menu is open */
 .is-menu-open .cdlv-header__mobile-drawer {
   transform: translateY(0);
   opacity: 1;
   visibility: visible;
 }
 
-/* Format the links inside the mobile drawer */
 .cdlv-header__mobile-drawer .cdlv-header__link {
   font-size: var(--font-size-h4);
   font-family: var(--font-family-heading);
@@ -170,31 +180,22 @@
   padding: var(--spacing-xs) 0;
 }
 
-/* Hide desktop links on mobile */
+/* Mobile Visibility Handling */
 @media (max-width: 991px) {
-  .cdlv-header__list--left,
+  /* Hide the left navigation links and any desktop-only links (Account) */
+  .cdlv-header__group--left .cdlv-header__list,
   .cdlv-header__item--desktop-only {
     display: none;
   }
 }
 
-/* --- DESKTOP LAYOUT --- */
+/* Desktop Layout */
 @media (min-width: 992px) {
-  .cdlv-header__nav {
-    grid-template-columns: 1fr auto 1fr;
-  }
-  
   .cdlv-header__toggle {
     display: none;
   }
-  
   .cdlv-header__mobile-drawer {
-    display: none; 
-  }
-  
-  .cdlv-header__list--left,
-  .cdlv-header__item--desktop-only {
-    display: flex;
+    display: none;
   }
 }
 
