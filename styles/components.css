@@ -81,6 +81,25 @@
   position: relative;
 }
 
+.cdlv-header__link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background-color: var(--color-text-dark); 
+  transition: width var(--transition-base);
+}
+
+.cdlv-header__link:hover::after {
+  width: 100%;
+}
+
+.cdlv-header__link[aria-current="page"]::after {
+  width: 100%;
+}
+
 /* Targets the actual SVG image file */
 .cdlv-header__cart-icon {
   width: var(--icon-size-base);
@@ -104,7 +123,7 @@
 }
 
 /* Disable the underline for the cart icon */
-.cdlv-header__link--cart::after {
+.cdlv-header__link--cart::after, cdlv-header__link--cart[aria-current="page"]::after {
   display: none;
 }
 
