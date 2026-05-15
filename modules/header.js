@@ -2,7 +2,7 @@
    MODULE: HEADER LOGIC (modules/header.js)
    Architecture: ES Module, Dynamic DOM Injection
    Purpose: Renders the global navigation, manages scroll state, and handles
-   mobile menu interactions.
+   mobile menu interactions (including sliding drawer logic).
    Security: 
    - Uses strict HTML entity escaping (`sanitizeData`) to prevent XSS.
    - Fully isolated scope (no global variable leakage).
@@ -52,7 +52,7 @@ const sanitizeData = (str) => {
 };
 
 /**
- * Builds a navigation list from the config array.
+ * Builds a navigation list from the config array for desktop display.
  * @param {Array} links - Array of link objects.
  * @param {string} alignment - 'left' or 'right'.
  * @returns {string} - HTML string for the <ul>.
@@ -80,7 +80,22 @@ const buildNavList = (links, alignment) => {
 };
 
 /**
- * Generates the complete HTML structure for the header.
+ * Builds the combined list of links specifically for the mobile dropdown drawer.
+ * Excludes the cart, as the cart icon remains in the top grid on mobile.
+ */
+const buildMobileDrawerList = () => {
+    // Combine left and right links, filter out the cart
+    const allLinks = [...config.links.left, ...config.links.right].filter(link => !link.isCart);
+    
+    return allLinks.map(link => `
+        <a href="${sanitizeData(link.url)}" class="cdlv-header__link">
+            ${sanitizeData(link.label)}
+        </a>
+    `).join('');
+};
+
+/**
+ * Generates the complete HTML structure for the header, including the mobile drawer.
  * @returns {string} - The DOM string to be injected.
  */
 const generateHeaderHTML = () => {
@@ -108,6 +123,11 @@ const generateHeaderHTML = () => {
             <!-- Right Navigation (Account & Cart) -->
             ${buildNavList(config.links.right, 'right')}
         </nav>
+
+        <!-- Mobile Menu Drawer -->
+        <aside id="mobile-menu" class="cdlv-header__mobile-drawer" aria-hidden="true">
+            ${buildMobileDrawerList()}
+        </aside>
     `;
 };
 
@@ -123,6 +143,9 @@ export function init(element) {
 
     // 2. Initialize Scroll State Logic (Transparent to Solid)
     const handleScroll = () => {
+        // If the mobile menu is open, force the solid background for readability
+        if (element.classList.contains('is-menu-open')) return;
+
         // Use a 50px threshold before turning solid to account for minor scrolling bounces
         if (window.scrollY > 50) {
             element.classList.add('cdlv-header--scrolled');
@@ -139,12 +162,27 @@ export function init(element) {
 
     // 3. Initialize Mobile Menu Interaction
     const menuToggle = element.querySelector('.cdlv-header__toggle');
-    if (menuToggle) {
+    const mobileDrawer = element.querySelector('.cdlv-header__mobile-drawer');
+
+    if (menuToggle && mobileDrawer) {
         menuToggle.addEventListener('click', () => {
             const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
-            menuToggle.setAttribute('aria-expanded', !isExpanded);
             
-            // Dispatch a custom event so a separate mobile-drawer module can listen and open
+            // Toggle ARIA states
+            menuToggle.setAttribute('aria-expanded', String(!isExpanded));
+            mobileDrawer.setAttribute('aria-hidden', String(isExpanded));
+            
+            // Toggle CSS interaction class on the root element
+            element.classList.toggle('is-menu-open', !isExpanded);
+
+            // Force header solid when opening the menu so the dropdown looks connected
+            if (!isExpanded) {
+                element.classList.add('cdlv-header--scrolled');
+            } else {
+                handleScroll(); // Re-evaluate scroll position when closing
+            }
+            
+            // Dispatch a custom event for other modules to listen to if needed
             document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', {
                 detail: { isOpen: !isExpanded }
             }));
