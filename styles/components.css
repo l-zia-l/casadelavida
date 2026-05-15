@@ -107,7 +107,7 @@
 }
 
 /* Ensure the icon color transition matches the rest of the nav */
-.cdlv-header__link--cart i {
+.cdlv-header__link--cart img {
   transition: color var(--transition-fast);
 }
 
