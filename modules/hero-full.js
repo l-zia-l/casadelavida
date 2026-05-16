@@ -5,13 +5,25 @@
    Security: Data sanitization applied to all configuration variables.
    ========================================================================== */
 
+// 1. Create a helper function to determine the base path
+function getBasePath() {
+  // Checks if we are on GitHub Pages and extracts the repo name automatically
+  if (window.location.hostname.includes('github.io')) {
+    const repoName = window.location.pathname.split('/')[1];
+    return `/${repoName}`;
+  }
+  // If we are on localhost or a custom domain, use the standard root
+  return '';
+}
+
+// 2. Prepend the base path to your asset link
 const defaultConfig = {
-  bgImage: 'assets/images/products/item_2.2.jpg',
+  bgImage: `${getBasePath()}/assets/images/products/item_2.2.jpg`,
   tagline: 'Sip • Soothe • Blossom',
   heading: 'Your wellness ritual, in one box.',
   description: 'Curated in Ghana for a balanced life. Discover our signature collections.',
   ctaText: 'Begin Your Ritual',
-  ctaLink: 'shop/wellness-boxes'
+  ctaLink: `${getBasePath()}/shop/wellness-boxes` // Also applied to links!
 };
 
 /**

@@ -507,7 +507,7 @@
 
 /* --- FULL-WIDTH HERO MODIFIER --- */
 .cdlv-hero--full {
-  min-height: 100vh;
+  min-height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -519,10 +519,9 @@
 
 .cdlv-hero__overlay-box {
   /* Semi-opaque white box over the high-res image */
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.9);
   padding: var(--spacing-xl) var(--spacing-lg);
-  max-width: 800px;
-  width: 100%;
+  width: min(90vw, 1200px);
   text-align: center;
   border-radius: var(--radius-strict);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
@@ -532,34 +531,41 @@
 
 /* --- COMPACT HERO MODIFIER --- */
 .cdlv-hero--compact {
-  min-height: 40vh;
   display: flex;
   flex-direction: column-reverse; /* Mobile: Image on top, text below */
+  background-color: var(--color-primary);
 }
 
 @media (min-width: 992px) {
   .cdlv-hero--compact {
     flex-direction: row; /* Desktop: Text Left, Image Right */
-    align-items: stretch;
+    height: 40vh;
+    min-height: 350px;
+    max-height: 450px;
   }
 }
 
 .cdlv-hero__text-panel {
   flex: 1;
-  padding: var(--spacing-lg) var(--layout-gutter);
+  padding: var(--spacing-md) var(--layout-gutter);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  background-color: var(--color-primary);
 }
 
 .cdlv-hero__image-panel {
   flex: 1;
-  min-height: 300px;
+  height: 250px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+@media (min-width: 992px) {
+  .cdlv-hero__image-panel {
+    height: auto;
+  }
 }
 
 /* --- HERO TYPOGRAPHY & ELEMENTS --- */
@@ -574,13 +580,19 @@
 }
 
 .cdlv-hero__title {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .cdlv-hero__description {
   margin-bottom: var(--spacing-lg);
   color: var(--color-text-dark);
   opacity: 0.9;
+  max-width: 60ch; 
+  margin-inline: auto;
+}
+
+.cdlv-hero--compact .cdlv-hero__description {
+  margin-inline: 0;
 }
 
 /* --- BUTTONS --- */
@@ -635,6 +647,10 @@
   }
 
   #global-footer {
+    display: none !important;
+  }
+
+  #main-content {
     display: none !important;
   }
 }
