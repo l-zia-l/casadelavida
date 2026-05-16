@@ -14,7 +14,7 @@
 const footerConfig = {
   logo: {
     src: 'assets/images/logo.png',
-    alt: 'Casa De La Vida'
+    alt: 'Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey'
   },
   categories: [
     {
@@ -102,12 +102,14 @@ const generateFooterHTML = () => {
 
     return `
       <div class="cdlv-footer-column" id="${safeId}">
-        <button class="cdlv-footer-toggle" aria-expanded="false" aria-controls="${safeId}-list">
-          <span class="cdlv-footer-toggle-title">${safeTitle}</span>
-          <svg class="cdlv-footer-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
+        <h3 class="cdlv-footer-heading">
+          <button class="cdlv-footer-toggle" aria-expanded="false" aria-controls="${safeId}-list">
+            <span class="cdlv-footer-toggle-title">${safeTitle}</span>
+            <svg class="cdlv-footer-toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </h3>
         <ul class="cdlv-footer-list" id="${safeId}-list" aria-label="${safeTitle}">
           ${linksHTML}
         </ul>
@@ -115,7 +117,6 @@ const generateFooterHTML = () => {
     `;
   }).join('');
 
-  // OPTIMIZATION: Added decoding="async" and loading="lazy" to social icons
   const socialsHTML = footerConfig.socials.map(social => `
     <a href="${sanitizeHTML(social.url)}" class="cdlv-footer-social-link" aria-label="${sanitizeHTML(social.network)}" target="_blank" rel="noopener noreferrer">
       <img src="${sanitizeHTML(social.iconSrc)}" alt="" aria-hidden="true" class="cdlv-footer-social-icon" loading="lazy" decoding="async">
@@ -131,7 +132,8 @@ const generateFooterHTML = () => {
       </div>
       
       <div class="cdlv-footer-inner">
-        <nav class="cdlv-footer-nav" aria-label="Footer Universal Site Directory">
+        <nav class="cdlv-footer-nav" aria-labelledby="footer-nav-heading">
+          <h2 id="footer-nav-heading" class="visually-hidden">Site Directory</h2>
           ${columnsHTML}
         </nav>
         

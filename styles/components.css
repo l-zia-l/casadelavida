@@ -253,6 +253,15 @@
   margin-inline: calc(var(--layout-gutter) * -1);
 }
 
+.cdlv-footer-heading {
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  font-family: inherit;
+}
+
 .cdlv-footer-inner {
   display: flex;
   flex-direction: column;
