@@ -514,6 +514,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-md);
+  padding-top: calc(var(--spacing-md) + var(--header-offset));
 }
 
 .cdlv-hero__overlay-box {
@@ -539,6 +540,10 @@
     flex-direction: row; /* Desktop: Text Left, Image Right */
     align-items: stretch;
   }
+
+  .cdlv-hero__text-panel {
+    padding-top: calc(var(--spacing-lg) + var(--header-offset)); 
+  }
 }
 
 .cdlv-hero__text-panel {
@@ -549,7 +554,6 @@
   justify-content: center;
   align-items: flex-start;
   background-color: var(--color-primary);
-  overflow-y: auto;
 }
 
 .cdlv-hero__image-panel {

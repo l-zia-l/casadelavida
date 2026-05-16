@@ -75,6 +75,7 @@
   /* --- 6. VIEWPORT & STRUCTURAL TOKENS --- */
   --vh-fallback: 100vh;
   --vh-modern: 100svh;
+  --header-offset: clamp(80px, 8vw, 120px)
 }
 
 /* GLOBAL RESET */
