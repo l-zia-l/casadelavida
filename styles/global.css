@@ -71,6 +71,10 @@
   --transition-fast: 150ms var(--ease-professional);
   --transition-base: 300ms var(--ease-professional);
   --transition-slow: 600ms var(--ease-professional);
+
+  /* --- 6. VIEWPORT & STRUCTURAL TOKENS --- */
+  --vh-fallback: 100vh;
+  --vh-modern: 100svh;
 }
 
 /* GLOBAL RESET */
@@ -190,6 +194,20 @@ img, video {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* UTILITY CLASSES */
+
+/* Forces an element to be exactly the height of the screen */
+.u-h-screen {
+  height: var(--vh-fallback);
+  height: var(--vh-modern);
+}
+
+/* Allows an element to be the height of the screen, but grow if content is longer */
+.u-min-h-screen {
+  min-height: var(--vh-fallback);
+  min-height: var(--vh-modern);
 }
 
 /* ULTRA-WIDE SCREEN ADJUSTMENTS */

@@ -508,8 +508,8 @@
 
 /* --- FULL-WIDTH HERO MODIFIER --- */
 .cdlv-hero--full {
-  height: 100vh; 
-  height: 100svh;
+  height: var(--vh-fallback); 
+  height: var(--vh-modern); 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -528,10 +528,10 @@
 
 /* --- COMPACT HERO MODIFIER --- */
 .cdlv-hero--compact {
-  height: 100vh;
-  height: 100svh;
+  height: var(--vh-fallback);
+  height: var(--vh-modern);
   display: flex;
-  flex-direction: column-reverse; /* Mobile: Image on top, text below */
+  flex-direction: column-reverse;
 }
 
 @media (min-width: 992px) {
