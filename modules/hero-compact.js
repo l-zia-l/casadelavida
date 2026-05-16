@@ -7,6 +7,7 @@
 
 const defaultConfig = {
   bgImage: 'assets/images/products/item_2.2.jpg', 
+  imageAlt: 'Glass jar filled with artisanal loose leaf tea and dried rose petals', // Descriptive default
   heading: 'The Shop',
   description: 'Every blend crafted with purpose to support women\'s health. Hand-sourced artisanal ingredients designed to elevate your daily routine.',
   ctaText: 'View All Collections',
@@ -25,13 +26,12 @@ function sanitizeHTML(str) {
 }
 
 export function init(node, customConfig = {}) {
-  // Merge the default config with any custom data passed from the page script
   const config = { ...defaultConfig, ...customConfig };
 
   const html = `
-    <section class="cdlv-hero cdlv-hero--compact animate-enter" aria-label="${sanitizeHTML(config.heading)}">
+    <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
       
-      <img src="${sanitizeHTML(config.bgImage)}" alt="Casa De La Vida Wellness Elements" class="cdlv-hero__bg-img">
+      <img src="${sanitizeHTML(config.bgImage)}" alt="${sanitizeHTML(config.imageAlt)}" class="cdlv-hero__bg-img">
       
       <div class="cdlv-hero__compact-overlay">
         <h1 class="cdlv-hero__title">${sanitizeHTML(config.heading)}</h1>

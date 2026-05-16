@@ -25,20 +25,19 @@ function sanitizeHTML(str) {
   return temp.innerHTML;
 }
 
-// 1. Add customConfig as an optional second parameter
 export function init(node, customConfig = {}) {
-  
-  // 2. Merge the default config with whatever the page passes in
-  // Any properties in customConfig will overwrite the default ones!
   const config = { ...defaultConfig, ...customConfig };
 
   const html = `
-    <section class="cdlv-hero cdlv-hero--full animate-enter" aria-label="${sanitizeHTML(config.heading)}">
-      <img src="${sanitizeHTML(config.bgImage)}" alt="Casa De La Vida Background" class="cdlv-hero__bg-img">
+    <section class="cdlv-hero cdlv-hero--full animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
+      
+      <img src="${sanitizeHTML(config.bgImage)}" alt="" aria-hidden="true" class="cdlv-hero__bg-img">
+      
       <div class="cdlv-hero__overlay-box">
         <span class="cdlv-hero__tagline">${sanitizeHTML(config.tagline)}</span>
         <h1 class="cdlv-hero__title">${sanitizeHTML(config.heading)}</h1>
         <p class="cdlv-hero__description">${sanitizeHTML(config.description)}</p>
+        
         <a href="${sanitizeHTML(config.ctaLink)}" class="cdlv-hero__btn cdlv-hero__btn--primary">
           ${sanitizeHTML(config.ctaText)}
         </a>
