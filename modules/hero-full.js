@@ -13,7 +13,7 @@ const defaultConfig = {
   heading: 'Your wellness ritual, in one box.',
   description: 'Curated in Ghana for a balanced life. Discover our signature collections.',
   ctaText: 'Begin Your Ritual',
-  ctaLink: 'shop/wellness-boxes',
+  ctaLink: 'shop/wellness-boxes.html',
   isPriority: true // Defaults to true for the main hero
 };
 
@@ -36,10 +36,13 @@ export function init(node, customConfig = {}) {
     ? 'fetchpriority="high" loading="eager"' 
     : 'loading="lazy"';
 
+  const safeBgImage = buildPath(config.bgImage);
+  const safeCtaLink = buildPath(config.ctaLink);
+
   const html = `
     <section class="cdlv-hero cdlv-hero--full animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
       
-      <img src="${sanitizeHTML(config.bgImage)}" 
+      <img src="${sanitizeHTML(safeBgImage)}" 
            alt="" 
            aria-hidden="true" 
            class="cdlv-hero__bg-img"
@@ -51,7 +54,7 @@ export function init(node, customConfig = {}) {
         <h1 class="cdlv-hero__title">${sanitizeHTML(config.heading)}</h1>
         <p class="cdlv-hero__description">${sanitizeHTML(config.description)}</p>
         
-        <a href="${sanitizeHTML(config.ctaLink)}" class="cdlv-hero__btn cdlv-hero__btn--primary">
+        <a href="${sanitizeHTML(safeCtaLink)}" class="cdlv-hero__btn cdlv-hero__btn--primary">
           ${sanitizeHTML(config.ctaText)}
         </a>
       </div>

@@ -21,17 +21,17 @@ const config = {
     logo: {
         text: 'Casa De La Vida', 
         src: 'assets/images/logo.png', 
-        url: 'index.html'
+        url: buildpath('index.html')
     },
     links: {
         left: [
-            { label: 'Shop', url: 'shop.html' },
-            { label: 'Rituals', url: 'shop/wellness-boxes.html' },
-            { label: 'Account', url: 'account/index.html', mobileOnly: true } 
+            { label: 'Shop', url: buildpath('shop.html') },
+            { label: 'Rituals', url: buildpath('shop/wellness-boxes.html') },
+            { label: 'Account', url: buildpath('account/index.html', mobileOnly: true } 
         ],
         right: [
-            { label: 'Account', url: 'account/index.html', desktopOnly: true },
-            { label: 'Cart', url: 'shopping-cart.html', isCart: true }
+            { label: 'Account', url: buildpath('account/index.html'), desktopOnly: true },
+            { label: 'Cart', url: buildpath('shopping-cart.html'), isCart: true }
         ]
     }
 };

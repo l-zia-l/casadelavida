@@ -15,7 +15,7 @@ import { buildPath } from '../utils/paths.js';
 // 1. MODULE CONFIGURATION
 const footerConfig = {
   logo: {
-    src: 'assets/images/logo.png',
+    src: buildPath('assets/images/logo.png'),
     alt: 'Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey'
   },
   categories: [
@@ -23,60 +23,60 @@ const footerConfig = {
       title: 'Casa De La Vida',
       id: 'col-brand',
       links: [
-        { label: 'About Us', url: 'about-us.html' },
-        { label: 'Blog', url: 'blog.html' },
-        { label: 'Shop All', url: 'shop.html' }
+        { label: 'About Us', url: buildPath('about-us.html') },
+        { label: 'Blog', url: buildPath('blog.html') },
+        { label: 'Shop All', url: buildPath('shop.html') }
       ]
     },
     {
       title: 'Services',
       id: 'col-services',
       links: [
-        { label: 'Wellness Boxes', url: 'shop/wellness-boxes.html' },
-        { label: 'Teas & More', url: 'shop/individual-wellness-products.html' },
-        { label: 'Accessories', url: 'shop/all-accessories.html' },
-        { label: 'Book A Consultation', url: 'appointments.html' }
+        { label: 'Wellness Boxes', url: buildPath('shop/wellness-boxes.html') },
+        { label: 'Teas & More', url: buildPath('shop/individual-wellness-products.html') },
+        { label: 'Accessories', url: buildPath('shop/all-accessories.html') },
+        { label: 'Book A Consultation', url: buildPath('appointments.html') }
       ]
     },
     {
       title: 'Account',
       id: 'col-account',
       links: [
-        { label: 'My Account', url: 'account/index.html' },
-        { label: 'Orders', url: 'account/orders.html' },
-        { label: 'Wishlist', url: 'account/wishlist.html' },
-        { label: 'Subscriptions', url: 'account/subscriptions.html' }
+        { label: 'My Account', url: buildpath('account/index.html') },
+        { label: 'Orders', url: buildpath('account/orders.html') },
+        { label: 'Wishlist', url: buildpath('account/wishlist.html') },
+        { label: 'Subscriptions', url: buildpath('account/subscriptions.html') }
       ]
     },
     {
       title: 'Local Delivery',
       id: 'col-delivery',
       links: [
-        { label: 'Accra, GA', url: 'local-delivery/accra.html' },
-        { label: 'Tamale, NR', url: 'local-delivery/tamale.html' }
+        { label: 'Accra, GA', url: buildpath('local-delivery/accra.html') },
+        { label: 'Tamale, NR', url: buildpath('local-delivery/tamale.html') }
       ]
     },
     {
       title: 'Help',
       id: 'col-help',
       links: [
-        { label: 'Help Center', url: 'help-center.html' },
-        { label: 'Shipping & Returns', url: 'legal/shipping-and-returns.html' }
+        { label: 'Help Center', url: buildpath('help-center.html') },
+        { label: 'Shipping & Returns', url: buildpath('legal/shipping-and-returns.html') }
       ]
     },
     {
       title: 'Legal',
       id: 'col-legal',
       links: [
-        { label: 'Privacy Policy', url: 'legal/privacy-policy.html' },
-        { label: 'Terms of Service', url: 'legal/terms-of-service.html' },
-        { label: 'Medical Disclaimer', url: 'legal/medical-disclaimer.html' }
+        { label: 'Privacy Policy', url: buildpath('legal/privacy-policy.html') },
+        { label: 'Terms of Service', url: buildpath('legal/terms-of-service.html') },
+        { label: 'Medical Disclaimer', url: buildpath('legal/medical-disclaimer.html') }
       ]
     }
   ],
   socials: [
-    { network: 'Instagram', url: 'https://www.instagram.com/casa_de_la_vida_gh/', iconSrc: 'assets/icons/instagram.svg' },
-    { network: 'TikTok', url: 'https://www.tiktok.com/@nurtureher06', iconSrc: 'assets/icons/tiktok.svg' }
+    { network: 'Instagram', url: buildpath('https://www.instagram.com/casa_de_la_vida_gh/', iconSrc: 'assets/icons/instagram.svg' },
+    { network: 'TikTok', url: buildpath('https://www.tiktok.com/@nurtureher06', iconSrc: 'assets/icons/tiktok.svg' }
   ]
 };
 
