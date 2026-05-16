@@ -260,6 +260,7 @@
   font-weight: inherit;
   line-height: inherit;
   font-family: inherit;
+  color: var(--color-text-light);
 }
 
 .cdlv-footer-inner {

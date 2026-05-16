@@ -161,8 +161,8 @@ const updateAccessibilityState = (container, isDesktop) => {
   if (isDesktop) {
     toggles.forEach(toggle => {
       toggle.setAttribute('tabindex', '-1');
-      toggle.setAttribute('aria-hidden', 'true');
       toggle.removeAttribute('aria-expanded');
+      toggle.removeAttribute('aria-hidden'); 
     });
     lists.forEach(list => list.removeAttribute('aria-hidden'));
   } else {
