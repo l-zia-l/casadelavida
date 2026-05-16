@@ -223,10 +223,16 @@ export function init(element) {
         rootMargin: '-50px 0px -95% 0px' 
     });
 
-    // Wait a brief moment for dynamic fragments to inject, then observe
-    setTimeout(() => {
-        document.querySelectorAll('[data-theme]').forEach(section => {
-            themeObserver.observe(section);
-        });
-    }, 500);
+    // INSTANT THEME CHECK: Eliminate the load delay (FOUC)
+    // Scan the DOM the exact millisecond the header loads
+    const initialSection = document.querySelector('[data-theme]');
+    if (initialSection) {
+        currentTheme = initialSection.getAttribute('data-theme') || 'light';
+        evaluateHeaderTheme(); // Force the color instantly before the browser paints
+    }
+
+    // Begin observing all theme sections for when the user scrolls
+    document.querySelectorAll('[data-theme]').forEach(section => {
+        themeObserver.observe(section);
+    });
 }
