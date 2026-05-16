@@ -127,12 +127,32 @@ export function init(element) {
     // 1. Inject HTML
     element.innerHTML = generateHeaderHTML();
 
-    // 2. High-Performance Scroll Listener
+    // 2. State Management for Dynamic Colors
+    let currentTheme = 'light';
+    const menuToggle = element.querySelector('.cdlv-header__toggle');
+
+    const evaluateHeaderTheme = () => {
+        const isScrolled = window.scrollY > 50;
+        const isMenuOpen = element.classList.contains('cdlv-header--menu-open');
+
+        // Text becomes white ONLY if:
+        // - We haven't scrolled past 50px (header is transparent)
+        // - The mobile menu is closed (menu background is white)
+        // - The section underneath explicitly requests a 'dark' theme
+        if (!isScrolled && !isMenuOpen && currentTheme === 'dark') {
+            element.classList.add('cdlv-header--inverted');
+        } else {
+            element.classList.remove('cdlv-header--inverted');
+        }
+    };
+
+    // 3. High-Performance Scroll Listener
     let ticking = false;
     const handleScroll = () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
                 element.classList.toggle('cdlv-header--scrolled', window.scrollY > 50);
+                evaluateHeaderTheme(); // Re-evaluate color on scroll
                 ticking = false;
             });
             ticking = true;
@@ -141,12 +161,11 @@ export function init(element) {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
 
-    // 3. Mobile Menu Toggle Logic
-    const menuToggle = element.querySelector('.cdlv-header__toggle');
-    
+    // 4. Mobile Menu Toggle Logic
     const closeMobileMenu = () => {
         element.classList.remove('cdlv-header--menu-open');
         if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+        evaluateHeaderTheme(); // Re-evaluate color when menu closes
         document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', { detail: { isOpen: false } }));
     };
 
@@ -155,39 +174,29 @@ export function init(element) {
             const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
             menuToggle.setAttribute('aria-expanded', !isExpanded);
             element.classList.toggle('cdlv-header--menu-open', !isExpanded);
-            
+            evaluateHeaderTheme(); // Re-evaluate color when menu opens
             document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', { detail: { isOpen: !isExpanded } }));
         });
     }
 
-    // 4. UX Fix: Close on clicking a link inside the menu
+    // 5. UX Fixes (Click outside, Bfcache, Escape key)
     const navLinks = element.querySelectorAll('.cdlv-header__link');
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
-            if (element.classList.contains('cdlv-header--menu-open')) {
-                closeMobileMenu();
-            }
+            if (element.classList.contains('cdlv-header--menu-open')) closeMobileMenu();
         });
     });
 
-    // 5. UX Fix: Close when clicking anywhere outside the header
     document.addEventListener('click', (e) => {
         const isMenuOpen = element.classList.contains('cdlv-header--menu-open');
         const isClickInsideHeader = element.contains(e.target);
-        
-        if (isMenuOpen && !isClickInsideHeader) {
-            closeMobileMenu();
-        }
+        if (isMenuOpen && !isClickInsideHeader) closeMobileMenu();
     });
 
-    // 6. UX Fix: Reset menu state when using browser Back/Forward buttons (bfcache)
     window.addEventListener('pageshow', (e) => {
-        if (e.persisted) {
-            closeMobileMenu();
-        }
+        if (e.persisted) closeMobileMenu();
     });
 
-    // 7. A11y: Escape key support
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && element.classList.contains('cdlv-header--menu-open')) {
             closeMobileMenu();
@@ -195,10 +204,29 @@ export function init(element) {
         }
     });
 
-    // 8. Desktop Breakpoint cleanup
     const desktopBreakpoint = window.matchMedia('(min-width: 992px)');
-    const handleBreakpointChange = (e) => {
+    desktopBreakpoint.addEventListener('change', (e) => {
         if (e.matches) closeMobileMenu();
-    };
-    desktopBreakpoint.addEventListener('change', handleBreakpointChange);
+    });
+
+    // 6. The Intersection Observer (Watches the sections underneath)
+    const themeObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Update the theme based on the section hitting the top of the screen
+                currentTheme = entry.target.getAttribute('data-theme') || 'light';
+                evaluateHeaderTheme();
+            }
+        });
+    }, { 
+        // Creates a horizontal trigger line near the top of the viewport
+        rootMargin: '-50px 0px -95% 0px' 
+    });
+
+    // Wait a brief moment for dynamic fragments to inject, then observe
+    setTimeout(() => {
+        document.querySelectorAll('[data-theme]').forEach(section => {
+            themeObserver.observe(section);
+        });
+    }, 500);
 }

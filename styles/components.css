@@ -219,6 +219,26 @@
   }
 }
 
+/* DYNAMIC INVERTED STATE (FOR DARK BACKGROUNDS) */
+
+/* Change all text to white */
+.cdlv-header--inverted .cdlv-header__link,
+.cdlv-header--inverted .cdlv-header__toggle,
+.cdlv-header--inverted .cdlv-header__logo-text {
+  color: var(--color-text-light);
+}
+
+/* Change the animated hover underline to white */
+.cdlv-header--inverted .cdlv-header__link::after {
+  background-color: var(--color-text-light);
+}
+
+/* Force the SVG images to render as pure white */
+.cdlv-header--inverted .cdlv-header__menu-icon,
+.cdlv-header--inverted .cdlv-header__cart-icon {
+  filter: brightness(0) invert(1);
+}
+
 /* --- DESKTOP LAYOUT --- */
 @media (min-width: 992px) {  
   .cdlv-header__toggle {
@@ -230,6 +250,8 @@
     display: flex;
   }
 }
+
+
 
 /* ==========================================================================
    MODULE: FOOTER (.cdlv-footer)
