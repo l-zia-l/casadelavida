@@ -247,8 +247,8 @@
    ========================================================================== */
 
 .cdlv-footer {
-  background-color: var(--color-neutral-bg);
-  color: var(--color-text-dark);
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
   font-family: var(--font-family-body);
   margin-inline: calc(var(--layout-gutter) * -1);
 }
@@ -342,7 +342,7 @@
   padding-block: clamp(0.25rem, 0.5vw, 0.5rem);
   font-size: var(--font-size-small);
   opacity: 0.8;
-  color: var(--color-text-dark);
+  color: var(--color-text-light);
 }
 
 .cdlv-footer-link:hover,
@@ -375,7 +375,7 @@
 }
 
 .cdlv-footer-social-link:hover {
-  background-color: var(--color-text-light);
+  transform: scale(1.1);
 }
 
 .cdlv-footer-social-icon {
