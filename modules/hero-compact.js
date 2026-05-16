@@ -6,7 +6,7 @@
    ========================================================================== */
 
 const defaultConfig = {
-  bgImage: 'assets/images/item_2.2.jpg', // Honey, Black Seed Oil, Tea Infuser
+  bgImage: 'assets/images/products/item_2.2.jpg', // Honey, Black Seed Oil, Tea Infuser
   heading: 'The Shop',
   description: 'Every blend crafted with purpose to support women\'s health. Hand-sourced artisanal ingredients designed to elevate your daily routine.',
   ctaText: 'View All Collections',

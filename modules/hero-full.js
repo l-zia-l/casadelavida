@@ -6,7 +6,7 @@
    ========================================================================== */
 
 const defaultConfig = {
-  bgImage: 'assets/images/item_2.2.jpg',
+  bgImage: 'assets/images/products/item_2.2.jpg',
   tagline: 'Sip • Soothe • Blossom',
   heading: 'Your wellness ritual, in one box.',
   description: 'Curated in Ghana for a balanced life. Discover our signature collections.',
