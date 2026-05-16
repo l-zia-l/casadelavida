@@ -29,10 +29,22 @@ export async function initializeComponents(rootNode = document) {
             // Dynamically import the module based on the sanitized name
             const module = await import(`${MODULE_PATH}${moduleName}.js`);
             
+            // Extract and parse custom configuration if it exists
+            const rawConfig = node.getAttribute('data-config');
+            let customConfig = {};
+            
+            if (rawConfig) {
+                try {
+                    customConfig = JSON.parse(rawConfig);
+                } catch (jsonError) {
+                    console.error(`Invalid JSON configuration in data-config for module ${moduleName}:`, jsonError);
+                }
+            }
+
             // Check if the module exports an 'init' function
             if (module.init && typeof module.init === 'function') {
-                // Pass the specific node so the JS only scopes to that instance
-                module.init(node);
+                // Pass the specific node and the parsed configuration
+                module.init(node, customConfig);
             } else {
                 console.warn(`Module ${moduleName} does not export an init function.`);
             }

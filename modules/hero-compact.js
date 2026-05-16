@@ -24,8 +24,9 @@ function sanitizeHTML(str) {
   return temp.innerHTML;
 }
 
-export function init(node) {
-  const config = { ...defaultConfig };
+export function init(node, customConfig = {}) {
+  // Merge the default config with any custom data passed from the page script
+  const config = { ...defaultConfig, ...customConfig };
 
   const html = `
     <section class="cdlv-hero cdlv-hero--compact animate-enter" aria-label="${sanitizeHTML(config.heading)}">
