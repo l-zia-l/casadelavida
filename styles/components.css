@@ -328,6 +328,8 @@
 
 .cdlv-footer-toggle-icon {
   transition: transform var(--transition-fast);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .cdlv-footer-toggle[aria-expanded="true"] .cdlv-footer-toggle-icon {
@@ -366,7 +368,6 @@
   opacity: 1;
   color: var(--color-text-dark);
   color: var(--color-secondary);
-  background-color: var(--color-secondary);
 }
 
 /* Social & Copyright */
@@ -391,6 +392,9 @@
   width: calc(var(--icon-size-base) * 1.8);
   height: calc(var(--icon-size-base) * 1.8);
   border-radius: var(--radius-strict);
+  transition: transform var(--transition-fast);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .cdlv-footer-social-link:focus-visible {
@@ -462,7 +466,6 @@
   .cdlv-footer-social-link:hover,
   .cdlv-footer-social-link:focus-visible {
     transform: none;
-    background-color: var(--color-secondary);
   }
   
   .cdlv-footer-social-icon,

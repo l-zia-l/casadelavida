@@ -115,9 +115,10 @@ const generateFooterHTML = () => {
     `;
   }).join('');
 
+  // OPTIMIZATION: Added decoding="async" and loading="lazy" to social icons
   const socialsHTML = footerConfig.socials.map(social => `
     <a href="${sanitizeHTML(social.url)}" class="cdlv-footer-social-link" aria-label="${sanitizeHTML(social.network)}" target="_blank" rel="noopener noreferrer">
-      <img src="${sanitizeHTML(social.iconSrc)}" alt="" aria-hidden="true" class="cdlv-footer-social-icon">
+      <img src="${sanitizeHTML(social.iconSrc)}" alt="" aria-hidden="true" class="cdlv-footer-social-icon" loading="lazy" decoding="async">
     </a>
   `).join('');
 
@@ -125,7 +126,7 @@ const generateFooterHTML = () => {
     <div class="cdlv-footer">
       <div class="cdlv-footer-brand-banner">
         <a href="index.html" class="cdlv-footer-logo-wrapper" aria-label="Casa De La Vida Home">
-            <img src="${sanitizeHTML(footerConfig.logo.src)}" alt="${sanitizeHTML(footerConfig.logo.alt)}" loading="lazy">
+            <img src="${sanitizeHTML(footerConfig.logo.src)}" alt="${sanitizeHTML(footerConfig.logo.alt)}" loading="lazy" decoding="async">
         </a>
       </div>
       
@@ -135,7 +136,7 @@ const generateFooterHTML = () => {
         </nav>
         
         <div class="cdlv-footer-bottom">
-          <nav class="cdlv-footer-social-nav" aria-label="Social Media Media Profiles">
+          <nav class="cdlv-footer-social-nav" aria-label="Social Media Profiles">
             <div class="cdlv-footer-socials">
               ${socialsHTML}
             </div>
@@ -149,23 +150,20 @@ const generateFooterHTML = () => {
   `;
 };
 
-// 4. BEHAVIOR & INTERACTIVE ACCESSIBILITY ENGINE
-const handleAccessibilityLayoutStates = (container) => {
+// 4. BEHAVIOR & INTERACTIVE ENGINE
+// OPTIMIZATION: Refactored to accept a boolean instead of querying window width directly
+const updateAccessibilityState = (container, isDesktop) => {
   const toggles = container.querySelectorAll('.cdlv-footer-toggle');
   const lists = container.querySelectorAll('.cdlv-footer-list');
   
-  if (window.innerWidth >= 992) {
-    // Desktop: Strip functional context profiles from screen reader processing loops
+  if (isDesktop) {
     toggles.forEach(toggle => {
       toggle.setAttribute('tabindex', '-1');
       toggle.setAttribute('aria-hidden', 'true');
       toggle.removeAttribute('aria-expanded');
     });
-    lists.forEach(list => {
-      list.removeAttribute('aria-hidden');
-    });
+    lists.forEach(list => list.removeAttribute('aria-hidden'));
   } else {
-    // Mobile: Re-engage structural interface constraints
     toggles.forEach(toggle => {
       toggle.setAttribute('tabindex', '0');
       toggle.setAttribute('aria-hidden', 'false');
@@ -174,26 +172,25 @@ const handleAccessibilityLayoutStates = (container) => {
       toggle.setAttribute('aria-expanded', isParentActive ? 'true' : 'false');
       
       const list = toggle.nextElementSibling;
-      if (list) {
-        list.setAttribute('aria-hidden', isParentActive ? 'false' : 'true');
-      }
+      if (list) list.setAttribute('aria-hidden', isParentActive ? 'false' : 'true');
     });
   }
 };
 
-const attachAccordionEvents = (container) => {
+const attachEvents = (container) => {
   const toggles = container.querySelectorAll('.cdlv-footer-toggle');
   
+  // Accordion Logic
   toggles.forEach(toggle => {
     toggle.addEventListener('click', (e) => {
-      if (window.innerWidth >= 992) return;
+      // Prevent execution if CSS Grid is active
+      if (window.matchMedia('(min-width: 992px)').matches) return;
       
       const currentToggle = e.currentTarget;
       const parentCol = currentToggle.closest('.cdlv-footer-column');
       const currentList = currentToggle.nextElementSibling;
       const isExpanded = currentToggle.getAttribute('aria-expanded') === 'true';
       
-      // Close open accordion panels to maintain focus structural symmetry
       toggles.forEach(t => {
         t.setAttribute('aria-expanded', 'false');
         const siblingList = t.nextElementSibling;
@@ -209,8 +206,23 @@ const attachAccordionEvents = (container) => {
     });
   });
 
-  // Attach execution hooks monitoring viewport updates
-  window.addEventListener('resize', () => handleAccessibilityLayoutStates(container));
+  // OPTIMIZATION: Replaced 'resize' event with 'matchMedia' listener
+  const mediaQuery = window.matchMedia('(min-width: 992px)');
+  
+  const handleBreakpointChange = (e) => {
+    updateAccessibilityState(container, e.matches);
+  };
+
+  // Modern syntax for media query listeners
+  if (mediaQuery.addEventListener) {
+    mediaQuery.addEventListener('change', handleBreakpointChange);
+  } else {
+    // Fallback for older Safari
+    mediaQuery.addListener(handleBreakpointChange);
+  }
+
+  // Initialize correct state on load
+  handleBreakpointChange(mediaQuery);
 };
 
 // 5. EXPORT INITIALIZER
@@ -220,6 +232,5 @@ export const init = (node) => {
     return;
   }
   node.innerHTML = generateFooterHTML();
-  attachAccordionEvents(node);
-  handleAccessibilityLayoutStates(node);
+  attachEvents(node);
 };
