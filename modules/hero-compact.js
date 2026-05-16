@@ -6,7 +6,7 @@
    ========================================================================== */
 
 const defaultConfig = {
-  bgImage: 'assets/images/logo.png', // Honey, Black Seed Oil, Tea Infuser
+  bgImage: 'assets/images/products/item_2.2.jpg', // Honey, Black Seed Oil, Tea Infuser
   heading: 'The Shop',
   description: 'Every blend crafted with purpose to support women\'s health. Hand-sourced artisanal ingredients designed to elevate your daily routine.',
   ctaText: 'View All Collections',
@@ -39,10 +39,8 @@ export function init(node) {
         </a>
       </div>
 
-      <div class="cdlv-hero__image-panel" 
-           style="background-image: url('${encodeURI(config.bgImage)}');"
-           role="img" 
-           aria-label="Casa De La Vida Wellness Elements">
+      <div class="cdlv-hero__image-panel">
+         <img src="${sanitizeHTML(config.bgImage)}" alt="Casa De La Vida Wellness Elements" class="cdlv-hero__panel-img">
       </div>
 
     </section>

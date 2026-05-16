@@ -6,7 +6,7 @@
    ========================================================================== */
 
 const defaultConfig = {
-  bgImage: 'assets/images/logo.png',
+  bgImage: 'assets/images/products/item_2.2.jpg',
   tagline: 'Sip • Soothe • Blossom',
   heading: 'Your wellness ritual, in one box.',
   description: 'Curated in Ghana for a balanced life. Discover our signature collections.',
@@ -30,9 +30,9 @@ export function init(node) {
   const config = { ...defaultConfig };
 
   const html = `
-    <section class="cdlv-hero cdlv-hero--full animate-enter" 
-             style="background-image: url('${encodeURI(config.bgImage)}');"
-             aria-label="Welcome to Casa De La Vida">
+    <section class="cdlv-hero cdlv-hero--full animate-enter" aria-label="Welcome to Casa De La Vida">
+      
+      <img src="${sanitizeHTML(config.bgImage)}" alt="Casa De La Vida Background" class="cdlv-hero__bg-img">
       
       <div class="cdlv-hero__overlay-box">
         <span class="cdlv-hero__tagline">${sanitizeHTML(config.tagline)}</span>
@@ -43,7 +43,6 @@ export function init(node) {
           ${sanitizeHTML(config.ctaText)}
         </a>
       </div>
-      
     </section>
   `;
 
