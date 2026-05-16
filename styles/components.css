@@ -508,7 +508,8 @@
 
 /* --- FULL-WIDTH HERO MODIFIER --- */
 .cdlv-hero--full {
-  min-height: 80vh;
+  height: 100vh; 
+  height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -527,7 +528,8 @@
 
 /* --- COMPACT HERO MODIFIER --- */
 .cdlv-hero--compact {
-  min-height: 40vh;
+  height: 100vh;
+  height: 100svh;
   display: flex;
   flex-direction: column-reverse; /* Mobile: Image on top, text below */
 }
@@ -547,14 +549,22 @@
   justify-content: center;
   align-items: flex-start;
   background-color: var(--color-primary);
+  overflow-y: auto;
 }
 
 .cdlv-hero__image-panel {
   flex: 1;
-  min-height: 300px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+}
+
+.cdlv-hero__panel-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* --- HERO TYPOGRAPHY & ELEMENTS --- */
