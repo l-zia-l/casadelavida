@@ -557,20 +557,24 @@
 }
 
 /* --- HERO TYPOGRAPHY & ELEMENTS --- */
-.cdlv-hero__tagline {
-  font-family: var(--font-family-body);
-  font-size: var(--font-size-small);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--color-text-dark);
-  margin-bottom: var(--spacing-xs);
-  display: block;
+.cdlv-hero__overlay-box,
+.cdlv-hero__compact-overlay {
+  max-height: 85vh; /* Prevents the box from ever being taller than the screen */
+  overflow-y: auto; /* Adds a scrollbar inside the box ONLY if things get too tight */
+  padding: clamp(1.5rem, 3vw, 3rem) var(--layout-gutter); /* Tighter vertical padding */
 }
 
-.cdlv-hero__title { margin-bottom: var(--spacing-sm); }
+/* 2. Tame the heading size specifically for the hero */
+.cdlv-hero__title { 
+  /* Overrides the global 7vw growth rate to a much calmer 4vw */
+  font-size: clamp(2rem, 4vw + 1rem, 4.5rem);
+  margin-bottom: var(--spacing-sm); 
+}
 
+/* 3. Tighten the description size and spacing */
 .cdlv-hero__description {
-  margin-bottom: var(--spacing-md);
+  font-size: clamp(1rem, 1.2vw + 0.5rem, 1.25rem);
+  margin-bottom: var(--spacing-sm); /* Reduced from --spacing-md to save vertical space */
   color: var(--color-text-dark);
   opacity: 0.9;
   max-width: 60ch; 
