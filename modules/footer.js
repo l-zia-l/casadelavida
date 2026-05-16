@@ -9,7 +9,7 @@
  * toggling aria-expanded profiles and shifting button accessibility trees.
  * ==============================================================================
  */
-import { buildPath } from '../utils/paths.js';
+import { buildPath } from '../utils/path.js';
 
 
 // 1. MODULE CONFIGURATION

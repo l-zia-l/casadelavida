@@ -5,7 +5,7 @@
    Security: Data sanitization applied to all configuration variables.
    ========================================================================== */
 
-import { buildPath } from '../utils/paths.js';
+import { buildPath } from '../utils/path.js';
 
 const defaultConfig = {
   bgImage: 'assets/images/products/item_2.2.jpg',
