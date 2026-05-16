@@ -1,0 +1,130 @@
+<!--
+================================================================================
+CASA DE LA VIDA - BASE LAYOUT SHELL (base-layout.html)
+================================================================================
+
+[SITEMAP DIRECTORY]
+casa-de-la-vida/
+├── assets/ (fonts/, icons/, images/)
+├── modules/ (header.js, footer.js, catalog-2-grid.js, etc.)
+├── styles/ (globals.css, components.css)
+├── utils/ (auth.js, cart.js, components.js, payments.js)
+├── account/ (index, orders, billing, settings, security, preferences, wishlist, subscriptions)
+├── local-delivery/ (accra.html, tamale.html)
+├── legal/ (privacy-policy, terms-of-service, shipping-and-returns, medical-disclaimer)
+├── blog/ (post_1.html)
+├── shop/ (wellness-boxes, individual-wellness-products, all-accessories)
+│   ├── packages/
+│   ├── products/
+│   └── accessories/
+├── auth/ (sign-up, reset-password, login)
+├── status/ (success, 404, confirmed)
+├── index.html, shop.html, about-us.html, help-center.html, appointments.html, blog.html, shopping-cart.html
+└── sitemap.xml
+
+[FRAGMENT INJECTION PROTOCOL]
+This architecture relies on Vanilla JS to fetch and inject HTML fragments into this shell.
+The `<body>` acts as the fluid canvas.
+- <header id="global-header"> targets the navigation module.
+- <main id="main-content"> targets page-specific views (e.g., shop, blog, cart).
+- <footer id="global-footer"> targets the footer module.
+
+To inject a module, use the ES Module `components.js` to fetch the raw HTML string 
+and assign it to the `innerHTML` of the target container.
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Content Security Policy (CSP) -->
+  <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self'; 
+                 script-src 'self' 'module';
+                 img-src 'self' data: https:; 
+                 connect-src 'self' https://*.supabase.co;">
+
+  <title>Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey</title>
+
+  <meta name="title" content="Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey">
+  <meta name="description" content="Discover premium wellness boxes, teas, and individual accessories designed to elevate your daily routine. Curated in Ghana for a balanced life.">
+  <meta name="keywords" content="wellness, tea-boxes, honey, tea, self-care, accessories, wellness boxes, Casa De La Vida, Accra, Tamale">
+  
+  <link rel="canonical" href="https://www.casadelavida.com/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://shopcasadelavida.com/">
+  <meta property="og:title" content="Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey">
+  <meta property="og:description" content="Discover premium wellness boxes, teas, and individual accessories designed to elevate your daily routine.">
+  <meta property="og:image" content="https://shopcasadelavida.com/assets/images/social-share-graph.jpg">
+
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="Casa De La Vida | Premium Wellness">
+  <meta property="twitter:description" content="Premium wellness boxes and teas to elevate your daily routine.">
+  <meta property="twitter:image" content="https://shopcasadelavida.com/assets/images/social-share-graph.jpg">
+
+  <meta name="theme-color" content="#FFFFFF">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HealthAndBeautyBusiness",
+    "name": "Casa De La Vida",
+    "image": "https://shopcasadelavida.com/assets/images/logo_small.png",
+    "url": "https://shopcasadelavida.com/",
+    "description": "Premium wellness boxes, teas, and accessories.",
+    "areaServed": [
+      {
+        "@type": "City",
+        "name": "Accra"
+      },
+      {
+        "@type": "City",
+        "name": "Tamale"
+      }
+    ]
+  }
+  </script>
+
+  <link rel="icon" href="assets/images/favicon.png" type="image/png">
+  
+  <link rel="apple-touch-icon" href="assets/images/favicon.png">
+
+  <link rel="preconnect" href="https://*.supabase.co" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Global Source of Truth -->
+  <link rel="stylesheet" href="styles/global.css">
+  <!-- Shared UI Components -->
+  <link rel="stylesheet" href="styles/components.css">
+
+  <!-- External Resources -->
+
+  <!-- Central Hub Utility Scripts (ES Modules) -->
+  <script type="module" src="utils/auth.js" defer></script>
+  <script type="module" src="utils/cart.js" defer></script>
+  <script type="module" src="utils/components.js" defer></script>
+</head>
+
+<body>
+  <!-- Navigation Module Target -->
+  <header id="global-header" class="container-fluid" data-module="header"></header>
+
+  <!-- Page Fragment Target -->
+  <main id="main-content" class="container">
+  <div data-module="hero-full"></div>
+  
+  </main>
+
+  <!-- <main id="main-content" class="container">
+  <div data-module="hero-compact"></div>
+  
+  </main> -->
+
+  <!-- Footer Module Target -->
+  <footer id="global-footer" class="container-fluid" data-module="footer"></footer>
+</body>
+</html>
