@@ -16,6 +16,7 @@ import { buildPath } from '../utils/path.js';
 const footerConfig = {
   logo: {
     src: buildPath('assets/images/logo.png'),
+    url: buildPath('index.html'),
     alt: 'Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey'
   },
   categories: [
@@ -128,7 +129,7 @@ const generateFooterHTML = () => {
   return `
     <div class="cdlv-footer">
       <div class="cdlv-footer-brand-banner">
-        <a href="index.html" class="cdlv-footer-logo-wrapper" aria-label="Casa De La Vida Home">
+        <a href="${sanitizeHTML(footerConfig.logo.url)}" class="cdlv-footer-logo-wrapper" aria-label="Casa De La Vida Home">
             <img src="${sanitizeHTML(footerConfig.logo.src)}" alt="${sanitizeHTML(footerConfig.logo.alt)}" loading="lazy" decoding="async">
         </a>
       </div>
