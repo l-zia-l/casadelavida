@@ -8,8 +8,8 @@
 import { buildPath } from '../utils/path.js';
 
 const defaultConfig = {
-  bgImage: 'assets/images/products/item_2.2.jpg', 
-  imageAlt: 'Glass jar filled with artisanal loose leaf tea and dried rose petals',
+  bgImage: '', 
+  imageAlt: '',
   headingLevel: 'h2', // Defaults to an SEO-friendly H2 for mid-page usage
   heading: 'The Shop',
   description: 'Every blend crafted with purpose to support women\'s health. Hand-sourced artisanal ingredients designed to elevate your daily routine.',
