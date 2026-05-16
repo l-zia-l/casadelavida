@@ -212,6 +212,31 @@ img, video {
   min-height: var(--vh-modern);
 }
 
+/* IMAGE REVEAL ENGINE */
+
+/* The wrapper keeps the background color visible while the image loads */
+.u-img-wrapper {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-neutral-bg); /* Shows while image is hidden */
+  border-radius: var(--radius-strict);
+}
+
+/* Initial state: Image is hidden and clipped to a tiny circle in the center */
+.u-img-reveal {
+  opacity: 0;
+  clip-path: circle(0% at 50% 50%);
+  will-change: opacity, clip-path;
+  transition: opacity 0.6s var(--ease-professional), 
+              clip-path 1.2s var(--ease-professional);
+}
+
+/* Loaded state: Image fades in and the circle expands beyond the corners */
+.u-img-reveal.is-loaded {
+  opacity: 1;
+  clip-path: circle(150% at 50% 50%);
+}
+
 /* ULTRA-WIDE SCREEN ADJUSTMENTS */
 @media (min-width: 1600px) { html { font-size: 110%; } }
 @media (min-width: 2000px) { html { font-size: 125%; } }
@@ -223,5 +248,11 @@ img, video {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .u-img-reveal {
+    transition: none !important;
+    clip-path: none !important;
+    opacity: 1 !important;
   }
 }
