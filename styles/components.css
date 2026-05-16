@@ -526,9 +526,8 @@
 
 /* --- FULL-WIDTH HERO MODIFIER --- */
 .cdlv-hero--full {
-  /* Changed from strict height to min-height so content can dictate size if needed */
-  min-height: var(--vh-fallback); 
-  min-height: var(--vh-modern); 
+  /* Locks height to 60% of the screen, with a 500px safety net to prevent content crushing */
+  min-height: max(60vh, 500px); 
   display: flex;
   align-items: center;
   justify-content: center;
