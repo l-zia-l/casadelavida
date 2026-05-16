@@ -12,27 +12,21 @@ const handleImageLoad = (img) => {
 };
 
 const setupImageReveal = (img) => {
-    // Skip if it's already set up, or if it's a tiny icon/logo (we only want this on big photos)
+    // Skip if it's already set up, or if it's a header/footer icon
     if (img.classList.contains('u-img-reveal') || img.closest('.cdlv-header__nav') || img.closest('.cdlv-footer')) {
         return;
     }
 
-    // 1. Add the reveal class
+    // 1. Add the reveal class (hides it immediately via CSS)
     img.classList.add('u-img-reveal');
 
-    // 2. Wrap the image in our background-colored container
-    const wrapper = document.createElement('div');
-    wrapper.className = 'u-img-wrapper';
-    img.parentNode.insertBefore(wrapper, img);
-    wrapper.appendChild(img);
-
-    // 3. Check if already cached by the browser
+    // 2. Check if already cached by the browser
     if (img.complete && img.naturalHeight !== 0) {
         handleImageLoad(img);
     } else {
         // Wait for the download to finish
         img.addEventListener('load', () => handleImageLoad(img), { once: true });
-        // Fail-safe just in case the image breaks
+        // Fail-safe just in case the image request errors out, so it doesn't stay invisible forever
         img.addEventListener('error', () => handleImageLoad(img), { once: true });
     }
 };

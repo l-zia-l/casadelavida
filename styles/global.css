@@ -214,14 +214,6 @@ img, video {
 
 /* IMAGE REVEAL ENGINE */
 
-/* The wrapper keeps the background color visible while the image loads */
-.u-img-wrapper {
-  position: relative;
-  overflow: hidden;
-  background-color: var(--color-neutral-bg); /* Shows while image is hidden */
-  border-radius: var(--radius-strict);
-}
-
 /* Initial state: Image is hidden and clipped to a tiny circle in the center */
 .u-img-reveal {
   opacity: 0;
