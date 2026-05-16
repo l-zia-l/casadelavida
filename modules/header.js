@@ -20,18 +20,18 @@ import { buildPath } from '../utils/path.js';
 const config = {
     logo: {
         text: 'Casa De La Vida', 
-        src: 'assets/images/logo.png', 
-        url: buildpath('index.html')
+        src: buildPath('assets/images/logo.png'), 
+        url: buildPath('index.html')
     },
     links: {
         left: [
-            { label: 'Shop', url: buildpath('shop.html') },
-            { label: 'Rituals', url: buildpath('shop/wellness-boxes.html') },
-            { label: 'Account', url: buildpath('account/index.html', mobileOnly: true } 
+            { label: 'Shop', url: buildPath('shop.html') },
+            { label: 'Rituals', url: buildPath('shop/wellness-boxes.html') },
+            { label: 'Account', url: buildPath('account/index.html'), mobileOnly: true } 
         ],
         right: [
-            { label: 'Account', url: buildpath('account/index.html'), desktopOnly: true },
-            { label: 'Cart', url: buildpath('shopping-cart.html'), isCart: true }
+            { label: 'Account', url: buildPath('account/index.html'), desktopOnly: true },
+            { label: 'Cart', url: buildPath('shopping-cart.html'), isCart: true }
         ]
     }
 };
@@ -72,8 +72,9 @@ const buildNavList = (links, alignment) => {
         const ariaCurrent = isCurrentPage ? 'aria-current="page"' : '';
         
         // A11y: Hide decorative icons from screen readers, rely on visually-hidden text instead
+        // FIX: Added buildPath() to the cart.svg image source
         const content = link.isCart 
-        ? `<img src="assets/icons/cart.svg" alt="" aria-hidden="true" class="cdlv-header__cart-icon"><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
+        ? `<img src="${buildPath('assets/icons/cart.svg')}" alt="" aria-hidden="true" class="cdlv-header__cart-icon"><span class="visually-hidden">${sanitizeData(link.label)}</span>` 
         : sanitizeData(link.label);
         
         return `
@@ -99,22 +100,18 @@ const generateHeaderHTML = () => {
     
     return `
         <nav class="cdlv-header__nav" aria-label="Primary Navigation">
-            <!-- Mobile Menu Toggle -->
             <button class="cdlv-header__toggle" aria-expanded="false" aria-controls="mobile-menu">
-                <img src="assets/icons/bars.svg" alt="" aria-hidden="true" class="cdlv-header__menu-icon">
+                <img src="${buildPath('assets/icons/bars.svg')}" alt="" aria-hidden="true" class="cdlv-header__menu-icon">
                 <span>Menu</span>
             </button>
 
-            <!-- Left Navigation (Desktop) -->
             ${buildNavList(config.links.left, 'left')}
 
-            <!-- Centered Logo -->
             <a href="${safeLogoUrl}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
                 <img src="${safeLogoSrc}" alt="" aria-hidden="true" class="cdlv-header__logo-img" fetchpriority="high" loading="eager">
                 <span class="cdlv-header__logo-text">${safeLogoText}</span>
             </a>
 
-            <!-- Right Navigation (Account & Cart) -->
             ${buildNavList(config.links.right, 'right')}
         </nav>
     `;

@@ -42,41 +42,41 @@ const footerConfig = {
       title: 'Account',
       id: 'col-account',
       links: [
-        { label: 'My Account', url: buildpath('account/index.html') },
-        { label: 'Orders', url: buildpath('account/orders.html') },
-        { label: 'Wishlist', url: buildpath('account/wishlist.html') },
-        { label: 'Subscriptions', url: buildpath('account/subscriptions.html') }
+        { label: 'My Account', url: buildPath('account/index.html') },
+        { label: 'Orders', url: buildPath('account/orders.html') },
+        { label: 'Wishlist', url: buildPath('account/wishlist.html') },
+        { label: 'Subscriptions', url: buildPath('account/subscriptions.html') }
       ]
     },
     {
       title: 'Local Delivery',
       id: 'col-delivery',
       links: [
-        { label: 'Accra, GA', url: buildpath('local-delivery/accra.html') },
-        { label: 'Tamale, NR', url: buildpath('local-delivery/tamale.html') }
+        { label: 'Accra, GA', url: buildPath('local-delivery/accra.html') },
+        { label: 'Tamale, NR', url: buildPath('local-delivery/tamale.html') }
       ]
     },
     {
       title: 'Help',
       id: 'col-help',
       links: [
-        { label: 'Help Center', url: buildpath('help-center.html') },
-        { label: 'Shipping & Returns', url: buildpath('legal/shipping-and-returns.html') }
+        { label: 'Help Center', url: buildPath('help-center.html') },
+        { label: 'Shipping & Returns', url: buildPath('legal/shipping-and-returns.html') }
       ]
     },
     {
       title: 'Legal',
       id: 'col-legal',
       links: [
-        { label: 'Privacy Policy', url: buildpath('legal/privacy-policy.html') },
-        { label: 'Terms of Service', url: buildpath('legal/terms-of-service.html') },
-        { label: 'Medical Disclaimer', url: buildpath('legal/medical-disclaimer.html') }
+        { label: 'Privacy Policy', url: buildPath('legal/privacy-policy.html') },
+        { label: 'Terms of Service', url: buildPath('legal/terms-of-service.html') },
+        { label: 'Medical Disclaimer', url: buildPath('legal/medical-disclaimer.html') }
       ]
     }
   ],
   socials: [
-    { network: 'Instagram', url: buildpath('https://www.instagram.com/casa_de_la_vida_gh/', iconSrc: 'assets/icons/instagram.svg' },
-    { network: 'TikTok', url: buildpath('https://www.tiktok.com/@nurtureher06', iconSrc: 'assets/icons/tiktok.svg' }
+    { network: 'Instagram', url: 'https://www.instagram.com/casa_de_la_vida_gh/', iconSrc: buildPath('assets/icons/instagram.svg') },
+    { network: 'TikTok', url: 'https://www.tiktok.com/@nurtureher06', iconSrc: buildPath('assets/icons/tiktok.svg') }
   ]
 };
 
