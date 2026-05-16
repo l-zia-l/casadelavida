@@ -14,9 +14,6 @@
  * Configuration Object
  * Defines the navigation structure. Use absolute paths based on the sitemap.
  */
-
-import { buildPath } from '../utils/paths.js';
-
 const config = {
     logo: {
         text: 'Casa De La Vida', 

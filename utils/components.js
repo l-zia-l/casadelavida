@@ -6,9 +6,7 @@
    Security: Utilizes strict path mapping to prevent arbitrary file inclusion.
    ========================================================================== */
 
-import { buildPath } from 'paths.js';
-
-const MODULE_PATH = buildPath('modules/');
+const MODULE_PATH = '../modules/'; 
 
 /**
  * Initializes all modules found within a specific DOM node.

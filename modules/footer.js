@@ -10,8 +10,6 @@
  * ==============================================================================
  */
 
-import { buildPath } from '../utils/paths.js';
-
 // 1. MODULE CONFIGURATION
 const footerConfig = {
   logo: {

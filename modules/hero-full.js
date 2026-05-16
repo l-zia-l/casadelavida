@@ -4,7 +4,6 @@
    Architecture: ES Module, Plug-and-Play.
    Security: Data sanitization applied to all configuration variables.
    ========================================================================== */
-import { buildPath } from '../utils/paths.js';
 
 const defaultConfig = {
   bgImage: 'assets/images/products/item_2.2.jpg',
