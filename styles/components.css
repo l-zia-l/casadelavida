@@ -489,6 +489,141 @@
 }
 
 /* ==========================================================================
+   MODULE: HERO (.cdlv-hero)
+   Purpose: Structural layouts for full-width and compact hero banners.
+   Architecture: BEM Naming Convention, CSS Grid/Flexbox, Mobile-First.
+   Security: No external assets referenced outside of allowed CSP scope.
+   ========================================================================== */
+
+/* Base hero block: Breaks out of the main container to span 100vw */
+.cdlv-hero {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow: hidden;
+  background-color: var(--color-neutral-bg);
+}
+
+/* --- FULL-WIDTH HERO MODIFIER --- */
+.cdlv-hero--full {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: var(--spacing-md);
+}
+
+.cdlv-hero__overlay-box {
+  /* Semi-opaque white box over the high-res image */
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: var(--spacing-xl) var(--spacing-lg);
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+  border-radius: var(--radius-strict);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  /* Hardware acceleration for smooth entry */
+  transform: translateZ(0); 
+}
+
+/* --- COMPACT HERO MODIFIER --- */
+.cdlv-hero--compact {
+  min-height: 40vh;
+  display: flex;
+  flex-direction: column-reverse; /* Mobile: Image on top, text below */
+}
+
+@media (min-width: 992px) {
+  .cdlv-hero--compact {
+    flex-direction: row; /* Desktop: Text Left, Image Right */
+    align-items: stretch;
+  }
+}
+
+.cdlv-hero__text-panel {
+  flex: 1;
+  padding: var(--spacing-lg) var(--layout-gutter);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--color-primary);
+}
+
+.cdlv-hero__image-panel {
+  flex: 1;
+  min-height: 300px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* --- HERO TYPOGRAPHY & ELEMENTS --- */
+.cdlv-hero__tagline {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-small);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-text-dark);
+  margin-bottom: var(--spacing-xs);
+  display: block;
+}
+
+.cdlv-hero__title {
+  margin-bottom: var(--spacing-md);
+}
+
+.cdlv-hero__description {
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text-dark);
+  opacity: 0.9;
+}
+
+/* --- BUTTONS --- */
+.cdlv-hero__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(2rem, 4vw, 3rem);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-small);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  font-weight: 600;
+  border-radius: var(--radius-strict);
+  cursor: pointer;
+  border: 2px solid transparent;
+  text-decoration: none;
+}
+
+.cdlv-hero__btn--primary {
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+}
+
+.cdlv-hero__btn--primary:hover,
+.cdlv-hero__btn--primary:focus-visible {
+  background-color: var(--color-text-dark);
+  color: var(--color-primary);
+}
+
+.cdlv-hero__btn--secondary {
+  background-color: transparent;
+  color: var(--color-text-dark);
+  border-color: var(--color-text-dark);
+}
+
+.cdlv-hero__btn--secondary:hover,
+.cdlv-hero__btn--secondary:focus-visible {
+  background-color: var(--color-text-dark);
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
