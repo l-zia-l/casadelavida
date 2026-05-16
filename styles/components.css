@@ -487,7 +487,7 @@
    Security: No external assets referenced outside of allowed CSP scope.
    ========================================================================== */
 
-/* Base hero block: Breaks out of the main container to span 100vw */
+/* Base hero block */
 .cdlv-hero {
   position: relative;
   width: 100vw;
@@ -508,67 +508,52 @@
 
 /* --- FULL-WIDTH HERO MODIFIER --- */
 .cdlv-hero--full {
-  height: var(--vh-fallback); 
-  height: var(--vh-modern); 
+  /* Changed from strict height to min-height so content can dictate size if needed */
+  min-height: var(--vh-fallback); 
+  min-height: var(--vh-modern); 
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-md);
-  padding-top: calc(var(--spacing-md) + var(--header-offset));
+  /* Smart padding considering header */
+  padding: calc(var(--header-offset) + var(--spacing-md)) var(--layout-gutter) var(--spacing-md);
 }
 
 .cdlv-hero__overlay-box {
   position: relative;
-  z-index: 2; /* Keeps text above the image */
+  z-index: 2; 
   background-color: rgba(255, 255, 255, 0.9);
   width: min(90vw, 1000px); 
-  padding: var(--spacing-xl) var(--layout-gutter);
+  /* Reduced vertical padding from --spacing-xl to --spacing-md to prevent cut-offs */
+  padding: var(--spacing-md) var(--layout-gutter);
   text-align: center;
   border-radius: var(--radius-strict);
 }
 
 /* --- COMPACT HERO MODIFIER --- */
 .cdlv-hero--compact {
-  height: var(--vh-fallback);
-  height: var(--vh-modern);
+  /* 40vh height with a 400px fallback so it doesn't crush on small devices */
+  min-height: max(40vh, 400px);
   display: flex;
-  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start; /* Aligns the overlay to the left */
+  /* Smart padding considering header */
+  padding: calc(var(--header-offset) + var(--spacing-sm)) var(--layout-gutter) var(--spacing-sm);
+}
+
+/* New Overlay Box specific to the Compact Hero */
+.cdlv-hero__compact-overlay {
+  position: relative;
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0.9);
+  width: 100%; /* Mobile: stretches to fill width minus standard layout margins */
+  padding: var(--spacing-md);
+  border-radius: var(--radius-strict);
 }
 
 @media (min-width: 992px) {
-  .cdlv-hero--compact {
-    flex-direction: row; /* Desktop: Text Left, Image Right */
-    align-items: stretch;
+  .cdlv-hero__compact-overlay {
+    width: max(40%, 450px); /* Desktop: Caps the width and leaves it on the left */
   }
-
-  .cdlv-hero__text-panel {
-    padding-top: calc(var(--spacing-lg) + var(--header-offset)); 
-  }
-}
-
-.cdlv-hero__text-panel {
-  flex: 1;
-  padding: var(--spacing-lg) var(--layout-gutter);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  background-color: var(--color-primary);
-}
-
-.cdlv-hero__image-panel {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
-
-.cdlv-hero__panel-img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 /* --- HERO TYPOGRAPHY & ELEMENTS --- */
