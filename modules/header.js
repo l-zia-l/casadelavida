@@ -124,10 +124,10 @@ const generateHeaderHTML = () => {
 export function init(element) {
     if (!element) return;
 
-    // 1. Inject the sanitized HTML structure
+    // 1. Inject HTML
     element.innerHTML = generateHeaderHTML();
 
-    // 2. Initialize Scroll State Logic with rAF Throttling
+    // 2. High-Performance Scroll Listener
     let ticking = false;
     const handleScroll = () => {
         if (!ticking) {
@@ -138,25 +138,18 @@ export function init(element) {
             ticking = true;
         }
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    
-    // Trigger once on load in case the user refreshes mid-page
-    handleScroll();
 
-    // 3. Initialize Mobile Menu Interaction
+    // 3. Mobile Menu Toggle Logic
     const menuToggle = element.querySelector('.cdlv-header__toggle');
-    /**
-     * Resets the mobile menu state to closed.
-     */
+    
     const closeMobileMenu = () => {
         element.classList.remove('cdlv-header--menu-open');
         if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
         document.dispatchEvent(new CustomEvent('cdlv:toggleMobileMenu', { detail: { isOpen: false } }));
     };
 
-    // 3. Initialize Mobile Menu Interaction
     if (menuToggle) {
         menuToggle.addEventListener('click', () => {
             const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
@@ -167,7 +160,34 @@ export function init(element) {
         });
     }
 
-    // A11y: Close menu on Escape key and return focus to the toggle button
+    // 4. UX Fix: Close on clicking a link inside the menu
+    const navLinks = element.querySelectorAll('.cdlv-header__link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (element.classList.contains('cdlv-header--menu-open')) {
+                closeMobileMenu();
+            }
+        });
+    });
+
+    // 5. UX Fix: Close when clicking anywhere outside the header
+    document.addEventListener('click', (e) => {
+        const isMenuOpen = element.classList.contains('cdlv-header--menu-open');
+        const isClickInsideHeader = element.contains(e.target);
+        
+        if (isMenuOpen && !isClickInsideHeader) {
+            closeMobileMenu();
+        }
+    });
+
+    // 6. UX Fix: Reset menu state when using browser Back/Forward buttons (bfcache)
+    window.addEventListener('pageshow', (e) => {
+        if (e.persisted) {
+            closeMobileMenu();
+        }
+    });
+
+    // 7. A11y: Escape key support
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && element.classList.contains('cdlv-header--menu-open')) {
             closeMobileMenu();
@@ -175,10 +195,10 @@ export function init(element) {
         }
     });
 
+    // 8. Desktop Breakpoint cleanup
     const desktopBreakpoint = window.matchMedia('(min-width: 992px)');
     const handleBreakpointChange = (e) => {
         if (e.matches) closeMobileMenu();
     };
-
     desktopBreakpoint.addEventListener('change', handleBreakpointChange);
 }
