@@ -1,6 +1,11 @@
 /* ==========================================================================
    MODULE: HERO COMPACT (hero-compact.js)
+   Purpose: Injects and manages the Compact Hero (40vh, Text Left / Image Right).
+   Architecture: ES Module, Plug-and-Play.
+   Security: Data sanitization applied to all configuration variables.
    ========================================================================== */
+
+import { buildPath } from '../utils/paths.js';
 
 const defaultConfig = {
   bgImage: 'assets/images/products/item_2.2.jpg', 
@@ -12,6 +17,12 @@ const defaultConfig = {
   ctaLink: 'shop',
   isPriority: false 
 };
+
+/**
+ * Basic text node sanitization to prevent XSS.
+ * @param {string} str - Raw string
+ * @returns {string} - Sanitized string safe for DOM injection
+ */
 
 function sanitizeHTML(str) {
   const temp = document.createElement('div');

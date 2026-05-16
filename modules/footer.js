@@ -9,6 +9,8 @@
  * toggling aria-expanded profiles and shifting button accessibility trees.
  * ==============================================================================
  */
+import { buildPath } from '../utils/paths.js';
+
 
 // 1. MODULE CONFIGURATION
 const footerConfig = {
