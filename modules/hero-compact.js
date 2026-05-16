@@ -1,25 +1,18 @@
 /* ==========================================================================
    MODULE: HERO COMPACT (hero-compact.js)
-   Purpose: Injects and manages the Compact Hero (40vh, Text Left / Image Right).
-   Architecture: ES Module, Plug-and-Play.
-   Security: Data sanitization applied to all configuration variables.
    ========================================================================== */
 
 const defaultConfig = {
   bgImage: 'assets/images/products/item_2.2.jpg', 
   imageAlt: 'Glass jar filled with artisanal loose leaf tea and dried rose petals',
+  headingLevel: 'h2', // Defaults to an SEO-friendly H2 for mid-page usage
   heading: 'The Shop',
   description: 'Every blend crafted with purpose to support women\'s health. Hand-sourced artisanal ingredients designed to elevate your daily routine.',
   ctaText: 'View All Collections',
   ctaLink: 'shop',
-  isPriority: false // Defaults to lazy-loading
+  isPriority: false 
 };
 
-/**
- * Basic text node sanitization to prevent XSS.
- * @param {string} str - Raw string
- * @returns {string} - Sanitized string safe for DOM injection
- */
 function sanitizeHTML(str) {
   const temp = document.createElement('div');
   temp.textContent = str;
@@ -33,6 +26,9 @@ export function init(node, customConfig = {}) {
     ? 'fetchpriority="high" loading="eager"' 
     : 'loading="lazy"';
 
+  // Ensure the heading level is valid HTML (h1 through h6) to prevent injection of invalid tags
+  const validHeading = /^(h[1-6])$/i.test(config.headingLevel) ? config.headingLevel.toLowerCase() : 'h2';
+
   const html = `
     <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
       
@@ -43,7 +39,7 @@ export function init(node, customConfig = {}) {
            decoding="async">
       
       <div class="cdlv-hero__compact-overlay">
-        <h1 class="cdlv-hero__title">${sanitizeHTML(config.heading)}</h1>
+        <${validHeading} class="cdlv-hero__title">${sanitizeHTML(config.heading)}</${validHeading}>
         <p class="cdlv-hero__description">${sanitizeHTML(config.description)}</p>
         
         <a href="${sanitizeHTML(config.ctaLink)}" class="cdlv-hero__btn cdlv-hero__btn--secondary">
