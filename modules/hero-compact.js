@@ -39,18 +39,27 @@ export function init(node, customConfig = {}) {
   // Ensure the heading level is valid HTML (h1 through h6) to prevent injection of invalid tags
   const validHeading = /^(h[1-6])$/i.test(config.headingLevel) ? config.headingLevel.toLowerCase() : 'h2';
 
-  // Apply buildPath dynamically AFTER configs are merged
-  const safeBgImage = buildPath(config.bgImage);
+  // Apply buildPath dynamically AFTER configs are merged for the link
   const safeCtaLink = buildPath(config.ctaLink);
 
-  const html = `
-    <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
-      
+  // 1. Conditionally generate the image HTML
+  let imageHTML = '';
+  if (config.bgImage && config.bgImage.trim() !== '') {
+    const safeBgImage = buildPath(config.bgImage);
+    imageHTML = `
       <img src="${sanitizeHTML(safeBgImage)}" 
            alt="${sanitizeHTML(config.imageAlt)}" 
            class="cdlv-hero__bg-img"
            ${loadingStrategy}
            decoding="async">
+    `;
+  }
+
+  // 2. Inject the dynamic imageHTML variable into the main template
+  const html = `
+    <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
+      
+      ${imageHTML}
       
       <div class="cdlv-hero__compact-overlay">
         <${validHeading} class="cdlv-hero__title">${sanitizeHTML(config.heading)}</${validHeading}>
