@@ -7,11 +7,12 @@
 
 const defaultConfig = {
   bgImage: 'assets/images/products/item_2.2.jpg', 
-  imageAlt: 'Glass jar filled with artisanal loose leaf tea and dried rose petals', // Descriptive default
+  imageAlt: 'Glass jar filled with artisanal loose leaf tea and dried rose petals',
   heading: 'The Shop',
   description: 'Every blend crafted with purpose to support women\'s health. Hand-sourced artisanal ingredients designed to elevate your daily routine.',
   ctaText: 'View All Collections',
-  ctaLink: 'shop'
+  ctaLink: 'shop',
+  isPriority: false // Defaults to lazy-loading
 };
 
 /**
@@ -28,10 +29,18 @@ function sanitizeHTML(str) {
 export function init(node, customConfig = {}) {
   const config = { ...defaultConfig, ...customConfig };
 
+  const loadingStrategy = config.isPriority 
+    ? 'fetchpriority="high" loading="eager"' 
+    : 'loading="lazy"';
+
   const html = `
     <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
       
-      <img src="${sanitizeHTML(config.bgImage)}" alt="${sanitizeHTML(config.imageAlt)}" class="cdlv-hero__bg-img">
+      <img src="${sanitizeHTML(config.bgImage)}" 
+           alt="${sanitizeHTML(config.imageAlt)}" 
+           class="cdlv-hero__bg-img"
+           ${loadingStrategy}
+           decoding="async">
       
       <div class="cdlv-hero__compact-overlay">
         <h1 class="cdlv-hero__title">${sanitizeHTML(config.heading)}</h1>

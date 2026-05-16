@@ -172,6 +172,7 @@ img, video {
 
 .animate-enter {
   animation: fade-in-up var(--transition-slow) forwards;
+  will-change: transform, opacity;
 }
 
 ::selection {

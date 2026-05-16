@@ -11,7 +11,8 @@ const defaultConfig = {
   heading: 'Your wellness ritual, in one box.',
   description: 'Curated in Ghana for a balanced life. Discover our signature collections.',
   ctaText: 'Begin Your Ritual',
-  ctaLink: 'shop/wellness-boxes'
+  ctaLink: 'shop/wellness-boxes',
+  isPriority: true // Defaults to true for the main hero
 };
 
 /**
@@ -28,10 +29,20 @@ function sanitizeHTML(str) {
 export function init(node, customConfig = {}) {
   const config = { ...defaultConfig, ...customConfig };
 
+  // Determine loading strategy based on priority
+  const loadingStrategy = config.isPriority 
+    ? 'fetchpriority="high" loading="eager"' 
+    : 'loading="lazy"';
+
   const html = `
     <section class="cdlv-hero cdlv-hero--full animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
       
-      <img src="${sanitizeHTML(config.bgImage)}" alt="" aria-hidden="true" class="cdlv-hero__bg-img">
+      <img src="${sanitizeHTML(config.bgImage)}" 
+           alt="" 
+           aria-hidden="true" 
+           class="cdlv-hero__bg-img"
+           ${loadingStrategy}
+           decoding="async">
       
       <div class="cdlv-hero__overlay-box">
         <span class="cdlv-hero__tagline">${sanitizeHTML(config.tagline)}</span>
