@@ -276,15 +276,20 @@
   align-items: center;
 }
 
+.cdlv-footer-logo-wrapper {
+  display: block;
+  border-radius: var(--radius-strict);
+}
+
 .cdlv-footer-logo-wrapper img {
   width: var(--logo-width-base);
   height: auto;
   display: block;
 }
 
-.cdlv-footer-logo-wrapper img {
-  width: var(--logo-width-base);
-  height: auto;
+.cdlv-footer-logo-wrapper:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
 }
 
 /* Navigation Grid / Accordion */
@@ -316,6 +321,11 @@
   text-align: left;
 }
 
+.cdlv-footer-toggle:focus-visible {
+  outline: 2px solid var(--color-text-light);
+  outline-offset: -2px;
+}
+
 .cdlv-footer-toggle-icon {
   transition: transform var(--transition-fast);
 }
@@ -343,6 +353,12 @@
   font-size: var(--font-size-small);
   opacity: 0.8;
   color: var(--color-text-light);
+  border-radius: var(--radius-strict);
+}
+
+.cdlv-footer-link:focus-visible {
+  outline: 2px solid var(--color-text-light);
+  outline-offset: -2px; /* Prevents bounding box clipping */
 }
 
 .cdlv-footer-link:hover,
@@ -350,6 +366,7 @@
   opacity: 1;
   color: var(--color-text-dark);
   color: var(--color-secondary);
+  background-color: var(--color-secondary);
 }
 
 /* Social & Copyright */
@@ -373,9 +390,16 @@
   justify-content: center;
   width: calc(var(--icon-size-base) * 1.8);
   height: calc(var(--icon-size-base) * 1.8);
+  border-radius: var(--radius-strict);
 }
 
-.cdlv-footer-social-link:hover {
+.cdlv-footer-social-link:focus-visible {
+  outline: 2px solid var(--color-text-light);
+  outline-offset: -2px; 
+}
+
+.cdlv-footer-social-link:hover,
+.cdlv-footer-social-link:focus-visible {
   transform: scale(1.1);
 }
 
@@ -430,6 +454,24 @@
 
   .cdlv-footer-link {
     padding-block: 0;
+  }
+}
+
+/* --- REDUCED MOTION SAFETY BLOCK (A11Y) --- */
+@media (prefers-reduced-motion: reduce) {
+  .cdlv-footer-social-link:hover,
+  .cdlv-footer-social-link:focus-visible {
+    transform: none;
+    background-color: var(--color-secondary);
+  }
+  
+  .cdlv-footer-social-icon,
+  .cdlv-footer-toggle-icon {
+     transition: none;
+  }
+  
+  .cdlv-footer-column.is-active .cdlv-footer-list {
+    animation: none;
   }
 }
 
