@@ -642,7 +642,6 @@
   flex-direction: column;
   justify-content: center;
   padding-top: calc(var(--header-offset) + var(--spacing-sm));
-  /* Changed from --spacing-md to --spacing-sm */
   padding-bottom: var(--spacing-sm); 
   overflow: hidden;
   position: relative;
@@ -652,13 +651,11 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  /* Changed from --spacing-md to --spacing-sm */
   margin-bottom: var(--spacing-sm);
 }
 
 .cdlv-catalog-slider__title {
   font-family: var(--font-family-heading);
-  /* Changed from --font-size-h2 to --font-size-h3 */
   font-size: var(--font-size-h3); 
   color: var(--color-accent);
   margin: 0;
@@ -686,6 +683,11 @@
   display: none; 
 }
 
+.cdlv-catalog-slider__track:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px; 
+}
+
 .cdlv-catalog-slider__card {
   flex: 0 0 max(280px, calc(25% - (var(--spacing-md) * 0.75)));
   scroll-snap-align: start;
@@ -699,17 +701,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Padding removed to allow the image to touch the edges */
   border-radius: var(--radius-strict);
   margin-bottom: var(--spacing-sm);
   overflow: hidden;
   text-decoration: none;
 }
 
+.cdlv-catalog-slider__image-box:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
 .cdlv-catalog-slider__image-box img {
   width: 100%;
   height: 100%;
-  /* Changed from contain to cover so it fills the box entirely */
   object-fit: cover; 
   border-radius: var(--radius-strict);
   transition: transform var(--transition-slow), opacity var(--transition-base);
@@ -755,18 +760,22 @@
     transition: opacity var(--transition-base), transform var(--transition-base);
   }
 
-  .cdlv-catalog-slider__arrow:hover {
+  .cdlv-catalog-slider__arrow:hover:not(:disabled) {
     background-color: var(--color-text-dark);
   }
 
-  .cdlv-catalog-slider__arrow:hover .cdlv-catalog-slider__arrow-icon {
+  .cdlv-catalog-slider__arrow:hover:not(:disabled) .cdlv-catalog-slider__arrow-icon {
     stroke: var(--color-primary);
+  }
+
+  .cdlv-catalog-slider__arrow:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
   }
 
   .cdlv-catalog-slider__arrow--prev {
     left: calc(var(--spacing-md) * -0.25);
     opacity: 0; 
-    pointer-events: none;
   }
 
   .cdlv-catalog-slider__arrow--next {
@@ -787,7 +796,6 @@
 .cdlv-catalog-slider__footer {
   display: flex;
   justify-content: center;
-  /* Changed from --spacing-lg to --spacing-sm */
   margin-top: var(--spacing-sm); 
 }
 
@@ -813,6 +821,27 @@
 .cdlv-catalog-slider__shop-all:hover,
 .cdlv-catalog-slider__shop-all:focus-visible {
   background-color: var(--color-text-dark);
+}
+
+.cdlv-catalog-slider__shop-all:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* ==========================================================================
+   A11Y: REDUCED MOTION SAFETY BLOCK
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .cdlv-catalog-slider__track {
+    scroll-behavior: auto; /* Disables smooth scroll natively */
+  }
+
+  .cdlv-catalog-slider__image-box img,
+  .cdlv-catalog-slider__arrow,
+  .cdlv-catalog-slider__arrow-icon,
+  .cdlv-catalog-slider__shop-all {
+    transition: none; /* Strips timing animations */
+  }
 }
 
 /* ==========================================================================

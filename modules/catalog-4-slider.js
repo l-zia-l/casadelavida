@@ -2,8 +2,8 @@
    MODULE: catalog-4-slider.js
    Purpose: Injects a 4-column fluid product slider with distinct card elements.
    Architecture: ES Module, Dynamic DOM Injection based on data attributes.
-   Security: Strict HTML Sanitization for JSON configurations. Safe path 
-   resolution via utils/path.js. No inline styles.
+   Security/A11y: Strict HTML Sanitization, safe paths, ARIA compliant, 
+   dynamic focus management.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -84,18 +84,18 @@ export function init(node, customConfig = {}) {
             </header>
             
             <div class="cdlv-catalog-slider__carousel-wrapper">
-                <button class="cdlv-catalog-slider__arrow cdlv-catalog-slider__arrow--prev" aria-label="Slide to previous items" type="button">
-                    <svg class="cdlv-catalog-slider__arrow-icon" viewBox="0 0 24 24">
+                <button class="cdlv-catalog-slider__arrow cdlv-catalog-slider__arrow--prev" aria-label="Slide to previous items" type="button" disabled>
+                    <svg class="cdlv-catalog-slider__arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M15 18l-6-6 6-6" stroke-linecap="square" stroke-linejoin="miter"/>
                     </svg>
                 </button>
                 
-                <div class="cdlv-catalog-slider__track" role="region" aria-label="Product Slider Track">
+                <div class="cdlv-catalog-slider__track" role="region" aria-label="Product Slider Track" tabindex="0">
                     ${cardsHTML}
                 </div>
                 
                 <button class="cdlv-catalog-slider__arrow cdlv-catalog-slider__arrow--next" aria-label="Slide to next items" type="button">
-                    <svg class="cdlv-catalog-slider__arrow-icon" viewBox="0 0 24 24">
+                    <svg class="cdlv-catalog-slider__arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M9 18l6-6-6-6" stroke-linecap="square" stroke-linejoin="miter"/>
                     </svg>
                 </button>
@@ -118,7 +118,6 @@ export function init(node, customConfig = {}) {
 
     if (!track || !prevBtn || !nextBtn) return;
 
-    // Calculate dynamic scroll distance based on current card width + gap
     const getScrollAmount = () => {
         const card = track.querySelector('.cdlv-catalog-slider__card');
         if (!card) return 0;
@@ -126,25 +125,25 @@ export function init(node, customConfig = {}) {
         return card.offsetWidth + gap;
     };
 
-    // Toggle arrow visibility
+    // Toggle arrow visibility and native HTML disabled state (handles focus & clicks)
     const updateArrows = () => {
         const scrollLeft = Math.ceil(track.scrollLeft);
         const maxScroll = Math.floor(track.scrollWidth - track.clientWidth);
         
         if (scrollLeft > 5) {
             prevBtn.style.opacity = '1';
-            prevBtn.style.pointerEvents = 'auto';
+            prevBtn.disabled = false;
         } else {
             prevBtn.style.opacity = '0';
-            prevBtn.style.pointerEvents = 'none';
+            prevBtn.disabled = true;
         }
 
         if (scrollLeft < maxScroll - 5) {
             nextBtn.style.opacity = '1';
-            nextBtn.style.pointerEvents = 'auto';
+            nextBtn.disabled = false;
         } else {
             nextBtn.style.opacity = '0';
-            nextBtn.style.pointerEvents = 'none';
+            nextBtn.disabled = true;
         }
     };
 
