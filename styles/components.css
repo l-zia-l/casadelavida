@@ -641,9 +641,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  /* Top padding clears the fixed header, bottom padding ensures breathing room */
   padding-top: calc(var(--header-offset) + var(--spacing-sm));
-  padding-bottom: var(--spacing-md);
+  /* Changed from --spacing-md to --spacing-sm */
+  padding-bottom: var(--spacing-sm); 
   overflow: hidden;
   position: relative;
 }
@@ -652,12 +652,14 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: var(--spacing-md);
+  /* Changed from --spacing-md to --spacing-sm */
+  margin-bottom: var(--spacing-sm);
 }
 
 .cdlv-catalog-slider__title {
   font-family: var(--font-family-heading);
-  font-size: var(--font-size-h2);
+  /* Changed from --font-size-h2 to --font-size-h3 */
+  font-size: var(--font-size-h3); 
   color: var(--color-accent);
   margin: 0;
   line-height: 1.2;
@@ -785,7 +787,8 @@
 .cdlv-catalog-slider__footer {
   display: flex;
   justify-content: center;
-  margin-top: var(--spacing-md);
+  /* Changed from --spacing-lg to --spacing-sm */
+  margin-top: var(--spacing-sm); 
 }
 
 .cdlv-catalog-slider__shop-all {
