@@ -5,8 +5,7 @@
    Dependencies: Uses tokens from globals.css (--color-primary, fluid spacing).
    ========================================================================== */
 
-/* The header container (applied to the parent #global-header by the system)
-   needs fixed positioning to float over the hero section */
+/* The header container */
 #global-header {
   position: fixed;
   top: 0;
@@ -14,13 +13,21 @@
   width: 100%;
   z-index: 1000;
   background-color: transparent;
-  transition: background-color var(--transition-base), box-shadow var(--transition-base);
+  /* Added 'transform' to the transition list for smooth sliding */
+  transition: background-color var(--transition-base), 
+              box-shadow var(--transition-base), 
+              transform var(--transition-base);
 }
 
 /* Scrolled state applied via JS */
 #global-header.cdlv-header--scrolled {
   background-color: var(--color-primary);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Hidden state applied via JS when scrolling down past the hero */
+#global-header.cdlv-header--hidden {
+  transform: translateY(-100%);
 }
 
 .cdlv-header__nav {

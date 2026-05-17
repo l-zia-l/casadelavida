@@ -146,20 +146,49 @@ export function init(element) {
         }
     };
 
-    // 3. High-Performance Scroll Listener
+    // 3. Smart Hide-on-Scroll Listener
     let ticking = false;
+    let lastScrollY = window.scrollY;
+
     const handleScroll = () => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                element.classList.toggle('cdlv-header--scrolled', window.scrollY > 50);
-                evaluateHeaderTheme(); // Re-evaluate color on scroll
+                const currentScrollY = window.scrollY;
+                const isMenuOpen = element.classList.contains('cdlv-header--menu-open');
+
+                // 3A. Transparent to Solid Logic
+                element.classList.toggle('cdlv-header--scrolled', currentScrollY > 50);
+                evaluateHeaderTheme(); 
+
+                // 3B. Slide Up / Slide Down Logic
+                // Dynamically find the hero module on the page to determine the threshold.
+                // If no hero exists, it defaults to a safe 500px threshold.
+                const heroSection = document.querySelector('[data-module^="hero"]');
+                const hideThreshold = heroSection ? heroSection.offsetHeight : 500;
+
+                if (currentScrollY > hideThreshold && !isMenuOpen) {
+                    if (currentScrollY > lastScrollY) {
+                        // Scrolling DOWN past the hero -> Slide Up (Hide)
+                        element.classList.add('cdlv-header--hidden');
+                    } else {
+                        // Scrolling UP -> Slide Down (Show)
+                        element.classList.remove('cdlv-header--hidden');
+                    }
+                } else {
+                    // Above the threshold or menu is open -> Always Show
+                    element.classList.remove('cdlv-header--hidden');
+                }
+
+                // Update the last scroll position for the next frame
+                lastScrollY = currentScrollY;
                 ticking = false;
             });
             ticking = true;
         }
     };
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    handleScroll(); // Trigger on load
 
     // 4. Mobile Menu Toggle Logic
     const closeMobileMenu = () => {
