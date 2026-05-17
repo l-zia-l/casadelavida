@@ -17,7 +17,7 @@ const defaultConfig = {
             title: 'The Fertility Wellness Box',
             image: 'assets/images/products/box_1.png',
             alt: 'Fertility Wellness Box packaged in premium materials',
-            actionLink: 'shop/packages/fertility-wellness.html'
+            actionLink: 'shop/packages/fertility-wellness-box.html'
         },
         {
             title: 'Premium Tea Leaves',
@@ -67,7 +67,6 @@ export function init(node, customConfig = {}) {
                 <a href="${sanitizeHTML(safeProductLink)}" class="cdlv-catalog-slider__image-box img-hover-scale" aria-label="View ${sanitizeHTML(product.title)}">
                     <img src="${sanitizeHTML(safeImage)}" 
                          alt="${sanitizeHTML(product.alt)}" 
-                         loading="lazy" 
                          decoding="async">
                 </a>
                 <div class="cdlv-catalog-slider__info">
