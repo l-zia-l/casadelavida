@@ -58,16 +58,22 @@ export function init(node, customConfig = {}) {
     const safeCtaLink = buildPath(config.ctaLink);
 
     // 1. Generate Product Cards
-    const cardsHTML = products.map(product => {
+    const cardsHTML = products.map((product, index) => {
         const safeImage = buildPath(product.image);
         const safeProductLink = buildPath(product.actionLink || config.ctaLink);
+        
+        // Performance: Eagerly load the first 4 visible cards, lazy load the rest
+        const isVisibleOnRender = index < 4;
+        const imageLoadingStrategy = isVisibleOnRender 
+            ? 'loading="eager" fetchpriority="high" decoding="sync"' 
+            : 'loading="lazy" decoding="async"';
         
         return `
             <article class="cdlv-catalog-slider__card">
                 <a href="${sanitizeHTML(safeProductLink)}" class="cdlv-catalog-slider__image-box img-hover-scale" aria-label="View ${sanitizeHTML(product.title)}">
                     <img src="${sanitizeHTML(safeImage)}" 
                          alt="${sanitizeHTML(product.alt)}" 
-                         decoding="async">
+                         ${imageLoadingStrategy}>
                 </a>
                 <div class="cdlv-catalog-slider__info">
                     <h3 class="cdlv-catalog-slider__product-title">${sanitizeHTML(product.title)}</h3>
@@ -118,6 +124,7 @@ export function init(node, customConfig = {}) {
 
     if (!track || !prevBtn || !nextBtn) return;
 
+    // Calculate dynamic scroll distance
     const getScrollAmount = () => {
         const card = track.querySelector('.cdlv-catalog-slider__card');
         if (!card) return 0;
@@ -125,7 +132,7 @@ export function init(node, customConfig = {}) {
         return card.offsetWidth + gap;
     };
 
-    // Toggle arrow visibility and native HTML disabled state (handles focus & clicks)
+    // DOM Update Logic
     const updateArrows = () => {
         const scrollLeft = Math.ceil(track.scrollLeft);
         const maxScroll = Math.floor(track.scrollWidth - track.clientWidth);
@@ -147,6 +154,18 @@ export function init(node, customConfig = {}) {
         }
     };
 
+    // Performance Optimization: Lock DOM updates to screen refresh rate
+    let ticking = false;
+    const onScrollOrResize = () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                updateArrows();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    };
+
     // Event Listeners
     prevBtn.addEventListener('click', () => {
         track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
@@ -156,9 +175,11 @@ export function init(node, customConfig = {}) {
         track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
     });
 
-    track.addEventListener('scroll', updateArrows, { passive: true });
+    // Use the rAF-optimized handler
+    track.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize, { passive: true });
     
     // Initial UI sync
     updateArrows();
-    window.addEventListener('resize', updateArrows, { passive: true });
+
 }

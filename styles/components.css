@@ -720,6 +720,10 @@
   transition: transform var(--transition-slow), opacity var(--transition-base);
 }
 
+.img-hover-scale:hover img {
+  transform: scale(1.03) translateZ(0);
+}
+
 .cdlv-catalog-slider__info {
   display: flex;
   flex-direction: column;
@@ -762,6 +766,7 @@
 
   .cdlv-catalog-slider__arrow:hover:not(:disabled) {
     background-color: var(--color-text-dark);
+    transform: translateY(-50%) translateZ(0);
   }
 
   .cdlv-catalog-slider__arrow:hover:not(:disabled) .cdlv-catalog-slider__arrow-icon {
