@@ -631,7 +631,12 @@
    ========================================================================== */
 
 .cdlv-catalog-slider {
-  padding-block: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Top padding clears the fixed header, bottom padding ensures breathing room */
+  padding-top: calc(var(--header-offset) + var(--spacing-sm));
+  padding-bottom: var(--spacing-md);
   overflow: hidden;
   position: relative;
 }
@@ -773,7 +778,7 @@
 .cdlv-catalog-slider__footer {
   display: flex;
   justify-content: center;
-  margin-top: var(--spacing-lg);
+  margin-top: var(--spacing-md);
 }
 
 .cdlv-catalog-slider__shop-all {

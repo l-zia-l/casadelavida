@@ -78,7 +78,7 @@ export function init(node, customConfig = {}) {
 
     // 2. Build the full module HTML
     const html = `
-        <div class="cdlv-catalog-slider animate-enter">
+        <div class="cdlv-catalog-slider animate-enter u-min-h-screen">
             <header class="cdlv-catalog-slider__header">
                 <h2 class="cdlv-catalog-slider__title">${sanitizeHTML(config.heading)}</h2>
             </header>
