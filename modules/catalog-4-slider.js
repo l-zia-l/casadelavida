@@ -71,9 +71,6 @@ export function init(node, customConfig = {}) {
                 </a>
                 <div class="cdlv-catalog-slider__info">
                     <h3 class="cdlv-catalog-slider__product-title">${sanitizeHTML(product.title)}</h3>
-                    <button class="cdlv-catalog-slider__add-btn" type="button" data-action="add-to-cart" aria-label="Add ${sanitizeHTML(product.title)} to cart">
-                        Add to Cart
-                    </button>
                 </div>
             </article>
         `;

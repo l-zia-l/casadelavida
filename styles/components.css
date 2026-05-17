@@ -653,7 +653,6 @@
 
 .cdlv-catalog-slider__carousel-wrapper {
   position: relative;
-  /* Negative margin pull to allow arrows to sit slightly outside the track */
   margin-inline: calc(var(--spacing-md) * -1); 
   padding-inline: var(--spacing-md);
 }
@@ -674,7 +673,6 @@
 }
 
 .cdlv-catalog-slider__card {
-  /* Mobile: 85vw to peek next card. Desktop: precisely 25% minus gap for 4-grid */
   flex: 0 0 max(280px, calc(25% - (var(--spacing-md) * 0.75)));
   scroll-snap-align: start;
   display: flex;
@@ -682,13 +680,12 @@
 }
 
 .cdlv-catalog-slider__image-box {
-  /* Using global neutral background to house the product image */
   background-color: var(--color-neutral-bg); 
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-sm);
+  /* Padding removed to allow the image to touch the edges */
   border-radius: var(--radius-strict);
   margin-bottom: var(--spacing-sm);
   overflow: hidden;
@@ -698,7 +695,8 @@
 .cdlv-catalog-slider__image-box img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  /* Changed from contain to cover so it fills the box entirely */
+  object-fit: cover; 
   border-radius: var(--radius-strict);
   transition: transform var(--transition-slow), opacity var(--transition-base);
 }
@@ -718,31 +716,6 @@
   letter-spacing: var(--letter-spacing-wide);
   color: var(--color-text-dark);
   margin: 0;
-}
-
-.cdlv-catalog-slider__add-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: clamp(0.75rem, 1.5vw, 1rem);
-  font-family: var(--font-family-body);
-  font-size: var(--font-size-small);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-  color: var(--color-text-dark);
-  background-color: transparent;
-  border: 1px solid var(--color-text-dark);
-  border-radius: var(--radius-strict);
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.cdlv-catalog-slider__add-btn:hover,
-.cdlv-catalog-slider__add-btn:focus-visible {
-  background-color: var(--color-text-dark);
-  color: var(--color-primary);
 }
 
 /* --- CAROUSEL CONTROLS --- */
