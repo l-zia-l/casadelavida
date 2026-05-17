@@ -83,9 +83,9 @@ export function init(node, customConfig = {}) {
         `;
     }).join('');
 
-    // 2. Build the full module HTML (Semantic HTML5)
+    // 2. Build the full module HTML (Semantic HTML5 & Synchronized Image Reveal)
     const html = `
-        <section class="cdlv-catalog-slider animate-enter" aria-label="${sanitizeHTML(config.heading)}">
+        <section class="cdlv-catalog-slider animate-enter" aria-label="${sanitizeHTML(config.heading)}" data-image-sync>
             <header class="cdlv-catalog-slider__header">
                 <h2 class="cdlv-catalog-slider__title">${sanitizeHTML(config.heading)}</h2>
             </header>
