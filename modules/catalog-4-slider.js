@@ -57,12 +57,11 @@ export function init(node, customConfig = {}) {
     const products = customConfig.products || config.products;
     const safeCtaLink = buildPath(config.ctaLink);
 
-    // 1. Generate Product Cards
+    // 1. Generate Product Cards (SEO Optimized)
     const cardsHTML = products.map((product, index) => {
         const safeImage = buildPath(product.image);
         const safeProductLink = buildPath(product.actionLink || config.ctaLink);
         
-        // Performance: Eagerly load the first 4 visible cards, lazy load the rest
         const isVisibleOnRender = index < 4;
         const imageLoadingStrategy = isVisibleOnRender 
             ? 'loading="eager" fetchpriority="high" decoding="sync"' 
@@ -70,21 +69,23 @@ export function init(node, customConfig = {}) {
         
         return `
             <article class="cdlv-catalog-slider__card">
-                <a href="${sanitizeHTML(safeProductLink)}" class="cdlv-catalog-slider__image-box img-hover-scale" aria-label="View ${sanitizeHTML(product.title)}">
+                <a href="${sanitizeHTML(safeProductLink)}" class="cdlv-catalog-slider__image-box img-hover-scale" tabindex="-1" aria-hidden="true">
                     <img src="${sanitizeHTML(safeImage)}" 
                          alt="${sanitizeHTML(product.alt)}" 
                          ${imageLoadingStrategy}>
                 </a>
                 <div class="cdlv-catalog-slider__info">
-                    <h3 class="cdlv-catalog-slider__product-title">${sanitizeHTML(product.title)}</h3>
+                    <h3 class="cdlv-catalog-slider__product-title">
+                        <a href="${sanitizeHTML(safeProductLink)}">${sanitizeHTML(product.title)}</a>
+                    </h3>
                 </div>
             </article>
         `;
     }).join('');
 
-    // 2. Build the full module HTML
+    // 2. Build the full module HTML (Semantic HTML5)
     const html = `
-        <div class="cdlv-catalog-slider animate-enter">
+        <section class="cdlv-catalog-slider animate-enter" aria-label="${sanitizeHTML(config.heading)}">
             <header class="cdlv-catalog-slider__header">
                 <h2 class="cdlv-catalog-slider__title">${sanitizeHTML(config.heading)}</h2>
             </header>
@@ -112,7 +113,7 @@ export function init(node, customConfig = {}) {
                     ${sanitizeHTML(config.ctaText)}
                 </a>
             </footer>
-        </div>
+        </section>
     `;
 
     node.innerHTML = html;
