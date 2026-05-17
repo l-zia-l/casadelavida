@@ -622,6 +622,211 @@
 .cdlv-hero__btn--secondary { background-color: transparent; color: var(--color-text-dark); border-color: var(--color-text-dark); }
 .cdlv-hero__btn--secondary:hover { background-color: var(--color-text-dark); color: var(--color-primary); }
 
+
+/* ==========================================================================
+   MODULE: CATALOG 4 SLIDER (.cdlv-catalog-slider)
+   Architecture: BEM Naming Convention, Mobile-First, Grid Layout
+   Purpose: Styling for the catalog-4-slider module.
+   Dependencies: Uses tokens from globals.css (--color-primary, fluid spacing, etc).
+   ========================================================================== */
+
+.cdlv-catalog-slider {
+  padding-block: var(--spacing-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+.cdlv-catalog-slider__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--spacing-md);
+}
+
+.cdlv-catalog-slider__title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-h2);
+  color: var(--color-accent);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.cdlv-catalog-slider__carousel-wrapper {
+  position: relative;
+  /* Negative margin pull to allow arrows to sit slightly outside the track */
+  margin-inline: calc(var(--spacing-md) * -1); 
+  padding-inline: var(--spacing-md);
+}
+
+.cdlv-catalog-slider__track {
+  display: flex;
+  gap: var(--spacing-md); 
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+  padding-bottom: var(--spacing-sm);
+  scroll-behavior: smooth;
+}
+
+.cdlv-catalog-slider__track::-webkit-scrollbar {
+  display: none; 
+}
+
+.cdlv-catalog-slider__card {
+  /* Mobile: 85vw to peek next card. Desktop: precisely 25% minus gap for 4-grid */
+  flex: 0 0 max(280px, calc(25% - (var(--spacing-md) * 0.75)));
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+}
+
+.cdlv-catalog-slider__image-box {
+  /* Using global neutral background to house the product image */
+  background-color: var(--color-neutral-bg); 
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-strict);
+  margin-bottom: var(--spacing-sm);
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.cdlv-catalog-slider__image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-strict);
+  transition: transform var(--transition-slow), opacity var(--transition-base);
+}
+
+.cdlv-catalog-slider__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+}
+
+.cdlv-catalog-slider__product-title {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-dark);
+  margin: 0;
+}
+
+.cdlv-catalog-slider__add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: clamp(0.75rem, 1.5vw, 1rem);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-dark);
+  background-color: transparent;
+  border: 1px solid var(--color-text-dark);
+  border-radius: var(--radius-strict);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.cdlv-catalog-slider__add-btn:hover,
+.cdlv-catalog-slider__add-btn:focus-visible {
+  background-color: var(--color-text-dark);
+  color: var(--color-primary);
+}
+
+/* --- CAROUSEL CONTROLS --- */
+.cdlv-catalog-slider__arrow {
+  display: none; 
+}
+
+@media (min-width: 992px) {
+  .cdlv-catalog-slider__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: calc(50% - var(--spacing-lg)); 
+    transform: translateY(-50%);
+    width: clamp(3rem, 4vw, 4rem);
+    height: clamp(3rem, 4vw, 4rem);
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-text-dark);
+    border-radius: var(--radius-strict);
+    cursor: pointer;
+    z-index: 10;
+    transition: opacity var(--transition-base), transform var(--transition-base);
+  }
+
+  .cdlv-catalog-slider__arrow:hover {
+    background-color: var(--color-text-dark);
+  }
+
+  .cdlv-catalog-slider__arrow:hover .cdlv-catalog-slider__arrow-icon {
+    stroke: var(--color-primary);
+  }
+
+  .cdlv-catalog-slider__arrow--prev {
+    left: calc(var(--spacing-md) * -0.25);
+    opacity: 0; 
+    pointer-events: none;
+  }
+
+  .cdlv-catalog-slider__arrow--next {
+    right: calc(var(--spacing-md) * -0.25);
+  }
+
+  .cdlv-catalog-slider__arrow-icon {
+    width: var(--icon-size-base);
+    height: var(--icon-size-base);
+    fill: none;
+    stroke: var(--color-text-dark);
+    stroke-width: 1.5;
+    transition: stroke var(--transition-base);
+  }
+}
+
+/* --- FOOTER CTA --- */
+.cdlv-catalog-slider__footer {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-lg);
+}
+
+.cdlv-catalog-slider__shop-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(2rem, 4vw, 3rem);
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-small);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-wide);
+  border: 2px solid transparent;
+  border-radius: var(--radius-strict);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition-base);
+}
+
+.cdlv-catalog-slider__shop-all:hover,
+.cdlv-catalog-slider__shop-all:focus-visible {
+  background-color: var(--color-text-dark);
+}
+
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
