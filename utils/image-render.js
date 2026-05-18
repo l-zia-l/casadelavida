@@ -1,15 +1,11 @@
-/* ==========================================================================
-   MODULE: IMAGE RENDER ENGINE (utils/image-render.js)
-   Purpose: The universal hub for image load tracking and smooth revealing.
-   ========================================================================== */
+// utils/image-render.js
 
 const handleImageLoad = (img) => {
-    // DOUBLE rAF: Forces the browser to paint the hidden state before adding the class
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            img.classList.add('is-loaded');
-        });
-    });
+    // Force a DOM reflow. This guarantees the browser registers the initial 
+    // clip-path and opacity: 0 BEFORE applying the transition class.
+    void img.offsetWidth; 
+    
+    img.classList.add('is-loaded');
 };
 
 const setupImageReveal = (img) => {
@@ -29,10 +25,10 @@ const setupImageReveal = (img) => {
     const syncContainer = img.closest('[data-image-sync]');
     
     if (syncContainer && img.getAttribute('loading') !== 'lazy') {
-        
         if (!syncContainer.hasAttribute('data-sync-active')) {
             syncContainer.setAttribute('data-sync-active', 'true');
             
+            // Push execution to the end of the call stack
             setTimeout(() => {
                 const syncImages = Array.from(syncContainer.querySelectorAll('img:not([loading="lazy"])'));
                 
@@ -51,12 +47,9 @@ const setupImageReveal = (img) => {
                 });
 
                 Promise.all(promises).then(() => {
-                    // DOUBLE rAF for the synchronized groups as well
-                    requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            syncImages.forEach(syncImg => syncImg.classList.add('is-loaded'));
-                        });
-                    });
+                    // Force reflow on the container to ensure all children animate
+                    void syncContainer.offsetWidth;
+                    syncImages.forEach(syncImg => syncImg.classList.add('is-loaded'));
                 });
             }, 0);
         }
