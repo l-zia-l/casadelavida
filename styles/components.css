@@ -691,10 +691,8 @@
 }
 
 .cdlv-catalog-slider__header,
-.cdlv-catalog-slider__footer,
-.cdlv-catalog-slider__carousel-wrapper {
-  width: 92vw;
-  max-width: 2400px; 
+.cdlv-catalog-slider__footer {
+  width: min(90vw, 1600px); 
   margin-inline: auto;
 }
 
@@ -714,6 +712,7 @@
 }
 
 .cdlv-catalog-slider__carousel-wrapper {
+  width: 100%;
   position: relative;
 }
 
@@ -726,6 +725,7 @@
   -ms-overflow-style: none;
   padding-bottom: var(--spacing-sm);
   scroll-behavior: smooth;
+  padding-inline: calc((100vw - min(90vw, 1600px)) / 2);
 }
 
 .cdlv-catalog-slider__track::-webkit-scrollbar {
@@ -738,7 +738,7 @@
 }
 
 .cdlv-catalog-slider__card {
-  flex: 0 0 clamp(16rem, 22vw, 22rem);
+  flex: 0 0 clamp(16rem, 22vw, 22rem); 
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
@@ -828,12 +828,12 @@
   }
 
   .cdlv-catalog-slider__arrow--prev {
-    left: calc(var(--spacing-md) * -0.5);
+    left: max(1rem, calc((100vw - min(90vw, 1600px)) / 2 - 2rem));
     opacity: 0;
   }
 
   .cdlv-catalog-slider__arrow--next {
-    right: calc(var(--spacing-md) * -0.5);
+    right: max(1rem, calc((100vw - min(90vw, 1600px)) / 2 - 2rem));
   }
 
   .cdlv-catalog-slider__arrow-icon {
