@@ -576,7 +576,7 @@
 
 @media (min-width: 992px) {
   .cdlv-hero__compact-overlay {
-    width: max(40%, 450px); /* Desktop: Caps the width and leaves it on the left */
+    width: max(45%, 450px); /* Desktop: Caps the width and leaves it on the left */
   }
 }
 

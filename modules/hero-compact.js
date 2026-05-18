@@ -49,7 +49,7 @@ export function init(node, customConfig = {}) {
     imageHTML = `
       <img src="${sanitizeHTML(safeBgImage)}" 
            alt="${sanitizeHTML(config.imageAlt)}" 
-           class="cdlv-hero__bg-img"
+           class="cdlv-hero__bg-img u-img-reveal" 
            ${loadingStrategy}
            decoding="async">
     `;
@@ -57,7 +57,7 @@ export function init(node, customConfig = {}) {
 
   // 2. Inject the dynamic imageHTML variable into the main template
   const html = `
-    <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
+    <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}" data-image-sync>
       
       ${imageHTML}
       
