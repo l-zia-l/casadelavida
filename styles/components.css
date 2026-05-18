@@ -892,10 +892,18 @@
    ========================================================================== */
 
 .cdlv-category-3-grid {
-  /* Uses fluid vertical spacing. Horizontal constraints are handled by 
-     the parent .container, ensuring perfect margins at the sides. */
+  /* Vertical spacing */
   padding-block: var(--spacing-xl);
-  width: 100%;
+  
+  /* Breakout Technique: Forces the container to stretch the full width of the 
+     viewport, bypassing the parent .container limits. */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  
+  /* Re-applies the global gutter so the outer edges of the grid match 
+     the constrained content above and below it. */
+  padding-inline: var(--layout-gutter);
+  
   background-color: transparent;
 }
 
@@ -905,7 +913,7 @@
 }
 
 .cdlv-category-3-grid__title {
-  color: var(--color-accent); /* Adjusted to match your global heading style */
+  color: var(--color-accent);
   margin-bottom: 0;
 }
 
@@ -972,7 +980,7 @@
 
 .cdlv-category-3-grid__card-title {
   font-family: var(--font-family-heading);
-  font-size: var(--font-size-h3); /* Slightly larger to match reference */
+  font-size: var(--font-size-h3); 
   color: var(--color-text-dark);
   margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
 }
