@@ -941,18 +941,15 @@
   background-color: var(--color-secondary);
   width: 100%; 
   
-  /* Intrinsic Card Height: Gives the 70/30 split physical space to exist 
-     while allowing the parent grid to flow vertically. */
   height: 70vh; 
-  min-height: 450px;
-  
+  min-height: 550px; 
   transition: transform var(--transition-fast);
 }
 
 @media (min-width: 1024px) {
   .cdlv-category-3-grid__card {
     height: 60vh; /* Slightly shorter on desktop since columns are narrower */
-    min-height: 500px;
+    min-height: 600px;
   }
 }
 
@@ -960,8 +957,7 @@
   margin: 0;
   width: 100%;
   
-  /* STRICT 70%: Locks the image to exactly 70% of the card's height */
-  flex: 0 0 70%;
+  flex: 1 1 0;
   min-height: 0; 
   
   overflow: hidden;
@@ -977,15 +973,16 @@
 }
 
 .cdlv-category-3-grid__content {
-  /* STRICT 30%: Locks the text box to the remaining 30% of the card height */
-  flex: 0 0 30%;
+  flex: 0 0 auto;
   
-  padding: var(--spacing-xs) var(--spacing-sm);
+  /* BUMPED PADDING: Restores spacing so the text isn't hugging the edges */
+  padding: var(--spacing-md) var(--spacing-sm);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-evenly; 
+  justify-content: center; 
+  gap: var(--spacing-sm);
 }
 
 .cdlv-category-3-grid__card-title {
