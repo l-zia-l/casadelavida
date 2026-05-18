@@ -87,7 +87,6 @@ export function init(node, customConfig = {}) {
     `;
   }).join('');
 
-  // CHANGED: From .u-min-h-screen to .u-h-screen to lock the height strictly to the viewport.
   const html = `
     <section class="cdlv-category-3-grid u-h-screen" aria-labelledby="category-grid-heading" data-image-sync>
       <header class="cdlv-category-3-grid__header">
