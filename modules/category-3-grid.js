@@ -1,41 +1,42 @@
 /* ==========================================================================
-   MODULE: CATEGORY 3-GRID (category-3-grid.js)
-   Purpose: Injects a responsive 3-column category grid.
-   Architecture: ES Module, Plug-and-Play.
-   Security: Strict HTML sanitization applied to prevent XSS vulnerabilities.
-   Integration: Uses data-image-sync for the global image render engine.
+   MODULE: CATEGORY 3 GRID (modules/category-3-grid.js)
+   Purpose: Injects and manages the 3-column responsive category grid.
+   Architecture: ES Module, Plug-and-Play. Uses semantic HTML5.
+   Security: DOM elements are sanitized prior to injection to prevent XSS.
+             Uses data-image-sync to interface with the global image engine.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
 
 const defaultConfig = {
-    heading: "Our Signature Collections",
-    cards: [
-        {
-            title: "Tea Infusions",
-            desc: "Limited-run blends featuring unique stems, handpicked and sure to sell out.",
-            btnText: "Shop Now",
-            btnLink: "shop/wellness-boxes.html",
-            image: "assets/images/products/item_2.2.1.jpg",
-            imageAlt: "Premium Tea Infusions"
-        },
-        {
-            title: "Wellness Boxes",
-            desc: "The ever-popular, always-sold-out variety that we just can't get enough of.",
-            btnText: "Shop Boxes",
-            btnLink: "shop/wellness-boxes.html",
-            image: "assets/images/products/box_1.png",
-            imageAlt: "Curated Wellness Boxes"
-        },
-        {
-            title: "Candles & Oils",
-            desc: "Event florals, oversized arrangements and more for your next celebration.",
-            btnText: "Shop Accessories",
-            btnLink: "shop/all-accessories.html",
-            image: "assets/images/products/item_5.jpg",
-            imageAlt: "Aromatherapy Candles and Oils"
-        }
-    ]
+  headingLevel: 'h2',
+  heading: 'New & Noteworthy',
+  categories: [
+    {
+      title: 'Tea Infusions',
+      image: 'assets/images/products/item_2.2.1.jpg',
+      alt: 'Assorted premium tea infusions',
+      description: 'Limited-run blends featuring unique stems, handpicked and sure to sell out.',
+      btnText: 'Shop Now',
+      btnLink: 'shop/products/premium-herbal-infusion.html'
+    },
+    {
+      title: 'Wellness Boxes',
+      image: 'assets/images/products/box_1.png',
+      alt: 'Curated fertility wellness box',
+      description: 'The ever-popular, always-sold-out variety that we just can\'t get enough of.',
+      btnText: 'Shop Boxes',
+      btnLink: 'shop/wellness-boxes.html'
+    },
+    {
+      title: 'Candles & Oils',
+      image: 'assets/images/products/item_5.jpg',
+      alt: 'Vanilla scented candle',
+      description: 'Event florals, oversized arrangements and more for your next celebration.',
+      btnText: 'Shop Accessories',
+      btnLink: 'shop/all-accessories.html'
+    }
+  ]
 };
 
 /**
@@ -44,51 +45,61 @@ const defaultConfig = {
  * @returns {string} - Sanitized string safe for DOM injection
  */
 function sanitizeHTML(str) {
-    if (!str) return '';
-    const temp = document.createElement('div');
-    temp.textContent = str;
-    return temp.innerHTML;
+  if (typeof str !== 'string') return '';
+  const temp = document.createElement('div');
+  temp.textContent = str;
+  return temp.innerHTML;
 }
 
 export function init(node, customConfig = {}) {
-    const config = { ...defaultConfig, ...customConfig };
+  // Merge configurations safely
+  const config = { ...defaultConfig, ...customConfig };
+  
+  // Allow array override specifically
+  if (customConfig.categories && Array.isArray(customConfig.categories)) {
+    config.categories = customConfig.categories;
+  }
+
+  // Ensure heading level falls back safely to 'h2' to prevent tag injection
+  const validHeading = /^(h[1-6])$/i.test(config.headingLevel) ? config.headingLevel.toLowerCase() : 'h2';
+
+  // Generate the cards
+  const cardsHTML = config.categories.map(category => {
+    const safeImage = buildPath(category.image);
+    const safeLink = buildPath(category.btnLink);
     
-    // Validate heading to ensure it's a safe string
-    const safeHeading = sanitizeHTML(config.heading);
-
-    // Map over the cards array to generate the HTML fragment securely
-    const cardsHTML = config.cards.map(card => {
-        const safeImage = buildPath(card.image);
-        const safeLink = buildPath(card.btnLink);
-        
-        return `
-            <article class="cdlv-category-3-grid__card">
-                <div class="cdlv-category-3-grid__image-wrapper">
-                    <img src="${sanitizeHTML(safeImage)}" 
-                         alt="${sanitizeHTML(card.imageAlt)}" 
-                         class="cdlv-category-3-grid__image" 
-                         loading="lazy" 
-                         decoding="async">
-                </div>
-                <div class="cdlv-category-3-grid__content">
-                    <h3 class="cdlv-category-3-grid__title">${sanitizeHTML(card.title)}</h3>
-                    <p class="cdlv-category-3-grid__desc">${sanitizeHTML(card.desc)}</p>
-                    <a href="${sanitizeHTML(safeLink)}" class="cdlv-category-3-grid__btn">
-                        ${sanitizeHTML(card.btnText)}
-                    </a>
-                </div>
-            </article>
-        `;
-    }).join('');
-
-    // Inject the fully constructed HTML into the target node.
-    // Notice the inclusion of data-image-sync on the wrapper to interface with image-render.js
-    node.innerHTML = `
-        <section class="cdlv-category-3-grid animate-enter" aria-label="${safeHeading}" data-image-sync>
-            <h2 class="cdlv-category-3-grid__heading">${safeHeading}</h2>
-            <div class="cdlv-category-3-grid__layout">
-                ${cardsHTML}
-            </div>
-        </section>
+    return `
+      <a href="${sanitizeHTML(safeLink)}" class="cdlv-category-3-grid__card img-hover-scale" aria-label="${sanitizeHTML(category.title)}">
+        <figure class="cdlv-category-3-grid__figure">
+          <img src="${sanitizeHTML(safeImage)}" 
+               alt="${sanitizeHTML(category.alt)}" 
+               class="cdlv-category-3-grid__image"
+               loading="lazy"
+               decoding="async">
+        </figure>
+        <div class="cdlv-category-3-grid__content">
+          <h3 class="cdlv-category-3-grid__card-title">${sanitizeHTML(category.title)}</h3>
+          <p class="cdlv-category-3-grid__desc">${sanitizeHTML(category.description)}</p>
+          <span class="cdlv-category-3-grid__btn">${sanitizeHTML(category.btnText)}</span>
+        </div>
+      </a>
     `;
+  }).join('');
+
+  // Note: the wrapper uses data-image-sync to alert image-render.js 
+  // to coordinate the reveal of these clustered images.
+  const html = `
+    <section class="cdlv-category-3-grid" aria-labelledby="category-grid-heading" data-image-sync>
+      <header class="cdlv-category-3-grid__header">
+        <${validHeading} id="category-grid-heading" class="cdlv-category-3-grid__title">
+          ${sanitizeHTML(config.heading)}
+        </${validHeading}>
+      </header>
+      <div class="cdlv-category-3-grid__grid">
+        ${cardsHTML}
+      </div>
+    </section>
+  `;
+
+  node.innerHTML = html;
 }
