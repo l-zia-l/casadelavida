@@ -64,12 +64,14 @@ export function init(node, customConfig = {}) {
         
         const imageLoadingStrategy = 'loading="eager" decoding="sync"';
         
+       
         return `
             <article class="cdlv-catalog-slider__card">
                 <a href="${sanitizeHTML(safeProductLink)}" class="cdlv-catalog-slider__image-box img-hover-scale" tabindex="-1" aria-hidden="true">
                     <img src="${sanitizeHTML(safeImage)}" 
-                         alt="${sanitizeHTML(product.alt)}" 
-                         ${imageLoadingStrategy}>
+                        alt="${sanitizeHTML(product.alt)}" 
+                        class="u-img-reveal"
+                        ${imageLoadingStrategy}>
                 </a>
                 <div class="cdlv-catalog-slider__info">
                     <h3 class="cdlv-catalog-slider__product-title">

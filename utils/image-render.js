@@ -1,8 +1,6 @@
 /* ==========================================================================
    MODULE: IMAGE RENDER ENGINE (utils/image-render.js)
-   Purpose: Globally intercepts images, hides them, and triggers a radial 
-   reveal animation only after they have fully downloaded.
-   Features: Supports Group Synchronization via [data-image-sync] container attribute.
+   Purpose: The universal hub for image load tracking and smooth revealing.
    ========================================================================== */
 
 const handleImageLoad = (img) => {
@@ -12,56 +10,61 @@ const handleImageLoad = (img) => {
 };
 
 const setupImageReveal = (img) => {
-    // Skip if already set up, or if it's a structural UI icon
-    if (img.classList.contains('u-img-reveal') || img.closest('.cdlv-header__nav') || img.closest('.cdlv-footer')) {
+    // 1. Universal Bailout: Skip if already tracked, or if it's a structural icon
+    if (img.hasAttribute('data-image-tracked') || img.closest('.cdlv-header__nav') || img.closest('.cdlv-footer')) {
         return;
+    }
+    
+    // Lock this image immediately so the observer ignores it on the next pass
+    img.setAttribute('data-image-tracked', 'true');
+
+    // Fail-safe: Ensure it's hidden just in case the HTML template missed the class
+    if (!img.classList.contains('u-img-reveal')) {
+        img.classList.add('u-img-reveal');
     }
 
     // ==========================================================================
-    // NEW: GLOBAL SYNCHRONIZATION GATE
+    // GROUP SYNCHRONIZATION (e.g., Catalog Sliders)
     // ==========================================================================
     const syncContainer = img.closest('[data-image-sync]');
     
-    // Only group images that are meant to load immediately (ignore lazy ones)
     if (syncContainer && img.getAttribute('loading') !== 'lazy') {
         
-        // If we haven't locked this specific container yet, lock it and group its images
         if (!syncContainer.hasAttribute('data-sync-active')) {
             syncContainer.setAttribute('data-sync-active', 'true');
             
-            // Grab all images in THIS container that are NOT lazy
-            const syncImages = Array.from(syncContainer.querySelectorAll('img:not([loading="lazy"])'));
-            
-            const promises = syncImages.map(syncImg => {
-                syncImg.classList.add('u-img-reveal'); // Hide immediately
+            // Push to the end of the execution stack to ensure all injected sibling images are in the DOM
+            setTimeout(() => {
+                const syncImages = Array.from(syncContainer.querySelectorAll('img:not([loading="lazy"])'));
                 
-                // If browser already cached it, resolve immediately
-                if (syncImg.complete && syncImg.naturalHeight !== 0) return Promise.resolve();
-                
-                // Otherwise, wait for the network
-                return new Promise(resolve => {
-                    syncImg.addEventListener('load', resolve, { once: true });
-                    syncImg.addEventListener('error', resolve, { once: true }); // Fail-safe
+                const promises = syncImages.map(syncImg => {
+                    syncImg.setAttribute('data-image-tracked', 'true'); // Lock siblings
+                    if (!syncImg.classList.contains('u-img-reveal')) syncImg.classList.add('u-img-reveal');
+                    
+                    return new Promise(resolve => {
+                        if (syncImg.complete) {
+                            resolve();
+                        } else {
+                            syncImg.addEventListener('load', resolve, { once: true });
+                            syncImg.addEventListener('error', resolve, { once: true }); 
+                        }
+                    });
                 });
-            });
 
-            // Wait for all visible images in this container, then reveal together
-            Promise.all(promises).then(() => {
-                requestAnimationFrame(() => {
-                    syncImages.forEach(syncImg => syncImg.classList.add('is-loaded'));
+                Promise.all(promises).then(() => {
+                    requestAnimationFrame(() => {
+                        syncImages.forEach(syncImg => syncImg.classList.add('is-loaded'));
+                    });
                 });
-            });
+            }, 0);
         }
-        // Exit early so the individual logic below doesn't run on grouped images
         return; 
     }
 
     // ==========================================================================
-    // ORIGINAL FALLBACK: Individual & Lazy Images
+    // INDIVIDUAL IMAGES (e.g., Hero Banners)
     // ==========================================================================
-    img.classList.add('u-img-reveal');
-
-    if (img.complete && img.naturalHeight !== 0) {
+    if (img.complete) {
         handleImageLoad(img);
     } else {
         img.addEventListener('load', () => handleImageLoad(img), { once: true });
@@ -70,8 +73,10 @@ const setupImageReveal = (img) => {
 };
 
 export const initImageRenderer = () => {
+    // Check existing images
     document.querySelectorAll('img').forEach(setupImageReveal);
 
+    // Watch for dynamically injected images
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
