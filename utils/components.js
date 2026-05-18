@@ -15,22 +15,23 @@ const MODULE_PATH = buildPath('modules/');
  * @param {HTMLElement|Document} rootNode - The node to scan (defaults to document)
  */
 export async function initializeComponents(rootNode = document) {
-    // 1. Convert the NodeList to an Array so we can use .map()
-    const moduleNodes = Array.from(rootNode.querySelectorAll('[data-module]'));
+    // Scan only within the provided root node
+    const moduleNodes = rootNode.querySelectorAll('[data-module]');
 
-    // 2. Map over the nodes to create an array of independent Promises
-    const initPromises = moduleNodes.map(async (node) => {
+    for (const node of moduleNodes) {
         const moduleName = node.getAttribute('data-module');
         
+        // Strict validation: Allow only alphanumeric characters and hyphens
         if (!/^[a-z0-9-]+$/.test(moduleName)) {
             console.warn(`Invalid module name detected: ${moduleName}`);
-            return; // Skip this specific module without breaking the others
+            continue;
         }
 
         try {
-            // Because this is inside .map(), all these imports trigger simultaneously!
+            // Dynamically import the module based on the sanitized name
             const module = await import(`${MODULE_PATH}${moduleName}.js`);
             
+            // Extract and parse custom configuration if it exists
             const rawConfig = node.getAttribute('data-config');
             let customConfig = {};
             
@@ -42,7 +43,9 @@ export async function initializeComponents(rootNode = document) {
                 }
             }
 
+            // Check if the module exports an 'init' function
             if (module.init && typeof module.init === 'function') {
+                // Pass the specific node and the parsed configuration
                 module.init(node, customConfig);
             } else {
                 console.warn(`Module ${moduleName} does not export an init function.`);
@@ -50,12 +53,10 @@ export async function initializeComponents(rootNode = document) {
         } catch (error) {
             console.error(`Failed to load JS module: ${moduleName}`, error);
         }
-    });
-
-    // 3. Wait for all modules to finish loading concurrently
-    await Promise.all(initPromises);
+    }
 }
 
+// Auto-initialize on DOMContentLoaded for static HTML elements
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => initializeComponents(document));
 } else {

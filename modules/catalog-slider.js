@@ -62,7 +62,7 @@ export function init(node, customConfig = {}) {
         const safeImage = buildPath(product.image);
         const safeProductLink = buildPath(product.actionLink || config.ctaLink);
         
-        const imageLoadingStrategy = 'loading="eager" decoding="async"';
+        const imageLoadingStrategy = 'loading="eager" decoding="sync"';
         
        
         return `

@@ -67,7 +67,7 @@
   --radius-strict: 0px; 
 
   /* --- 5. MOTION & INTERACTION DNA --- */
-  --ease-professional: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-professional: cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: 150ms var(--ease-professional);
   --transition-base: 300ms var(--ease-professional);
   --transition-slow: 600ms var(--ease-professional);
@@ -214,18 +214,19 @@ img, video {
 
 /* IMAGE REVEAL ENGINE */
 
-/* Initial hidden state: shared base across all reveal-ready images */
+/* Initial state: Image is hidden and clipped to a tiny circle in the center */
 .u-img-reveal {
-  will-change: opacity, clip-path;
   opacity: 0;
-  clip-path: circle(0% at 50% 50%); 
-  transition: opacity 0.8s var(--ease-professional);
+  clip-path: circle(0% at 50% 50%);
+  will-change: opacity, clip-path;
+  transition: opacity 0.6s var(--ease-professional), 
+              clip-path 1.2s var(--ease-professional);
 }
 
-/* Loaded state: shared base state */
+/* Loaded state: Image fades in and the circle expands beyond the corners */
 .u-img-reveal.is-loaded {
   opacity: 1;
-  clip-path: circle(150% at 50% 50%); 
+  clip-path: circle(150% at 50% 50%);
 }
 
 /* ULTRA-WIDE SCREEN ADJUSTMENTS */
