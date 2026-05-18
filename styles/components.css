@@ -892,12 +892,18 @@
    ========================================================================== */
 
 .cdlv-category-3-grid {
-  /* Horizontal breakout is now handled by the .u-fill-width utility class in HTML */
-  padding-top: calc(var(--header-offset) + var(--spacing-sm));
-  padding-bottom: var(--spacing-xl);
+  /* Vertical spacing */
+  padding-block: var(--spacing-xl);
   
-  /* Restores the internal margins so cards align with the rest of the site */
+  /* Breakout Technique: Forces the container to stretch the full width of the 
+     viewport, bypassing the parent .container limits. */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  
+  /* Re-applies the global gutter so the outer edges of the grid match 
+     the constrained content above and below it. */
   padding-inline: var(--layout-gutter);
+  
   background-color: transparent;
 }
 
@@ -913,7 +919,9 @@
 
 .cdlv-category-3-grid__grid {
   display: grid;
+  /* Mobile: 1 column stretching full width */
   grid-template-columns: 1fr;
+  /* Fluid gap based on global tokens to keep spacing proportional */
   gap: var(--spacing-sm);
   width: 100%;
 }
@@ -925,7 +933,7 @@
   }
 }
 
-/* Desktop: 3 columns */
+/* Desktop: 3 columns, forcing them to evenly divide the space and stretch */
 @media (min-width: 1024px) {
   .cdlv-category-3-grid__grid {
     grid-template-columns: repeat(3, 1fr);
@@ -939,83 +947,59 @@
   overflow: hidden;
   text-decoration: none;
   background-color: var(--color-secondary);
-  width: 100%; 
-  
-  /* Intrinsic Card Height: Gives the 70/30 split physical space to exist 
-     while allowing the parent grid to flow vertically. */
-  height: 70vh; 
-  min-height: 450px;
-  
+  width: 100%; /* Force card to stretch and fill its grid cell */
   transition: transform var(--transition-fast);
-}
-
-@media (min-width: 1024px) {
-  .cdlv-category-3-grid__card {
-    height: 60vh; /* Slightly shorter on desktop since columns are narrower */
-    min-height: 500px;
-  }
 }
 
 .cdlv-category-3-grid__figure {
   margin: 0;
   width: 100%;
-  
-  /* STRICT 70%: Locks the image to exactly 70% of the card's height */
-  flex: 0 0 70%;
-  min-height: 0; 
-  
+  /* A 1:1 or 4:5 aspect ratio ensures images take up significant vertical real estate */
+  aspect-ratio: 1 / 1.1; 
   overflow: hidden;
-  background-color: rgba(0,0,0,0.05); 
+  background-color: rgba(0,0,0,0.05); /* Fallback placeholder color if image is missing */
 }
 
 .cdlv-category-3-grid__image {
   width: 100%;
   height: 100%;
-  object-fit: cover; 
+  object-fit: cover; /* Ensures the image fills the area without distortion */
   display: block;
   transition: transform var(--transition-slow);
 }
 
 .cdlv-category-3-grid__content {
-  /* STRICT 30%: Locks the text box to the remaining 30% of the card height */
-  flex: 0 0 30%;
-  
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-sm);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-evenly; 
+  justify-content: center;
+  flex-grow: 1; /* Pushes content to fill the remaining box space evenly */
 }
 
 .cdlv-category-3-grid__card-title {
   font-family: var(--font-family-heading);
   font-size: var(--font-size-h3); 
   color: var(--color-text-dark);
-  margin-bottom: 0; 
+  margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
 }
 
 .cdlv-category-3-grid__desc {
   font-family: var(--font-family-body);
   font-size: var(--font-size-small);
   color: var(--color-text-dark);
-  margin-bottom: 0; 
+  margin-bottom: var(--spacing-sm);
   max-width: 40ch;
-  line-height: 1.3;
+  line-height: 1.4;
   opacity: 0.9;
-  
-  /* Safety clamp to prevent heavy text from breaking the 30% ratio */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .cdlv-category-3-grid__btn {
   display: inline-block;
   background-color: var(--color-primary);
   color: var(--color-text-dark);
-  padding: clamp(0.5rem, 1vw, 0.75rem) clamp(1rem, 2vw, 2rem);
+  padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1.5rem, 4vw, 3rem);
   font-family: var(--font-family-body);
   font-size: var(--font-size-small);
   font-weight: 700;
@@ -1042,7 +1026,7 @@
   border-color: var(--color-text-dark);
 }
 
-/* REDUCED MOTION */
+/* REDUCED MOTION (ACCESSIBILITY) */
 @media (prefers-reduced-motion: reduce) {
   .cdlv-category-3-grid__card:hover,
   .cdlv-category-3-grid__card:hover .cdlv-category-3-grid__image {
