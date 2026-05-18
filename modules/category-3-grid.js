@@ -52,15 +52,20 @@ function sanitizeHTML(str) {
 }
 
 export function init(node, customConfig = {}) {
+  // Merge configurations safely
   const config = { ...defaultConfig, ...customConfig };
   
+  // Allow array override specifically
   if (customConfig.categories && Array.isArray(customConfig.categories)) {
     config.categories = customConfig.categories;
   }
 
+  // Ensure heading level falls back safely to 'h2' to prevent tag injection
   const validHeading = /^(h[1-6])$/i.test(config.headingLevel) ? config.headingLevel.toLowerCase() : 'h2';
 
+  // Generate the cards
   const cardsHTML = config.categories.map(category => {
+    // Graceful fallback for missing images
     const hasImage = category.image && category.image.trim() !== '';
     const safeImage = hasImage ? buildPath(category.image) : '';
     const safeLink = buildPath(category.btnLink);
@@ -87,9 +92,10 @@ export function init(node, customConfig = {}) {
     `;
   }).join('');
 
-  // UTILITY REMOVED: No more global u-h-screen class causing the squash.
+  // INJECTED UTILITY CLASS: Added 'u-min-h-screen' to the section tag 
+  // to ensure the entire grid scales to fit at least the height of the viewport.
   const html = `
-    <section class="cdlv-category-3-grid" aria-labelledby="category-grid-heading" data-image-sync>
+    <section class="cdlv-category-3-grid u-min-h-screen" aria-labelledby="category-grid-heading" data-image-sync>
       <header class="cdlv-category-3-grid__header">
         <${validHeading} id="category-grid-heading" class="cdlv-category-3-grid__title">
           ${sanitizeHTML(config.heading)}
