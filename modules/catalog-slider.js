@@ -80,29 +80,30 @@ export function init(node, customConfig = {}) {
         `;
     }).join('');
 
-    // 2. Build the full module HTML (Semantic HTML5 & Synchronized Image Reveal)
+    // 2. Build the full module HTML (Arrows moved to Header)
     const html = `
         <section class="cdlv-catalog-slider animate-enter" aria-label="${sanitizeHTML(config.heading)}" data-image-sync>
             <header class="cdlv-catalog-slider__header">
                 <h2 class="cdlv-catalog-slider__title">${sanitizeHTML(config.heading)}</h2>
+                
+                <div class="cdlv-catalog-slider__controls">
+                    <button class="cdlv-catalog-slider__arrow cdlv-catalog-slider__arrow--prev" aria-label="Slide to previous items" type="button" disabled>
+                        <svg class="cdlv-catalog-slider__arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M15 18l-6-6 6-6" stroke-linecap="square" stroke-linejoin="miter"/>
+                        </svg>
+                    </button>
+                    <button class="cdlv-catalog-slider__arrow cdlv-catalog-slider__arrow--next" aria-label="Slide to next items" type="button">
+                        <svg class="cdlv-catalog-slider__arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M9 18l6-6-6-6" stroke-linecap="square" stroke-linejoin="miter"/>
+                        </svg>
+                    </button>
+                </div>
             </header>
             
             <div class="cdlv-catalog-slider__carousel-wrapper">
-                <button class="cdlv-catalog-slider__arrow cdlv-catalog-slider__arrow--prev" aria-label="Slide to previous items" type="button" disabled>
-                    <svg class="cdlv-catalog-slider__arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path d="M15 18l-6-6 6-6" stroke-linecap="square" stroke-linejoin="miter"/>
-                    </svg>
-                </button>
-                
                 <div class="cdlv-catalog-slider__track" role="region" aria-label="Product Slider Track" tabindex="0">
                     ${cardsHTML}
                 </div>
-                
-                <button class="cdlv-catalog-slider__arrow cdlv-catalog-slider__arrow--next" aria-label="Slide to next items" type="button">
-                    <svg class="cdlv-catalog-slider__arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path d="M9 18l6-6-6-6" stroke-linecap="square" stroke-linejoin="miter"/>
-                    </svg>
-                </button>
             </div>
 
             <footer class="cdlv-catalog-slider__footer">

@@ -686,6 +686,7 @@
   padding-top: calc(var(--header-offset) + var(--spacing-sm));
   padding-bottom: var(--spacing-sm); 
   position: relative;
+  overflow: hidden;
 }
 
 .cdlv-catalog-slider__header {
@@ -782,32 +783,34 @@
   margin: 0;
 }
 
-/* --- CAROUSEL CONTROLS --- */
-.cdlv-catalog-slider__arrow {
-  display: none; 
+/* --- CAROUSEL CONTROLS (Moved to Header) --- */
+.cdlv-catalog-slider__controls {
+  display: none;
 }
 
 @media (min-width: 992px) {
+  .cdlv-catalog-slider__controls {
+    display: flex;
+    gap: var(--spacing-xs);
+    align-items: center;
+  }
+
   .cdlv-catalog-slider__arrow {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    top: calc(50% - var(--spacing-lg)); 
-    transform: translateY(-50%);
-    width: clamp(3rem, 4vw, 4rem);
-    height: clamp(3rem, 4vw, 4rem);
+    /* Static layout now, no more absolute positioning! */
+    width: clamp(2.5rem, 3vw, 3.5rem);
+    height: clamp(2.5rem, 3vw, 3.5rem);
     background-color: var(--color-primary);
     border: 1px solid var(--color-text-dark);
     border-radius: var(--radius-strict);
     cursor: pointer;
-    z-index: 10;
-    transition: opacity var(--transition-base), transform var(--transition-base);
+    transition: opacity var(--transition-base), background-color var(--transition-base);
   }
 
   .cdlv-catalog-slider__arrow:hover:not(:disabled) {
     background-color: var(--color-text-dark);
-    transform: translateY(-50%) translateZ(0);
   }
 
   .cdlv-catalog-slider__arrow:hover:not(:disabled) .cdlv-catalog-slider__arrow-icon {
@@ -817,15 +820,6 @@
   .cdlv-catalog-slider__arrow:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 4px;
-  }
-
-  .cdlv-catalog-slider__arrow--prev {
-    left: calc(var(--spacing-md) * -0.25);
-    opacity: 0; 
-  }
-
-  .cdlv-catalog-slider__arrow--next {
-    right: calc(var(--spacing-md) * -0.25);
   }
 
   .cdlv-catalog-slider__arrow-icon {
