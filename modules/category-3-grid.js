@@ -76,7 +76,7 @@ export function init(node, customConfig = {}) {
               class="cdlv-category-3-grid__image"
               loading="lazy"
               decoding="async">`
-      : ``; // Renders an empty placeholder space using the figure background color if no image
+      : ``; 
     
     return `
       <a href="${sanitizeHTML(safeLink)}" class="cdlv-category-3-grid__card" aria-label="${sanitizeHTML(category.title)}">
@@ -92,10 +92,10 @@ export function init(node, customConfig = {}) {
     `;
   }).join('');
 
-  // The wrapper uses data-image-sync to alert image-render.js 
-  // to coordinate the reveal of these clustered images simultaneously.
+  // INJECTED UTILITY CLASS: Added 'u-min-h-screen' to the section tag 
+  // to ensure the entire grid scales to fit at least the height of the viewport.
   const html = `
-    <section class="cdlv-category-3-grid" aria-labelledby="category-grid-heading" data-image-sync>
+    <section class="cdlv-category-3-grid u-min-h-screen" aria-labelledby="category-grid-heading" data-image-sync>
       <header class="cdlv-category-3-grid__header">
         <${validHeading} id="category-grid-heading" class="cdlv-category-3-grid__title">
           ${sanitizeHTML(config.heading)}
