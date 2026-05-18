@@ -629,6 +629,13 @@
 .cdlv-hero__btn--secondary { background-color: transparent; color: var(--color-text-dark); border-color: var(--color-text-dark); }
 .cdlv-hero__btn--secondary:hover { background-color: var(--color-text-dark); color: var(--color-primary); }
 
+.cdlv-hero .u-img-reveal,
+.cdlv-hero--compact .u-img-reveal,
+.cdlv-hero--full .u-img-reveal {
+ transition: opacity 0.8s var(--ease-professional), 
+              clip-path 1.2s var(--ease-professional);
+}
+
 
 /* ==========================================================================
    MODULE: INFO BANNER (.cdlv-info-banner)

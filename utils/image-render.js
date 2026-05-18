@@ -1,72 +1,141 @@
-// utils/image-render.js
+/* ==========================================================================
+   MODULE: IMAGE RENDER ENGINE (utils/image-render.js) - REWRITTEN
+   Purpose: Universal image reveal handler, safely animating images on load.
+   Architecture: ES Module, Plug-and-Play.
+   ========================================================================== */
 
-const handleImageLoad = (img) => {
-    // Force a DOM reflow. This guarantees the browser registers the initial 
-    // clip-path and opacity: 0 BEFORE applying the transition class.
-    void img.offsetWidth; 
-    
-    img.classList.add('is-loaded');
+// Forces a browser reflow, ensuring initial hidden state (.u-img-reveal)
+// is rendered before the transition begins.
+const forceReflow = (element) => {
+    if (!element) return;
+    // Accessing layout property forces a reflow.
+    void element.offsetHeight; 
 };
 
+// ==========================================================================
+// Standard Reveal Flow for Individual Images (and failsafe standard handling)
+// ==========================================================================
+const handleStandardIndividualReveal = (img) => {
+    // Re-apply reveal class if somehow missing (failsafe)
+    if (!img.classList.contains('u-img-reveal')) img.classList.add('u-img-reveal');
+    
+    // Safety guard
+    if (img.classList.contains('is-loaded')) return;
+
+    // Standard reveal uses the original double rAF strategy
+    requestAnimationFrame(() => {
+        // Force Reflow on image
+        forceReflow(img);
+        
+        // Add loaded state next frame
+        requestAnimationFrame(() => {
+            img.classList.add('is-loaded');
+        });
+    });
+};
+
+
+// ==========================================================================
+// Core Processing Function
+// ==========================================================================
 const setupImageReveal = (img) => {
-    if (img.hasAttribute('data-image-tracked') || img.closest('.cdlv-header__nav') || img.closest('.cdlv-footer')) {
+    // --- 1. Guard Clauses & Validation ---
+    if (!img || img.tagName !== 'IMG' || img.hasAttribute('data-image-tracked')) return;
+    
+    // Exclude UI icons (header/footer typically don't animate like this)
+    if (img.closest('.cdlv-header__nav') || img.closest('.cdlv-footer')) {
+        img.setAttribute('data-image-tracked', 'true'); // still track it so we don't look again
         return;
     }
-    
-    img.setAttribute('data-image-tracked', 'true');
 
+    // --- 2. Initial Setup: Set Tracking Attribute ---
+    img.setAttribute('data-image-tracked', 'true');
+    
+    // Failure failsafe: Ensure standard base hidden state exists.
+    // The HTML templates from components should already have this class.
     if (!img.classList.contains('u-img-reveal')) {
         img.classList.add('u-img-reveal');
     }
 
-    // ==========================================================================
-    // GROUP SYNCHRONIZATION
-    // ==========================================================================
+    // --- 3. Determine Image Priority/Strategy ---
+    // Priority/Cached images bypass 'load' events. Sync images must wait for the group.
     const syncContainer = img.closest('[data-image-sync]');
+    const isPriorityOrEager = (img.getAttribute('fetchpriority') === 'high' || img.getAttribute('loading') === 'eager');
     
-    if (syncContainer && img.getAttribute('loading') !== 'lazy') {
+    // ==========================================================================
+    // BRANCH A: SYNCHRONIZED GROUP REVEAL (wait for priority group members)
+    // ==========================================================================
+    // This logic handles priority/cached images (catalog cards and compact heroes)
+    // and ensures they sync loading state before revealing smoothly.
+    if (syncContainer && isPriorityOrEager) {
+        
+        // Group initialization (runs only once per container)
         if (!syncContainer.hasAttribute('data-sync-active')) {
             syncContainer.setAttribute('data-sync-active', 'true');
             
-            // Push execution to the end of the call stack
-            setTimeout(() => {
-                const syncImages = Array.from(syncContainer.querySelectorAll('img:not([loading="lazy"])'));
-                
-                const promises = syncImages.map(syncImg => {
-                    syncImg.setAttribute('data-image-tracked', 'true'); 
-                    if (!syncImg.classList.contains('u-img-reveal')) syncImg.classList.add('u-img-reveal');
+            // Collect images. We use Double rAF to wait until the DOM insertion that triggered this is complete.
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    // Collect priority images for sync.
+                    const syncImages = Array.from(syncContainer.querySelectorAll('img:not([loading="lazy"])'));
                     
-                    return new Promise(resolve => {
-                        if (syncImg.complete) {
-                            resolve();
-                        } else {
-                            syncImg.addEventListener('load', resolve, { once: true });
-                            syncImg.addEventListener('error', resolve, { once: true }); 
-                        }
+                    // Failsafe: Ensure reveal state exists
+                    syncImages.forEach(si => {
+                        if (!si.classList.contains('u-img-reveal')) si.classList.add('u-img-reveal');
+                    });
+
+                    // Create loading promises
+                    const promises = syncImages.map(syncImg => {
+                        return new Promise(resolve => {
+                            if (syncImg.complete) {
+                                resolve();
+                            } else {
+                                syncImg.addEventListener('load', resolve, { once: true });
+                                syncImg.addEventListener('error', resolve, { once: true }); 
+                            }
+                        });
+                    });
+
+                    // BRANCH A ENDSTATE: Reveal entire group simultaneously
+                    Promise.all(promises).then(() => {
+                        
+                        // Critical reveal flow: wait for a fresh frame
+                        requestAnimationFrame(() => {
+                            // !!! SOLUTION !!!
+                            // Force a forced reflow ON THE CONTAINER.
+                            // This guarantees the hidden state of ALL images paints BEFORE we add 'is-loaded'.
+                            forceReflow(syncContainer);
+                            
+                            // Next frame, apply 'is-loaded'. Transition starts for entire group.
+                            requestAnimationFrame(() => {
+                                syncImages.forEach(si => si.classList.add('is-loaded'));
+                            });
+                        });
                     });
                 });
-
-                Promise.all(promises).then(() => {
-                    // Force reflow on the container to ensure all children animate
-                    void syncContainer.offsetWidth;
-                    syncImages.forEach(syncImg => syncImg.classList.add('is-loaded'));
-                });
-            }, 0);
+            });
         }
-        return; 
+        // Do not continue to individual handling for sync images, 
+        // otherwise they might trigger before the group Promise resolves.
+        return;
     }
 
     // ==========================================================================
-    // INDIVIDUAL IMAGES
+    // BRANCH B: INDIVIDUAL IMAGE REVEAL (Standard/Lazy handling)
     // ==========================================================================
     if (img.complete) {
-        handleImageLoad(img);
+        // If already complete (cached standard image), reveal safely
+        handleStandardIndividualReveal(img);
     } else {
-        img.addEventListener('load', () => handleImageLoad(img), { once: true });
-        img.addEventListener('error', () => handleImageLoad(img), { once: true });
+        // Otherwise, wait for standard events
+        img.addEventListener('load', () => handleStandardIndividualReveal(img), { once: true });
+        img.addEventListener('error', () => handleStandardIndividualReveal(img), { once: true });
     }
 };
 
+// ==========================================================================
+// Initialization and Mutation Observer (Unchanged logic)
+// ==========================================================================
 export const initImageRenderer = () => {
     document.querySelectorAll('img').forEach(setupImageReveal);
 
