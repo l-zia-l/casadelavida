@@ -45,7 +45,7 @@ export function init(node, customConfig = {}) {
       <img src="${sanitizeHTML(safeBgImage)}" 
            alt="" 
            aria-hidden="true" 
-           class="cdlv-hero__bg-img"
+           class="cdlv-hero__bg-img u-img-reveal" 
            ${loadingStrategy}
            decoding="async">
       
