@@ -30,7 +30,7 @@ const defaultConfig = {
     },
     {
       title: 'Candles & Oils',
-      image: 'assets/images/products/item_5.jpg',
+      image: 'assets/images/products/item_6.jpg',
       alt: 'Vanilla scented candle',
       description: 'Event florals, oversized arrangements and more for your next celebration.',
       btnText: 'Shop Accessories',
@@ -87,8 +87,9 @@ export function init(node, customConfig = {}) {
     `;
   }).join('');
 
+  // UTILITY REMOVED: No more global u-h-screen class causing the squash.
   const html = `
-    <section class="cdlv-category-3-grid u-h-screen" aria-labelledby="category-grid-heading" data-image-sync>
+    <section class="cdlv-category-3-grid" aria-labelledby="category-grid-heading" data-image-sync>
       <header class="cdlv-category-3-grid__header">
         <${validHeading} id="category-grid-heading" class="cdlv-category-3-grid__title">
           ${sanitizeHTML(config.heading)}
