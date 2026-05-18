@@ -680,14 +680,13 @@
    ========================================================================== */
 
 .cdlv-catalog-slider {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   padding-top: calc(var(--header-offset) + var(--spacing-sm));
   padding-bottom: var(--spacing-sm);
-  position: relative;
-  width: 100%;
-  margin-left: calc(50% - 50vw);
 }
 
 .cdlv-catalog-slider__header,
@@ -828,12 +827,12 @@
   }
 
   .cdlv-catalog-slider__arrow--prev {
-    left: max(1rem, calc((100vw - min(90vw, 1600px)) / 2 - 2rem));
+    left: calc(((100vw - min(90vw, 1600px)) / 2) - clamp(3rem, 4vw, 4rem));
     opacity: 0;
   }
 
   .cdlv-catalog-slider__arrow--next {
-    right: max(1rem, calc((100vw - min(90vw, 1600px)) / 2 - 2rem));
+    right: calc(((100vw - min(90vw, 1600px)) / 2) - clamp(3rem, 4vw, 4rem));
   }
 
   .cdlv-catalog-slider__arrow-icon {
