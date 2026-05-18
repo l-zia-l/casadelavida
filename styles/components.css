@@ -675,7 +675,7 @@
 /* ==========================================================================
    MODULE: CATALOG 4 SLIDER (.cdlv-catalog-slider)
    Architecture: BEM Naming Convention, Mobile-First, Grid Layout
-   Purpose: Styling for the catalog-4-slider module.
+   Purpose: Styling for the catalog-slider module.
    Dependencies: Uses tokens from globals.css (--color-primary, fluid spacing, etc).
    ========================================================================== */
 
@@ -686,6 +686,15 @@
   padding-top: calc(var(--header-offset) + var(--spacing-sm));
   padding-bottom: var(--spacing-sm);
   position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+
+}
+
+.cdlv-catalog-slider__header,
+.cdlv-catalog-slider__footer {
+  width: min(90vw, 1600px); 
+  margin-inline: auto;
 }
 
 .cdlv-catalog-slider__header {
@@ -705,8 +714,7 @@
 
 .cdlv-catalog-slider__carousel-wrapper {
   position: relative;
-  margin-inline: calc(var(--spacing-md) * -1); 
-  padding-inline: var(--spacing-md);
+  padding-inline: calc(50vw - (min(90vw, 1600px) / 2));
 }
 
 .cdlv-catalog-slider__track {
@@ -730,7 +738,7 @@
 }
 
 .cdlv-catalog-slider__card {
-  flex: 0 0 max(280px, calc(25% - (var(--spacing-md) * 0.75)));
+  flex: 0 0 clamp(16rem, 22vw, 22rem);
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
@@ -820,12 +828,12 @@
   }
 
   .cdlv-catalog-slider__arrow--prev {
-    left: calc(var(--spacing-md) * -0.25);
-    opacity: 0; 
+    left: var(--layout-gutter);
+    opacity: 0;
   }
 
   .cdlv-catalog-slider__arrow--next {
-    right: calc(var(--spacing-md) * -0.25);
+    right: var(--layout-gutter);
   }
 
   .cdlv-catalog-slider__arrow-icon {

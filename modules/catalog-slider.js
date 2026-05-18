@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MODULE: catalog-4-slider.js
+   MODULE: catalog-slider.js
    Purpose: Injects a 4-column fluid product slider with distinct card elements.
    Architecture: ES Module, Dynamic DOM Injection based on data attributes.
    Security/A11y: Strict HTML Sanitization, safe paths, ARIA compliant, 
