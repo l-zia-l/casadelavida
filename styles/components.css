@@ -714,7 +714,6 @@
 
 .cdlv-catalog-slider__carousel-wrapper {
   position: relative;
-  padding-inline: calc(50vw - (min(90vw, 1600px) / 2));
 }
 
 .cdlv-catalog-slider__track {
@@ -723,7 +722,7 @@
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none; 
-  -ms-overflow-style: none; 
+  -ms-overflow-style: none; padding-inline: calc(50vw - (min(90vw, 1600px) / 2)); 
   padding-bottom: var(--spacing-sm);
   scroll-behavior: smooth;
 }
