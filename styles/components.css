@@ -885,6 +885,105 @@
 }
 
 /* ==========================================================================
+   MODULE: CATEGORY 3-GRID (.cdlv-category-3-grid)
+   Architecture: BEM Naming Convention, Mobile-First, CSS Grid
+   Purpose: Displays a responsive grid of 3 category cards (Image top, Text bottom).
+   Dependencies: Uses tokens from globals.css (--color-secondary, fluid spacing).
+   ========================================================================== */
+
+.cdlv-category-3-grid {
+    padding-block: var(--spacing-xl);
+}
+
+.cdlv-category-3-grid__heading {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-text-dark);
+}
+
+.cdlv-category-3-grid__layout {
+    display: grid;
+    /* Fluid grid: Stacks cards automatically when they hit the 320px minimum */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
+.cdlv-category-3-grid__card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: var(--radius-strict);
+    overflow: hidden;
+    background-color: var(--color-secondary);
+}
+
+.cdlv-category-3-grid__image-wrapper {
+    width: 100%;
+    /* Enforces a uniform aspect ratio across all images to maintain grid alignment */
+    aspect-ratio: 1 / 1; 
+    overflow: hidden;
+    background-color: var(--color-neutral-bg);
+}
+
+.cdlv-category-3-grid__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-strict);
+    /* Transforms are handled by global .u-img-reveal engine */
+}
+
+.cdlv-category-3-grid__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--spacing-md) var(--spacing-sm);
+    flex-grow: 1; /* Pushes the button to the bottom if text lengths vary */
+    gap: var(--spacing-sm);
+}
+
+.cdlv-category-3-grid__title {
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-h4);
+    font-weight: 700;
+    color: var(--color-text-dark);
+    margin: 0;
+}
+
+.cdlv-category-3-grid__desc {
+    font-size: var(--font-size-small);
+    color: var(--color-text-dark);
+    margin: 0;
+    margin-bottom: auto; /* Acts as a spacer to keep buttons aligned */
+    opacity: 0.9;
+    max-width: 40ch;
+}
+
+.cdlv-category-3-grid__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary);
+    color: var(--color-text-dark);
+    padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1.5rem, 3vw, 2.5rem);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    font-weight: 700;
+    border-radius: var(--radius-strict);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cdlv-category-3-grid__btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
