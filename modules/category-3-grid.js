@@ -65,17 +65,23 @@ export function init(node, customConfig = {}) {
 
   // Generate the cards
   const cardsHTML = config.categories.map(category => {
-    const safeImage = buildPath(category.image);
+    // Graceful fallback for missing images
+    const hasImage = category.image && category.image.trim() !== '';
+    const safeImage = hasImage ? buildPath(category.image) : '';
     const safeLink = buildPath(category.btnLink);
     
+    const imageElement = hasImage 
+      ? `<img src="${sanitizeHTML(safeImage)}" 
+              alt="${sanitizeHTML(category.alt)}" 
+              class="cdlv-category-3-grid__image"
+              loading="lazy"
+              decoding="async">`
+      : ``; // Renders an empty placeholder space using the figure background color if no image
+    
     return `
-      <a href="${sanitizeHTML(safeLink)}" class="cdlv-category-3-grid__card img-hover-scale" aria-label="${sanitizeHTML(category.title)}">
+      <a href="${sanitizeHTML(safeLink)}" class="cdlv-category-3-grid__card" aria-label="${sanitizeHTML(category.title)}">
         <figure class="cdlv-category-3-grid__figure">
-          <img src="${sanitizeHTML(safeImage)}" 
-               alt="${sanitizeHTML(category.alt)}" 
-               class="cdlv-category-3-grid__image"
-               loading="lazy"
-               decoding="async">
+          ${imageElement}
         </figure>
         <div class="cdlv-category-3-grid__content">
           <h3 class="cdlv-category-3-grid__card-title">${sanitizeHTML(category.title)}</h3>
@@ -86,8 +92,8 @@ export function init(node, customConfig = {}) {
     `;
   }).join('');
 
-  // Note: the wrapper uses data-image-sync to alert image-render.js 
-  // to coordinate the reveal of these clustered images.
+  // The wrapper uses data-image-sync to alert image-render.js 
+  // to coordinate the reveal of these clustered images simultaneously.
   const html = `
     <section class="cdlv-category-3-grid" aria-labelledby="category-grid-heading" data-image-sync>
       <header class="cdlv-category-3-grid__header">

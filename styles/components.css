@@ -892,11 +892,11 @@
    ========================================================================== */
 
 .cdlv-category-3-grid {
-  /* Utilizing global fluid spacing for standard section padding */
+  /* Uses fluid vertical spacing. Horizontal constraints are handled by 
+     the parent .container, ensuring perfect margins at the sides. */
   padding-block: var(--spacing-xl);
-  padding-inline: var(--layout-gutter);
   width: 100%;
-  background-color: var(--color-primary);
+  background-color: transparent;
 }
 
 .cdlv-category-3-grid__header {
@@ -905,17 +905,31 @@
 }
 
 .cdlv-category-3-grid__title {
-  /* Inherits h2 styles but centers and ensures proper color */
-  color: var(--color-accent);
+  color: var(--color-accent); /* Adjusted to match your global heading style */
   margin-bottom: 0;
 }
 
 .cdlv-category-3-grid__grid {
   display: grid;
-  /* Fluid auto-fitting: drops gracefully from 3 -> 2 -> 1 column based on space */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  /* Mobile: 1 column stretching full width */
+  grid-template-columns: 1fr;
+  /* Fluid gap based on global tokens to keep spacing proportional */
   gap: var(--spacing-sm);
   width: 100%;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+  .cdlv-category-3-grid__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 3 columns, forcing them to evenly divide the space and stretch */
+@media (min-width: 1024px) {
+  .cdlv-category-3-grid__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .cdlv-category-3-grid__card {
@@ -925,22 +939,25 @@
   overflow: hidden;
   text-decoration: none;
   background-color: var(--color-secondary);
+  width: 100%; /* Force card to stretch and fill its grid cell */
+  transition: transform var(--transition-fast);
 }
 
 .cdlv-category-3-grid__figure {
   margin: 0;
-  /* Forces the image to take up the lion's share of the vertical space */
-  aspect-ratio: 1 / 1.1; 
   width: 100%;
+  /* A 1:1 or 4:5 aspect ratio ensures images take up significant vertical real estate */
+  aspect-ratio: 1 / 1.1; 
   overflow: hidden;
+  background-color: rgba(0,0,0,0.05); /* Fallback placeholder color if image is missing */
 }
 
 .cdlv-category-3-grid__image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Ensures the image fills the area without distortion */
   display: block;
-  /* Standard transition applied for the image reveal engine */
+  transition: transform var(--transition-slow);
 }
 
 .cdlv-category-3-grid__content {
@@ -950,13 +967,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Prevents the text box from competing with the image height */
-  flex-grow: 0; 
+  flex-grow: 1; /* Pushes content to fill the remaining box space evenly */
 }
 
 .cdlv-category-3-grid__card-title {
   font-family: var(--font-family-heading);
-  font-size: var(--font-size-h4);
+  font-size: var(--font-size-h3); /* Slightly larger to match reference */
   color: var(--color-text-dark);
   margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
 }
@@ -975,30 +991,36 @@
   display: inline-block;
   background-color: var(--color-primary);
   color: var(--color-text-dark);
-  padding: clamp(0.5rem, 1vw, 0.75rem) clamp(1.5rem, 3vw, 2rem);
+  padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1.5rem, 4vw, 3rem);
   font-family: var(--font-family-body);
   font-size: var(--font-size-small);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wide);
   border-radius: var(--radius-strict);
   transition: background-color var(--transition-fast), color var(--transition-fast);
-  border: none;
+  border: 1px solid transparent;
 }
 
 /* Hover interactions */
+.cdlv-category-3-grid__card:hover {
+  transform: translateY(-4px);
+}
+
 .cdlv-category-3-grid__card:hover .cdlv-category-3-grid__image {
-  transform: scale(1.03); /* Subtle zoom on the image */
+  transform: scale(1.05);
 }
 
 .cdlv-category-3-grid__btn:hover,
-.cdlv-category-3-grid__card:hover .cdlv-category-3-grid__btn {
-  background-color: var(--color-text-dark);
-  color: var(--color-primary);
+.cdlv-category-3-grid__card:focus-visible .cdlv-category-3-grid__btn {
+  background-color: transparent;
+  color: var(--color-text-dark);
+  border-color: var(--color-text-dark);
 }
 
 /* REDUCED MOTION (ACCESSIBILITY) */
 @media (prefers-reduced-motion: reduce) {
+  .cdlv-category-3-grid__card:hover,
   .cdlv-category-3-grid__card:hover .cdlv-category-3-grid__image {
     transform: none;
   }
