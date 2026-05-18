@@ -4,27 +4,27 @@
    ========================================================================== */
 
 const handleImageLoad = (img) => {
+    // DOUBLE rAF: Forces the browser to paint the hidden state before adding the class
     requestAnimationFrame(() => {
-        img.classList.add('is-loaded');
+        requestAnimationFrame(() => {
+            img.classList.add('is-loaded');
+        });
     });
 };
 
 const setupImageReveal = (img) => {
-    // 1. Universal Bailout: Skip if already tracked, or if it's a structural icon
     if (img.hasAttribute('data-image-tracked') || img.closest('.cdlv-header__nav') || img.closest('.cdlv-footer')) {
         return;
     }
     
-    // Lock this image immediately so the observer ignores it on the next pass
     img.setAttribute('data-image-tracked', 'true');
 
-    // Fail-safe: Ensure it's hidden just in case the HTML template missed the class
     if (!img.classList.contains('u-img-reveal')) {
         img.classList.add('u-img-reveal');
     }
 
     // ==========================================================================
-    // GROUP SYNCHRONIZATION (e.g., Catalog Sliders)
+    // GROUP SYNCHRONIZATION
     // ==========================================================================
     const syncContainer = img.closest('[data-image-sync]');
     
@@ -33,12 +33,11 @@ const setupImageReveal = (img) => {
         if (!syncContainer.hasAttribute('data-sync-active')) {
             syncContainer.setAttribute('data-sync-active', 'true');
             
-            // Push to the end of the execution stack to ensure all injected sibling images are in the DOM
             setTimeout(() => {
                 const syncImages = Array.from(syncContainer.querySelectorAll('img:not([loading="lazy"])'));
                 
                 const promises = syncImages.map(syncImg => {
-                    syncImg.setAttribute('data-image-tracked', 'true'); // Lock siblings
+                    syncImg.setAttribute('data-image-tracked', 'true'); 
                     if (!syncImg.classList.contains('u-img-reveal')) syncImg.classList.add('u-img-reveal');
                     
                     return new Promise(resolve => {
@@ -52,8 +51,11 @@ const setupImageReveal = (img) => {
                 });
 
                 Promise.all(promises).then(() => {
+                    // DOUBLE rAF for the synchronized groups as well
                     requestAnimationFrame(() => {
-                        syncImages.forEach(syncImg => syncImg.classList.add('is-loaded'));
+                        requestAnimationFrame(() => {
+                            syncImages.forEach(syncImg => syncImg.classList.add('is-loaded'));
+                        });
                     });
                 });
             }, 0);
@@ -62,7 +64,7 @@ const setupImageReveal = (img) => {
     }
 
     // ==========================================================================
-    // INDIVIDUAL IMAGES (e.g., Hero Banners)
+    // INDIVIDUAL IMAGES
     // ==========================================================================
     if (img.complete) {
         handleImageLoad(img);
@@ -73,10 +75,8 @@ const setupImageReveal = (img) => {
 };
 
 export const initImageRenderer = () => {
-    // Check existing images
     document.querySelectorAll('img').forEach(setupImageReveal);
 
-    // Watch for dynamically injected images
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
