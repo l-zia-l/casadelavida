@@ -649,7 +649,6 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
-  /* Constrain the inner content back to standard layout width */
   width: min(90vw, 1600px);
   margin-inline: auto;
 }
@@ -657,10 +656,10 @@
 .cdlv-info-banner__item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-xs); 
   font-family: var(--font-family-body);
-  font-size: clamp(0.7rem, 1vw + 0.1rem, 0.85rem);
-  font-weight: 600;
+  font-size: var(--font-size-small);
+  font-weight: 600; 
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wide);
 }
