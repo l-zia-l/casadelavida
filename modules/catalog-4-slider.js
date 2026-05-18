@@ -20,16 +20,16 @@ const defaultConfig = {
             actionLink: 'shop/packages/fertility-wellness-box.html'
         },
         {
-            title: 'Premium Tea Leaves',
+            title: 'Premium Herbal Infusion',
             image: 'assets/images/products/item_2.2.1.jpg',
             alt: 'The Premium Tea Leaves',
-            actionLink: 'shop/products/premium-tea-leaves.html'
+            actionLink: 'shop/products/premium-herbal-infusion.html'
         },
         {
-            title: 'Creamy Tumeric Paste',
+            title: 'Honey Infused Tumeric',
             image: 'assets/images/products/item_1.jpg',
             alt: 'Glass jar of creamy tumeric paste and black paper',
-            actionLink: 'shop/products/creamy-tumeric-paste.html'
+            actionLink: 'shop/products/honey-infused-tumeric.html'
         },
         {
             title: 'Organic Honey',

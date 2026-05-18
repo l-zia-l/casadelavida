@@ -642,8 +642,7 @@
   flex-direction: column;
   justify-content: center;
   padding-top: calc(var(--header-offset) + var(--spacing-sm));
-  padding-bottom: var(--spacing-sm); 
-  overflow: hidden;
+  padding-bottom: var(--spacing-sm);
   position: relative;
 }
 
