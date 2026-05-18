@@ -892,11 +892,9 @@
    ========================================================================== */
 
 .cdlv-category-3-grid {
-  /* Horizontal breakout is now handled by the .u-fill-width utility class in HTML */
+  /* The .u-fill-width utility handles edge-to-edge stretch in HTML */
   padding-top: calc(var(--header-offset) + var(--spacing-sm));
   padding-bottom: var(--spacing-xl);
-  
-  /* Restores the internal margins so cards align with the rest of the site */
   padding-inline: var(--layout-gutter);
   background-color: transparent;
 }
@@ -918,18 +916,12 @@
   width: 100%;
 }
 
-/* Tablet: 2 columns */
 @media (min-width: 768px) {
-  .cdlv-category-3-grid__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .cdlv-category-3-grid__grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Desktop: 3 columns */
 @media (min-width: 1024px) {
-  .cdlv-category-3-grid__grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .cdlv-category-3-grid__grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 .cdlv-category-3-grid__card {
@@ -941,6 +933,7 @@
   background-color: var(--color-secondary);
   width: 100%; 
   
+  /* Intrinsic Card Height: Setup based on your last success */
   height: 70vh; 
   min-height: 550px; 
   transition: transform var(--transition-fast);
@@ -948,8 +941,8 @@
 
 @media (min-width: 1024px) {
   .cdlv-category-3-grid__card {
-    height: 60vh; /* Slightly shorter on desktop since columns are narrower */
-    min-height: 600px;
+    height: 60vh; 
+    min-height: 600px; 
   }
 }
 
@@ -957,7 +950,13 @@
   margin: 0;
   width: 100%;
   
-  flex: 1 1 0;
+  /* RULE 1: IMAGE DOMINANCE (70%)
+     Forces the image box to aim for 70% of the card height. */
+  flex: 0 0 70%;
+  
+  /* RULE 2: FLEXIBILITY
+     Allows the image to shrink below 70% if the text box hits its 
+     minimum safety 'floor' (Rule 3). */
   min-height: 0; 
   
   overflow: hidden;
@@ -973,16 +972,22 @@
 }
 
 .cdlv-category-3-grid__content {
-  flex: 0 0 auto;
+  /* Locks the content area to the remaining 30% height */
+  flex: 0 0 30%;
   
-  /* BUMPED PADDING: Restores spacing so the text isn't hugging the edges */
-  padding: var(--spacing-md) var(--spacing-sm);
+  /* RULE 3: TEXT SAFETY 'FLOOR'
+     The fixed percentage (Rule 1) is strict, but this minimum height 
+     override ensures that on tight screens, the text box never crushes 
+     its contents. It uses fluid spacing to scale with the typography. */
+  min-height: calc(var(--font-size-h3) * 1.2 + (var(--font-size-small) * 1.3 * 2.5) + (var(--spacing-xs) * 2));
+  
+  padding: var(--spacing-xs) var(--spacing-sm);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; 
-  gap: var(--spacing-sm);
+  justify-content: space-evenly; 
+  overflow: hidden; 
 }
 
 .cdlv-category-3-grid__card-title {
@@ -1000,12 +1005,6 @@
   max-width: 40ch;
   line-height: 1.3;
   opacity: 0.9;
-  
-  /* Safety clamp to prevent heavy text from breaking the 30% ratio */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .cdlv-category-3-grid__btn {
@@ -1024,13 +1023,8 @@
 }
 
 /* Hover interactions */
-.cdlv-category-3-grid__card:hover {
-  transform: translateY(-4px);
-}
-
-.cdlv-category-3-grid__card:hover .cdlv-category-3-grid__image {
-  transform: scale(1.05);
-}
+.cdlv-category-3-grid__card:hover { transform: translateY(-4px); }
+.cdlv-category-3-grid__card:hover .cdlv-category-3-grid__image { transform: scale(1.05); }
 
 .cdlv-category-3-grid__btn:hover,
 .cdlv-category-3-grid__card:focus-visible .cdlv-category-3-grid__btn {
