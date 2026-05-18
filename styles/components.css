@@ -920,8 +920,8 @@
 
 .cdlv-category-3-grid__image-wrapper {
     width: 100%;
-    /* Enforces a uniform aspect ratio across all images to maintain grid alignment */
-    aspect-ratio: 1 / 1; 
+    /* Switched to a 4/5 portrait ratio to increase image dominance and reduce the text box size */
+    aspect-ratio: 4 / 5; 
     overflow: hidden;
     background-color: var(--color-neutral-bg);
 }
@@ -931,7 +931,6 @@
     height: 100%;
     object-fit: cover;
     border-radius: var(--radius-strict);
-    /* Transforms are handled by global .u-img-reveal engine */
 }
 
 .cdlv-category-3-grid__content {
@@ -940,8 +939,7 @@
     align-items: center;
     text-align: center;
     padding: var(--spacing-md) var(--spacing-sm);
-    flex-grow: 1; /* Pushes the button to the bottom if text lengths vary */
-    gap: var(--spacing-sm);
+    flex-grow: 1; /* Forces this container to take up remaining card height */
 }
 
 .cdlv-category-3-grid__title {
@@ -949,14 +947,14 @@
     font-size: var(--font-size-h4);
     font-weight: 700;
     color: var(--color-text-dark);
-    margin: 0;
+    margin: 0 0 var(--spacing-sm) 0;
 }
 
 .cdlv-category-3-grid__desc {
     font-size: var(--font-size-small);
     color: var(--color-text-dark);
-    margin: 0;
-    margin-bottom: auto; /* Acts as a spacer to keep buttons aligned */
+    /* The 'auto' margin on the bottom eats up all empty space, pushing the button to the bottom */
+    margin: 0 0 auto 0; 
     opacity: 0.9;
     max-width: 40ch;
 }
@@ -975,6 +973,7 @@
     border: none;
     cursor: pointer;
     text-decoration: none;
+    margin-top: var(--spacing-md); /* Ensures consistent spacing above the button */
     transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
