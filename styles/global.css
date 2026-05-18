@@ -198,18 +198,29 @@ img, video {
   border: 0;
 }
 
-/* UTILITY CLASSES */
+/* ==========================================================================
+   UTILITY CLASSES: VIEWPORT FILLERS
+   ========================================================================== */
 
-/* Forces an element to be exactly the height of the screen */
-.u-h-screen {
+/* * u-fill-screen: STRICT HORIZONTAL ONLY (Heroes, Single-slide Sliders)
+ * Breaks out of the parent .container to fill 100vw and locks the height 
+ * to exactly 100vh. No scrolling inside this container.
+ */
+.u-fill-screen {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
   height: var(--vh-fallback);
   height: var(--vh-modern);
 }
 
-/* Allows an element to be the height of the screen, but grow if content is longer */
-.u-min-h-screen {
-  min-height: var(--vh-fallback);
-  min-height: var(--vh-modern);
+/* * u-fill-width: FLOWING VERTICAL & HORIZONTAL (Grids, Catalogs, Forms)
+ * Breaks out of the parent .container to fill 100vw, but allows the 
+ * container's height to flow naturally so content is never cut off.
+ */
+.u-fill-width {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  height: auto;
 }
 
 /* IMAGE REVEAL ENGINE */
