@@ -58,14 +58,11 @@ export function init(node, customConfig = {}) {
     const safeCtaLink = buildPath(config.ctaLink);
 
     // 1. Generate Product Cards (SEO Optimized)
-    const cardsHTML = products.map((product, index) => {
+    const cardsHTML = products.map((product) => {
         const safeImage = buildPath(product.image);
         const safeProductLink = buildPath(product.actionLink || config.ctaLink);
         
-        const isVisibleOnRender = index < 4;
-        const imageLoadingStrategy = isVisibleOnRender 
-            ? 'loading="eager" fetchpriority="high" decoding="sync"' 
-            : 'loading="lazy" decoding="async"';
+        const imageLoadingStrategy = 'loading="eager" decoding="sync"';
         
         return `
             <article class="cdlv-catalog-slider__card">
