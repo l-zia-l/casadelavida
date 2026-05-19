@@ -904,8 +904,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  flex-grow: 1; 
+  justify-content: flex-start; 
+  flex-grow: 1;
 }
 
 .cdlv-category-3-grid__card-title {
@@ -926,6 +926,7 @@
 }
 
 .cdlv-category-3-grid__btn {
+  margin-top: auto; 
   display: inline-block;
   background-color: var(--color-primary);
   color: var(--color-text-dark);
