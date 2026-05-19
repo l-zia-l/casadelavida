@@ -949,6 +949,11 @@
   transform: scale(1.05);
 }
 
+.cdlv-category-3-grid__card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
 .cdlv-category-3-grid__btn:hover,
 .cdlv-category-3-grid__card:focus-visible .cdlv-category-3-grid__btn {
   background-color: transparent;
