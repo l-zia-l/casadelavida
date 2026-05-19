@@ -41,7 +41,11 @@ const defaultConfig = {
     controls: false,
     buttonText: '', 
     buttonLink: '',
-    isPriority: true // Added flag to control LCP fetchpriority
+    isPriority: true,
+    // SEO-specific configurations
+    headingLevel: 'h1', // Change to h2, h3, etc., based on page placement
+    headingText: 'Casa De La Vida Premium Wellness', // Visually hidden outline anchor
+    seoDescription: 'Casa De La Vida background video featuring premium wellness products and tea.' // Crawler fallback
 };
 
 export const init = (node, customConfig = {}) => {
@@ -50,7 +54,6 @@ export const init = (node, customConfig = {}) => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const willAutoplay = config.autoplay && !prefersReducedMotion;
     
-    // Determine loading priority attributes based on config
     const priorityAttrs = config.isPriority ? 'fetchpriority="high" preload="auto"' : 'preload="metadata"';
     
     const videoAttrs = [
@@ -94,8 +97,21 @@ export const init = (node, customConfig = {}) => {
         </div>
     ` : '';
 
+    // SEO: Validating and injecting the proper heading tag
+    const validHeadings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+    const safeHeadingLevel = validHeadings.includes(config.headingLevel.toLowerCase()) 
+        ? config.headingLevel.toLowerCase() 
+        : 'h2';
+
+    const headingHTML = config.headingText ? `
+        <${safeHeadingLevel} class="visually-hidden">
+            ${sanitizeText(config.headingText)}
+        </${safeHeadingLevel}>
+    ` : '';
+
     const moduleHTML = `
-        <section class="cdlv-hero-video u-fill-screen ${willAutoplay ? 'is-playing' : ''} ${config.muted ? 'is-muted' : ''}" aria-label="Video Feature Background">
+        <section class="cdlv-hero-video u-fill-screen ${willAutoplay ? 'is-playing' : ''} ${config.muted ? 'is-muted' : ''}" aria-labelledby="hero-video-heading-${node.id || 'feature'}">
+            ${headingHTML.replace('class="visually-hidden"', `id="hero-video-heading-${node.id || 'feature'}" class="visually-hidden"`)}
             <video 
                 class="cdlv-hero-video__media" 
                 poster="${buildPath(config.posterSrc)}"
@@ -104,6 +120,7 @@ export const init = (node, customConfig = {}) => {
                 ${videoAttrs}
             >
                 <source src="${buildPath(config.videoSrc)}" type="video/mp4">
+                <p>${sanitizeText(config.seoDescription)}</p>
             </video>
             ${buttonHTML}
             ${controlsHTML}
@@ -112,7 +129,7 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = moduleHTML;
 
-    // 4. Bind Interactions (Using cached queries for performance)
+    // Bind Interactions
     if (config.controls) {
         const section = node.querySelector('.cdlv-hero-video');
         const video = node.querySelector('.cdlv-hero-video__media');
@@ -122,7 +139,6 @@ export const init = (node, customConfig = {}) => {
         if (playBtn && video) {
             playBtn.addEventListener('click', () => {
                 const isPaused = video.paused;
-                // RequestAnimationFrame ensures UI updates sync cleanly with the display refresh rate
                 requestAnimationFrame(() => {
                     if (isPaused) {
                         video.play();
