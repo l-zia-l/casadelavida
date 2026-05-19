@@ -1,165 +1,118 @@
 /* ==========================================================================
-   MODULE: CATALOG GRID (.cdlv-catalog-grid)
-   Purpose: Responsive 2-to-4 column product grid with a sticky left header.
-   Architecture: Mobile-first flexbox layout that shifts to a side-by-side 
-   configuration on desktop. Strict 0px border radius is enforced.
+   MODULE: CATALOG GRID LOGIC (modules/catalog-grid.js)
+   Purpose: Renders a dynamic product grid based on external configuration.
+   Architecture: ES Module. Imports global path builder for asset resolution.
+   Security: Uses DOM-based sanitization to prevent XSS from config payloads.
    ========================================================================== */
 
-.cdlv-catalog-grid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-  margin-block: var(--spacing-xl);
+import { buildPath } from '../utils/path.js';
+
+// Default configuration fallback
+const defaultConfig = {
+    heading: 'Our Collection',
+    products: []
+};
+
+/**
+ * Sanitizes strings to prevent Cross-Site Scripting (XSS).
+ * @param {string|number} str - The raw input.
+ * @returns {string} - The sanitized HTML string.
+ */
+function sanitizeHTML(str) {
+    if (!str && str !== 0) return '';
+    const temp = document.createElement('div');
+    temp.textContent = str;
+    return temp.innerHTML;
 }
 
-.cdlv-catalog-grid__header {
-  margin-bottom: var(--spacing-sm);
-}
+/**
+ * Initializes the module by compiling the config and injecting the DOM elements.
+ * @param {HTMLElement} node - The DOM node assigned to this module.
+ * @param {Object} customConfig - The configuration parsed from data-config.
+ */
+export const init = (node, customConfig = {}) => {
+    // Merge provided config with defaults
+    const config = { ...defaultConfig, ...customConfig };
+    const products = customConfig.products || config.products;
 
-.cdlv-catalog-grid__title {
-  font-family: var(--font-family-heading);
-  font-size: var(--font-size-h2);
-  color: var(--color-accent);
-  margin-bottom: var(--spacing-xs);
-}
+    if (!products || !Array.isArray(products) || products.length === 0) {
+        console.warn('Catalog Grid Initialization Error: No products array found in config.', node);
+        return;
+    }
 
-.cdlv-catalog-grid__items {
-  display: grid;
-  /* Baseline mobile: 2 columns */
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-sm);
-  width: 100%;
-}
+    const headingText = sanitizeHTML(config.heading);
 
-.cdlv-catalog-grid__card {
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-primary);
-  border-radius: var(--radius-strict);
-  overflow: hidden;
-  transition: transform var(--transition-base);
-}
+    // Map through the products and build the HTML fragments
+    const productsHTML = products.map((product, index) => {
+        const title = sanitizeHTML(product.title);
+        const safeImage = buildPath(product.image);
+        const safeLink = buildPath(product.link || '#');
+        const basePrice = parseFloat(product.price || 0);
+        const discount = product.subscriptionDiscount ? parseFloat(product.subscriptionDiscount) : 0;
+        
+        // Eager load the first 4 visible cards (desktop grid baseline), lazy load the rest
+        const isVisible = index < 4;
+        const loadingStrategy = isVisible ? 'loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
 
-.cdlv-catalog-grid__card:hover {
-  transform: translateY(-2px);
-}
+        let subInfoHTML = '';
+        let actionBtnHTML = '';
 
-.cdlv-catalog-grid__img-wrapper {
-  aspect-ratio: 4 / 5;
-  width: 100%;
-  overflow: hidden;
-  border-radius: var(--radius-strict);
-}
+        // If actions are not hidden, process subscriptions and buttons
+        if (!product.hideActions) {
+            if (discount > 0) {
+                const subPrice = (basePrice - (basePrice * (discount / 100))).toFixed(2);
+                subInfoHTML = `
+                    <hr class="cdlv-catalog-grid__divider">
+                    <p class="cdlv-catalog-grid__sub-text">Subscribe for ${sanitizeHTML(discount)}% off + free shipping</p>
+                    <p class="cdlv-catalog-grid__sub-price">from <strong>GHS ${sanitizeHTML(subPrice)}</strong></p>
+                `;
+            }
 
-.cdlv-catalog-grid__img-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--radius-strict);
-  transition: transform var(--transition-slow);
-}
+            const isOOS = product.isOutOfStock;
+            const btnText = isOOS ? 'Out of Stock' : 'Add to Cart';
+            const btnClass = isOOS ? 'cdlv-btn--disabled' : 'cdlv-btn--primary';
+            const ariaDisabled = isOOS ? 'aria-disabled="true" tabindex="-1"' : '';
 
-.cdlv-catalog-grid__card:hover .cdlv-catalog-grid__img-wrapper img {
-  transform: scale(1.03);
-}
+            actionBtnHTML = `
+                <button class="cdlv-btn ${btnClass}" ${ariaDisabled}>
+                    ${sanitizeHTML(btnText)}
+                </button>
+            `;
+        }
 
-.cdlv-catalog-grid__content {
-  padding-block: var(--spacing-sm);
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
+        // Assemble individual card fragment
+        return `
+            <article class="cdlv-catalog-grid__card">
+                <a href="${sanitizeHTML(safeLink)}" class="cdlv-catalog-grid__link">
+                    <figure class="cdlv-catalog-grid__img-wrapper u-img-loader">
+                        <img src="${sanitizeHTML(safeImage)}" 
+                             alt="${title}" 
+                             class="u-img-reveal"
+                             ${loadingStrategy}>
+                    </figure>
+                </a>
+                <div class="cdlv-catalog-grid__content">
+                    <h3 class="cdlv-catalog-grid__item-title">${title}</h3>
+                    <p class="cdlv-catalog-grid__price">from <strong>GHS ${sanitizeHTML(basePrice.toFixed(2))}</strong></p>
+                    ${subInfoHTML}
+                    ${actionBtnHTML}
+                </div>
+            </article>
+        `;
+    }).join('');
 
-.cdlv-catalog-grid__item-title {
-  font-family: var(--font-family-body);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-text-dark);
-  margin-bottom: calc(var(--spacing-xs) / 2);
-}
+    // Ensure data-image-sync is applied for the global image render engine
+    node.setAttribute('data-image-sync', 'true');
 
-.cdlv-catalog-grid__price {
-  font-size: var(--font-size-small);
-  color: var(--color-text-dark);
-  margin-bottom: var(--spacing-xs);
-}
-
-.cdlv-catalog-grid__divider {
-  border: none;
-  border-top: 1px solid rgba(26, 26, 26, 0.1);
-  margin-block: var(--spacing-xs);
-}
-
-.cdlv-catalog-grid__sub-text {
-  font-size: clamp(0.75rem, 1vw, 0.875rem);
-  color: var(--color-neutral-bg); /* Mapped to the neutral green variable */
-  font-weight: 600;
-  margin-bottom: calc(var(--spacing-xs) / 2);
-}
-
-.cdlv-catalog-grid__sub-price {
-  font-size: var(--font-size-small);
-  margin-bottom: var(--spacing-sm);
-}
-
-/* Button Extracted as Reusable Component UI if not already existing */
-.cdlv-btn {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.75rem 1.5rem;
-  font-family: var(--font-family-body);
-  font-size: var(--font-size-small);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-  border: none;
-  cursor: pointer;
-  border-radius: var(--radius-strict);
-  width: 100%;
-  margin-top: auto; /* Pushes button to bottom of card */
-  transition: background-color var(--transition-base), color var(--transition-base);
-}
-
-.cdlv-btn--primary {
-  background-color: var(--color-neutral-bg); /* Assigned neutral green from system */
-  color: var(--color-text-dark);
-}
-
-.cdlv-btn--primary:hover {
-  background-color: var(--color-accent);
-  color: var(--color-primary);
-}
-
-.cdlv-btn--disabled {
-  background-color: #e0e0e0;
-  color: #888888;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-/* Responsive Scaling to 4 Columns & Side Header Shift */
-@media (min-width: 768px) {
-  .cdlv-catalog-grid__items {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-md);
-  }
-}
-
-@media (min-width: 1024px) {
-  .cdlv-catalog-grid {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-  
-  .cdlv-catalog-grid__header {
-    flex: 0 0 clamp(200px, 20vw, 300px);
-    position: sticky;
-    top: var(--header-offset); /* Relies on global token */
-  }
-
-  .cdlv-catalog-grid__items {
-    flex: 1;
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+    // Build the grid structure natively within the target node
+    node.innerHTML = `
+        <section class="cdlv-catalog-grid animate-enter" aria-label="${headingText}">
+            <header class="cdlv-catalog-grid__header">
+                <h2 class="cdlv-catalog-grid__title">${headingText}</h2>
+            </header>
+            <div class="cdlv-catalog-grid__items">
+                ${productsHTML}
+            </div>
+        </section>
+    `;
+};
