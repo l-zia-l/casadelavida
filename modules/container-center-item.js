@@ -2,8 +2,9 @@
    MODULE: CONTAINER CENTER ITEM (modules/container-center-item.js)
    Purpose: Dynamically renders a full-width call-to-action banner.
    Architecture: Exportable ES Module. Constructs a fragment and injects it.
-   Security: Implements DOM-based text sanitization to prevent XSS from 
-             malicious or malformed data-config inputs.
+   Security: Implements DOM-based text sanitization.
+   A11y: Dynamic ID generation for ARIA labeling.
+   SEO: Dynamic heading level mapping to prevent skipped hierarchy.
    ========================================================================== */
 
 /**
@@ -20,8 +21,9 @@ const sanitizeText = (str) => {
 
 // Default configurable text parameters
 const defaultConfig = {
-    heading: "Soften Up Your Inbox",
-    text: "Join our email list for fresh wellness drops, enlightening blog posts and exclusive savings.",
+    headingLevel: "h2", // Configurable for strict SEO hierarchy
+    heading: "Brighten Up Your Inbox",
+    text: "Join our email list for fresh floral drops, curated picks and exclusive savings.",
     buttonText: "Sign Up",
     buttonLink: "newsletter-sign-up.html"
 };
@@ -32,27 +34,33 @@ const defaultConfig = {
  * @param {Object} customConfig - Optional JSON configuration from data-config.
  */
 export const init = (node, customConfig = {}) => {
-    // Merge defaults with any overrides provided via data-config
     const config = { ...defaultConfig, ...customConfig };
-
-    // Apply the global fluid width utility to the mounting node
     node.classList.add('u-fill-width');
 
-    // Construct the semantic fragment using sanitized inputs
+    // Generate a unique ID to link the section to its heading for screen readers
+    const uniqueId = `cta-heading-${Math.random().toString(36).substring(2, 9)}`;
+
+    // Validate the heading level to prevent HTML injection of unsupported tags
+    const validHeadings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+    const semanticTag = validHeadings.includes(config.headingLevel.toLowerCase()) 
+        ? config.headingLevel.toLowerCase() 
+        : 'h2';
+
     const html = `
-        <section class="cdlv-container-center-item">
-            <h2 class="cdlv-container-center-item__heading">
+        <section class="cdlv-container-center-item" aria-labelledby="${uniqueId}">
+            <${semanticTag} id="${uniqueId}" class="cdlv-container-center-item__heading">
                 ${sanitizeText(config.heading)}
-            </h2>
+            </${semanticTag}>
             <p class="cdlv-container-center-item__text">
                 ${sanitizeText(config.text)}
             </p>
-            <a href="${sanitizeText(config.buttonLink)}" class="cdlv-container-center-item__btn">
+            <a href="${sanitizeText(config.buttonLink)}" 
+               class="cdlv-container-center-item__btn"
+               aria-label="${sanitizeText(config.buttonText)} for ${sanitizeText(config.heading)}">
                 ${sanitizeText(config.buttonText)}
             </a>
         </section>
     `;
 
-    // Inject fragment into the DOM
     node.innerHTML = html;
 };

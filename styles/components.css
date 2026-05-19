@@ -639,7 +639,8 @@
    MODULE: CONTAINER CENTER ITEM
    Purpose: Full-width, centrally aligned banner for newsletter/CTAs.
    Architecture: Inherits fluid typography and spacing from global.css.
-                 Uses flexbox for vertical rhythm.
+   A11y: Includes strict focus states and respects prefers-reduced-motion.
+   Performance: Hardware-accelerated transforms for interactions.
    ========================================================================== */
 
 .cdlv-container-center-item {
@@ -656,13 +657,12 @@
 
 .cdlv-container-center-item__heading {
     margin-bottom: 0; 
-    /* Stepped down to h4 to save vertical space and reduce bulk */
     font-size: var(--font-size-h4);
     color: var(--color-text-dark);
 }
 
 .cdlv-container-center-item__text {
-    margin-bottom: 0;
+    margin-bottom: 0; 
 }
 
 .cdlv-container-center-item__btn {
@@ -684,10 +684,23 @@
                 transform var(--transition-fast);
 }
 
+/* A11y: Explicit keyboard navigation focus state */
+.cdlv-container-center-item__btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+}
+
+/* Default hover color inversion (safe for all users) */
 .cdlv-container-center-item__btn:hover {
     background-color: var(--color-text-dark);
     color: var(--color-text-light);
-    transform: translateY(-2px);
+}
+
+/* A11y & Perf: Restrict spatial motion to users with no preference */
+@media (prefers-reduced-motion: no-preference) {
+    .cdlv-container-center-item__btn:hover {
+        transform: translateY(-2px);
+    }
 }
 
 /* ==========================================================================
