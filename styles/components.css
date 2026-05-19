@@ -1126,6 +1126,130 @@
 }
 
 /* ==========================================================================
+CSS SCRIPT: SHOP HEADER COMPONENT (styles/components.css)
+Architecture: Scoped BEM methodology (Block: cdlv-shop-header).
+Purpose: Provides styling for the opaque shop header, prioritizing high
+contrast, fluid scaling, and a stable frame for product browsing.
+Integration: Append this block to /styles/components.css.
+========================================================================== */
+
+.cdlv-shop-header {
+position: sticky;
+top: 0;
+width: 100%;
+height: var(--header-offset);
+background-color: var(--color-primary);
+border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+z-index: 1000;
+display: flex;
+align-items: center;
+transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.cdlv-shop-header--scrolled {
+box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.cdlv-shop-header--hidden {
+transform: translateY(-100%);
+}
+
+.cdlv-shop-header__inner {
+display: flex;
+justify-content: space-between;
+align-items: center;
+width: 100%;
+height: 100%;
+}
+
+/* Logo Setup */
+.cdlv-shop-header__logo-link {
+display: flex;
+align-items: center;
+gap: var(--spacing-xs);
+text-decoration: none;
+}
+
+.cdlv-shop-header__logo-img {
+width: var(--logo-width-base);
+height: auto;
+object-fit: contain;
+}
+
+.cdlv-shop-header__logo-text {
+font-family: var(--font-family-heading);
+font-size: var(--font-size-logo-text);
+color: var(--color-text-dark);
+font-weight: 600;
+letter-spacing: var(--letter-spacing-wide);
+display: none; /* Hidden on mobile, revealed on tablet+ */
+}
+
+@media (min-width: 768px) {
+.cdlv-shop-header__logo-text {
+display: block;
+}
+}
+
+/* Utilities Setup */
+.cdlv-shop-header__utilities {
+display: flex;
+align-items: center;
+gap: var(--spacing-sm);
+list-style: none;
+}
+
+.cdlv-shop-header__utility-item {
+display: flex;
+align-items: center;
+}
+
+.cdlv-shop-header__utility-link {
+position: relative;
+display: flex;
+align-items: center;
+justify-content: center;
+width: calc(var(--icon-size-base) * 2.5);
+height: calc(var(--icon-size-base) * 2.5);
+color: var(--color-text-dark);
+border-radius: var(--radius-strict);
+transition: background-color var(--transition-fast);
+}
+
+.cdlv-shop-header__utility-link:hover,
+.cdlv-shop-header__utility-link:focus-visible {
+background-color: rgba(0, 0, 0, 0.04);
+}
+
+.cdlv-shop-header__utility-icon {
+width: var(--icon-size-base);
+height: var(--icon-size-base);
+}
+
+/* Cart Badge / */
+.cdlv-shop-header__cart-badge {
+position: absolute;
+top: 4px;
+right: 4px;
+background-color: var(--color-accent);
+color: var(--color-text-light);
+font-size: 0.75rem;
+font-weight: 700;
+width: 18px;
+height: 18px;
+display: flex;
+align-items: center;
+justify-content: center;
+border-radius: var((--radius-strict));
+transform: scale(0);
+transition: transform var(--transition-base);
+}
+
+.cdlv-shop-header__cart-badge--active {
+transform: scale(1);
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
