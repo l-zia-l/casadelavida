@@ -1275,19 +1275,22 @@
 
 @media (min-width: 1024px) {
   .cdlv-catalog-grid {
-    flex-direction: row;
-    align-items: flex-start;
+    /* Switch to Grid to lock down cross-module alignment */
+    display: grid;
+    grid-template-columns: clamp(220px, 22vw, 320px) 1fr;
+    gap: var(--spacing-xl); /* Gives the products plenty of room to breathe */
+    align-items: start;
   }
   
   .cdlv-catalog-grid__header {
-    flex: 0 0 clamp(200px, 20vw, 300px);
     position: sticky;
-    top: var(--header-offset); /* Relies on global token */
+    top: var(--header-offset);
+    padding-right: var(--spacing-md); /* Keeps text from bumping into the grid */
   }
 
   .cdlv-catalog-grid__items {
-    flex: 1;
     grid-template-columns: repeat(4, 1fr);
+    width: 100%;
   }
 }
 
