@@ -290,13 +290,6 @@
   padding-inline: var(--layout-gutter);
 }
 
-/* Logo Alignment */
-.cdlv-footer-brand {
-  display: flex;
-  justify-content: center;
-  padding-bottom: var(--spacing-md);
-}
-
 .cdlv-footer-brand-banner {
   background-color: var(--color-primary);
   padding-block: var(--spacing-md);
@@ -312,8 +305,6 @@
 
 .cdlv-footer-logo-wrapper img {
   width: var(--logo-width-base);
-  height: auto;
-  display: block;
 }
 
 .cdlv-footer-logo-wrapper:focus-visible {
@@ -353,10 +344,6 @@
 .cdlv-footer-toggle:focus-visible {
   outline: 2px solid var(--color-text-light);
   outline-offset: -2px;
-}
-
-.cdlv-footer-toggle-icon {
-  transition: transform var(--transition-fast);
 }
 
 .cdlv-footer-toggle[aria-expanded="true"] .cdlv-footer-toggle-icon {
@@ -435,8 +422,6 @@
   width: calc(var(--icon-size-base) * 1.5);
   height: calc(var(--icon-size-base) * 1.5);
   object-fit: contain;
-  display: block;
-  transition: transform var(--transition-fast);
   filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(200%) contrast(100%);
 }
 
@@ -489,11 +474,6 @@
   .cdlv-footer-social-link:hover,
   .cdlv-footer-social-link:focus-visible {
     transform: none;
-  }
-  
-  .cdlv-footer-social-icon,
-  .cdlv-footer-toggle-icon {
-     transition: none;
   }
   
   .cdlv-footer-column.is-active .cdlv-footer-list {

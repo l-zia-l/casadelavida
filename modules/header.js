@@ -25,7 +25,7 @@ const config = {
     links: {
         left: [
             { label: 'Shop', url: buildPath('shop.html') },
-            { label: 'Wellness Boxes', url: buildPath('shop/wellness-boxes.html') },
+            { label: 'Wellness Routine', url: buildPath('shop/wellness-boxes.html') },
             { label: 'Account', url: buildPath('account/index.html'), mobileOnly: true } 
         ],
         right: [

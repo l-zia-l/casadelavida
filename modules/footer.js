@@ -11,7 +11,6 @@
  */
 import { buildPath } from '../utils/path.js';
 
-
 // 1. MODULE CONFIGURATION
 const footerConfig = {
   logo: {
@@ -156,7 +155,6 @@ const generateFooterHTML = () => {
 };
 
 // 4. BEHAVIOR & INTERACTIVE ENGINE
-// OPTIMIZATION: Refactored to accept a boolean instead of querying window width directly
 const updateAccessibilityState = (container, isDesktop) => {
   const toggles = container.querySelectorAll('.cdlv-footer-toggle');
   const lists = container.querySelectorAll('.cdlv-footer-list');
@@ -184,12 +182,13 @@ const updateAccessibilityState = (container, isDesktop) => {
 
 const attachEvents = (container) => {
   const toggles = container.querySelectorAll('.cdlv-footer-toggle');
+  const mediaQuery = window.matchMedia('(min-width: 992px)');
   
   // Accordion Logic
   toggles.forEach(toggle => {
     toggle.addEventListener('click', (e) => {
       // Prevent execution if CSS Grid is active
-      if (window.matchMedia('(min-width: 992px)').matches) return;
+      if (mediaQuery.matches) return;
       
       const currentToggle = e.currentTarget;
       const parentCol = currentToggle.closest('.cdlv-footer-column');
@@ -210,21 +209,11 @@ const attachEvents = (container) => {
       }
     });
   });
-
-  // OPTIMIZATION: Replaced 'resize' event with 'matchMedia' listener
-  const mediaQuery = window.matchMedia('(min-width: 992px)');
   
-  const handleBreakpointChange = (e) => {
-    updateAccessibilityState(container, e.matches);
-  };
+  const handleBreakpointChange = (e) => updateAccessibilityState(container, e.matches);
 
-  // Modern syntax for media query listeners
-  if (mediaQuery.addEventListener) {
-    mediaQuery.addEventListener('change', handleBreakpointChange);
-  } else {
-    // Fallback for older Safari
-    mediaQuery.addListener(handleBreakpointChange);
-  }
+  // Modern listener mapping
+  mediaQuery.addEventListener('change', handleBreakpointChange);
 
   // Initialize correct state on load
   handleBreakpointChange(mediaQuery);
