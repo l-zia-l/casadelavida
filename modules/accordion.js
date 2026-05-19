@@ -8,6 +8,8 @@
    `components.css` for styling.
    A11y: Full WCAG compliance. Arrow key navigation (Up/Down/Home/End), 
    dynamic aria-expanded toggling, and aria-labelledby region linking.
+   Performance: Hardware-accelerated transforms for iconography. Native CSS 
+   Grid interpolation for height transitions (prevents JS layout thrashing).
    ========================================================================== */
 
 /**
@@ -45,7 +47,7 @@ export const init = (node, customConfig = {}) => {
         </svg>
     `;
 
-    // 1. Build HTML with strict A11y IDs and roles
+    // 1. Build HTML
     const accordionHTML = `
         <div class="cdlv-accordion">
             ${config.items.map((item, index) => {
@@ -72,51 +74,71 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = accordionHTML;
 
-    // 2. Attach Logic & Keyboard Management
-    const triggers = Array.from(node.querySelectorAll('.cdlv-accordion__trigger'));
-    
-    triggers.forEach((trigger, index) => {
-        // Click / Space / Enter toggle
-        trigger.addEventListener('click', () => {
-            const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
-            const panelId = trigger.getAttribute('aria-controls');
-            const panel = node.querySelector(`#${panelId}`);
-            
-            trigger.setAttribute('aria-expanded', !isExpanded);
-            
-            if (!isExpanded) {
-                panel.removeAttribute('hidden');
-                requestAnimationFrame(() => {
-                    trigger.classList.add('is-open');
-                });
-            } else {
-                trigger.classList.remove('is-open');
-                setTimeout(() => {
-                    if(trigger.getAttribute('aria-expanded') === 'false') {
-                        panel.setAttribute('hidden', 'true');
-                    }
-                }, 300); // Matches var(--transition-base)
-            }
-        });
+    // 2. Performant Event Delegation (Click/Enter/Space)
+    node.addEventListener('click', (event) => {
+        const trigger = event.target.closest('.cdlv-accordion__trigger');
+        if (!trigger) return; // Exit if a non-trigger was clicked
 
-        // WAI-ARIA Arrow Key Navigation
-        trigger.addEventListener('keydown', (e) => {
-            let targetIndex = null;
-            
-            if (e.key === 'ArrowDown') {
-                targetIndex = (index + 1) % triggers.length;
-            } else if (e.key === 'ArrowUp') {
-                targetIndex = (index - 1 + triggers.length) % triggers.length;
-            } else if (e.key === 'Home') {
-                targetIndex = 0;
-            } else if (e.key === 'End') {
-                targetIndex = triggers.length - 1;
-            }
+        const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+        const panelId = trigger.getAttribute('aria-controls');
+        // document.getElementById is significantly faster than node.querySelector
+        const panel = document.getElementById(panelId); 
 
-            if (targetIndex !== null) {
-                e.preventDefault(); // Prevent page scroll
-                triggers[targetIndex].focus();
-            }
-        });
+        // Auto-close currently open panel (if it's not the one just clicked)
+        const activeTrigger = node.querySelector('.cdlv-accordion__trigger[aria-expanded="true"]');
+        if (activeTrigger && activeTrigger !== trigger) {
+            activeTrigger.setAttribute('aria-expanded', 'false');
+            activeTrigger.classList.remove('is-open');
+            const activePanelId = activeTrigger.getAttribute('aria-controls');
+            const activePanel = document.getElementById(activePanelId);
+            
+            setTimeout(() => {
+                if(activeTrigger.getAttribute('aria-expanded') === 'false') {
+                    activePanel.setAttribute('hidden', 'true');
+                }
+            }, 300); // Matches var(--transition-base)
+        }
+
+        // Toggle the clicked panel
+        trigger.setAttribute('aria-expanded', !isExpanded);
+        
+        if (!isExpanded) {
+            panel.removeAttribute('hidden');
+            requestAnimationFrame(() => {
+                trigger.classList.add('is-open');
+            });
+        } else {
+            trigger.classList.remove('is-open');
+            setTimeout(() => {
+                if(trigger.getAttribute('aria-expanded') === 'false') {
+                    panel.setAttribute('hidden', 'true');
+                }
+            }, 300); 
+        }
+    });
+
+    // 3. Performant Event Delegation (Arrow Key Navigation)
+    node.addEventListener('keydown', (e) => {
+        const trigger = e.target.closest('.cdlv-accordion__trigger');
+        if (!trigger) return;
+        
+        const triggers = Array.from(node.querySelectorAll('.cdlv-accordion__trigger'));
+        const index = triggers.indexOf(trigger);
+        let targetIndex = null;
+        
+        if (e.key === 'ArrowDown') {
+            targetIndex = (index + 1) % triggers.length;
+        } else if (e.key === 'ArrowUp') {
+            targetIndex = (index - 1 + triggers.length) % triggers.length;
+        } else if (e.key === 'Home') {
+            targetIndex = 0;
+        } else if (e.key === 'End') {
+            targetIndex = triggers.length - 1;
+        }
+
+        if (targetIndex !== null) {
+            e.preventDefault(); // Prevents the window from scrolling
+            triggers[targetIndex].focus();
+        }
     });
 };

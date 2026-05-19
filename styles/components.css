@@ -1038,7 +1038,8 @@
 
 /* ==========================================================================
    MODULE: ACCORDION
-   Architecture: Uses CSS Grid for performant vertical expansion.
+   Performance: Hardware-accelerated transforms for iconography. Native CSS 
+   Grid interpolation for height transitions (prevents JS layout thrashing).
    A11y: Includes :focus-visible and prefers-reduced-motion checks.
    ========================================================================== */
 
@@ -1066,6 +1067,7 @@
     font-size: var(--font-size-h4);
     cursor: pointer;
     text-align: left;
+    /* Strictly target color to prevent the engine from interpolating 'all' */
     transition: color var(--transition-fast);
 }
 
@@ -1073,7 +1075,6 @@
     color: rgba(26, 26, 26, 0.6);
 }
 
-/* A11y: Strict visual focus indicator that matches the 0px radius aesthetic */
 .cdlv-accordion__trigger:focus-visible {
     outline: 2px solid var(--color-text-dark);
     outline-offset: 4px;
@@ -1083,9 +1084,10 @@
 .cdlv-accordion__icon {
     width: var(--icon-size-base);
     height: var(--icon-size-base);
-    transition: transform var(--transition-base);
     flex-shrink: 0;
     margin-left: var(--spacing-sm);
+    /* Hardware acceleration: Target transform specifically */
+    transition: transform var(--transition-base);
 }
 
 .cdlv-accordion__trigger[aria-expanded="true"] .cdlv-accordion__icon {
@@ -1095,6 +1097,7 @@
 .cdlv-accordion__panel {
     display: grid;
     grid-template-rows: 0fr;
+    /* Native engine reflow, avoids JS getBoundingClientRect thrashing */
     transition: grid-template-rows var(--transition-base);
 }
 
