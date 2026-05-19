@@ -112,13 +112,96 @@ and assign it to the `innerHTML` of the target container.
 
 <body>
   <!-- Navigation Module Target -->
-  <header id="global-header" class="container-fluid" data-module="header-shop"></header>
+  <header id="global-header" class="container-fluid" data-module="header"></header>
 
   <!-- Page Fragment Target -->
   <main id="main-content" class="container">
     <div data-module="hero-compact" 
          data-theme="dark"
          data-config='{"headingLevel": "h1", "heading": "The Shop", "bgImage": "assets/images/products/item_2.2.1.webp", "imageAlt": "Glass jars filled with artisanal loose leaf tea and dried rose petals", "description": "Every blend crafted with purpose to support women’s health. Hand-sourced artisanal ingredients designed to elevate your daily routine.", "ctaText": "View All Collections", "ctaLink": "shop.html", "isPriority": true}'>
+    </div>
+
+    <div data-module="catalog-grid" 
+     data-config='{
+       "heading": "Wellness Package",
+       "products": [
+         {
+           "title": "Calming Fertility Package",
+           "image": "assets/images/products/box_3.webp",
+           "link": "shop/packages/fertility-wellness-box.html",
+           "price": 600,
+           "subscriptionDiscount": 10,
+           "isOutOfStock": false,
+           "hideActions": false
+         }
+       ]
+     }'>
+    </div>
+
+    <div data-module="catalog-grid" 
+     data-config='{
+       "heading": "Individual Tea Products",
+       "products": [
+         {
+           "title": "Premium Herbal Infusion",
+           "image": "assets/images/products/item_2.2.1.webp",
+           "link": "shop/products/premium-herbal-infusion.html",
+           "price": 100,
+           "subscriptionDiscount": 10,
+           "isOutOfStock": false,
+           "hideActions": false
+         },
+         {
+           "title": "Honey Infused Tumeric",
+           "image": "assets/images/products/item_1.webp",
+           "link": "shop/products/honey-infused-tumeric.html",
+           "price": 100,
+           "isOutOfStock": true,
+           "hideActions": false
+         },
+         {
+           "title": "Saffron Infused Honey",
+           "image": "assets/images/products/item_4.webp",
+           "link": "shop/products/saffron-infused-honey.html",
+           "price": 80,
+           "isOutOfStock": false,
+           "hideActions": false
+         },
+         {
+           "title": "Blackseed Infused Honey",
+           "image": "assets/images/products/item_4.2.webp",
+           "link": "shop/products/blackseed-infused-honey.html",
+           "price": 80,
+           "isOutOfStock": true,
+           "hideActions": false
+         }
+       ]
+     }'>
+    </div>
+
+    <div data-module="catalog-grid" 
+     data-config='{
+       "heading": "Individual Tea Products",
+       "products": [
+         {
+           "title": "Tea Infuser",
+           "image": "assets/images/products/item_7.webp",
+           "link": "shop/accessories/tea-infuser.html",
+           "price": 50,
+           "subscriptionDiscount": 10,
+           "isOutOfStock": false,
+           "hideActions": false
+         },
+         {
+           "title": "Vanilla Candle",
+           "image": "assets/images/products/item_6.webp",
+           "link": "shop/accessories/vanilla-candle.html",
+           "price": 100,
+           "isOutOfStock": true,
+           "hideActions": false
+         }
+       ]
+     }'>
     </div>
   </main>
 
