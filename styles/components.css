@@ -879,10 +879,7 @@
 
 .cdlv-category-3-grid {
   padding-block: var(--spacing-xl);
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
   padding-inline: var(--layout-gutter);
-  background-color: transparent;
 }
 
 .cdlv-category-3-grid__header {
@@ -919,26 +916,22 @@
   flex-direction: column;
   border-radius: var(--radius-strict);
   overflow: hidden;
-  text-decoration: none;
   background-color: var(--color-secondary);
   width: 100%; 
   transition: transform var(--transition-fast);
 }
 
 .cdlv-category-3-grid__figure {
-  margin: 0;
   width: 100%;
   aspect-ratio: 1 / 1.1; 
   overflow: hidden;
   background-color: rgba(0,0,0,0.05); 
 }
 
-/* OPTIMIZATION: Stripped native module opacity transition rules to prevent rendering engine lag */
 .cdlv-category-3-grid__image {
   width: 100%;
   height: 100%;
   object-fit: cover; 
-  display: block;
   transition: transform var(--transition-slow);
 }
 
@@ -999,7 +992,6 @@
   border-color: var(--color-text-dark);
 }
 
-/* REDUCED MOTION (ACCESSIBILITY) */
 @media (prefers-reduced-motion: reduce) {
   .cdlv-category-3-grid__card:hover,
   .cdlv-category-3-grid__card:hover .cdlv-category-3-grid__image {

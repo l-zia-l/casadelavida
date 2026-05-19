@@ -67,10 +67,10 @@ export function init(node, customConfig = {}) {
        
         return `
             <article class="cdlv-catalog-slider__card">
-                <a href="${sanitizeHTML(safeProductLink)}" class="cdlv-catalog-slider__image-box img-hover-scale" tabindex="-1" aria-hidden="true">
+                <a href="${sanitizeHTML(safeProductLink)}" class="cdlv-catalog-slider__image-box img-hover-scale u-img-loader" tabindex="-1" aria-hidden="true">
                     <img src="${sanitizeHTML(safeImage)}" 
                         alt="${sanitizeHTML(product.alt)}" 
-                        class="u-img-reveal u-img-loader"
+                        class="u-img-reveal"
                         ${imageLoadingStrategy}>
                 </a>
                 <div class="cdlv-catalog-slider__info">

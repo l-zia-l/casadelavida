@@ -1,10 +1,3 @@
-/* ==========================================================================
-   MODULE: CATEGORY 3 GRID (modules/category-3-grid.js)
-   Purpose: Injects and manages the 3-column responsive category grid.
-   Architecture: ES Module, Plug-and-Play. Uses semantic HTML5.
-   Security: DOM elements are sanitized prior to injection to prevent XSS.
-   ========================================================================== */
-
 import { buildPath } from '../utils/path.js';
 
 const defaultConfig = {
@@ -38,11 +31,6 @@ const defaultConfig = {
   ]
 };
 
-/**
- * Basic text node sanitization to prevent XSS.
- * @param {string} str - Raw string
- * @returns {string} - Sanitized string safe for DOM injection
- */
 function sanitizeHTML(str) {
   if (typeof str !== 'string') return '';
   const temp = document.createElement('div');
@@ -51,35 +39,30 @@ function sanitizeHTML(str) {
 }
 
 export function init(node, customConfig = {}) {
-  // Merge configurations safely
   const config = { ...defaultConfig, ...customConfig };
   
-  // Allow array override specifically
-  if (customConfig.categories && Array.isArray(customConfig.categories)) {
-    config.categories = customConfig.categories;
+  // Ensure categories array falls back safely
+  if (!Array.isArray(config.categories)) {
+    config.categories = defaultConfig.categories;
   }
 
-  // Ensure heading level falls back safely to 'h2' to prevent tag injection
   const validHeading = /^(h[1-6])$/i.test(config.headingLevel) ? config.headingLevel.toLowerCase() : 'h2';
 
-  // Generate the cards
   const cardsHTML = config.categories.map(category => {
-    // Graceful fallback for missing images
-    const hasImage = category.image && category.image.trim() !== '';
-    const safeImage = hasImage ? buildPath(category.image) : '';
+    const safeImage = category.image?.trim() ? buildPath(category.image) : '';
     const safeLink = buildPath(category.btnLink);
     
-    const imageElement = hasImage 
+    const imageElement = safeImage 
       ? `<img src="${sanitizeHTML(safeImage)}" 
               alt="${sanitizeHTML(category.alt)}" 
               class="cdlv-category-3-grid__image"
               loading="lazy"
               decoding="async">`
-      : ``; // Renders an empty placeholder space using the figure background color if no image
+      : ``; 
     
     return `
       <a href="${sanitizeHTML(safeLink)}" class="cdlv-category-3-grid__card" aria-label="${sanitizeHTML(category.title)}">
-        <figure class="cdlv-category-3-grid__figure">
+        <figure class="cdlv-category-3-grid__figure u-img-loader">
           ${imageElement}
         </figure>
         <div class="cdlv-category-3-grid__content">
@@ -91,8 +74,9 @@ export function init(node, customConfig = {}) {
     `;
   }).join('');
 
-  const html = `
-    <section class="cdlv-category-3-grid" aria-labelledby="category-grid-heading">
+  // Added 'u-fill-width' utility class to inherit global logic
+  node.innerHTML = `
+    <section class="cdlv-category-3-grid u-fill-width" aria-labelledby="category-grid-heading">
       <header class="cdlv-category-3-grid__header">
         <${validHeading} id="category-grid-heading" class="cdlv-category-3-grid__title">
           ${sanitizeHTML(config.heading)}
@@ -103,6 +87,4 @@ export function init(node, customConfig = {}) {
       </div>
     </section>
   `;
-
-  node.innerHTML = html;
 }
