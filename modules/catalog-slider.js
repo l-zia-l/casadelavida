@@ -1,11 +1,3 @@
-/* ==========================================================================
-   MODULE: catalog-slider.js
-   Purpose: Injects a 4-column fluid product slider with distinct card elements.
-   Architecture: ES Module, Dynamic DOM Injection based on data attributes.
-   Security/A11y: Strict HTML Sanitization, safe paths, ARIA compliant, 
-   dynamic focus management.
-   ========================================================================== */
-
 import { buildPath } from '../utils/path.js';
 
 const defaultConfig = {
@@ -40,11 +32,6 @@ const defaultConfig = {
     ]
 };
 
-/**
- * Basic text node sanitization to prevent XSS.
- * @param {string} str - Raw string
- * @returns {string} - Sanitized string safe for DOM injection
- */
 function sanitizeHTML(str) {
     if (!str) return '';
     const temp = document.createElement('div');
@@ -57,21 +44,21 @@ export function init(node, customConfig = {}) {
     const products = customConfig.products || config.products;
     const safeCtaLink = buildPath(config.ctaLink);
 
-    // 1. Generate Product Cards (SEO Optimized)
-    const cardsHTML = products.map((product) => {
+    const cardsHTML = products.map((product, index) => {
         const safeImage = buildPath(product.image);
         const safeProductLink = buildPath(product.actionLink || config.ctaLink);
         
-        const imageLoadingStrategy = 'loading="eager" decoding="sync"';
+        // Eager load only the first 2 visible cards, lazy load the rest
+        const isVisible = index < 2;
+        const loadingStrategy = isVisible ? 'loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
         
-       
         return `
             <article class="cdlv-catalog-slider__card">
                 <a href="${sanitizeHTML(safeProductLink)}" class="cdlv-catalog-slider__image-box img-hover-scale u-img-loader" tabindex="-1" aria-hidden="true">
                     <img src="${sanitizeHTML(safeImage)}" 
                         alt="${sanitizeHTML(product.alt)}" 
                         class="u-img-reveal"
-                        ${imageLoadingStrategy}>
+                        ${loadingStrategy}>
                 </a>
                 <div class="cdlv-catalog-slider__info">
                     <h3 class="cdlv-catalog-slider__product-title">
@@ -82,7 +69,6 @@ export function init(node, customConfig = {}) {
         `;
     }).join('');
 
-    // 2. Build the full module HTML (Arrows moved to Header)
     const html = `
         <section class="cdlv-catalog-slider animate-enter" aria-label="${sanitizeHTML(config.heading)}" data-image-sync>
             <header class="cdlv-catalog-slider__header">
@@ -118,14 +104,12 @@ export function init(node, customConfig = {}) {
 
     node.innerHTML = html;
 
-    // 3. Attach Interaction Logic
     const track = node.querySelector('.cdlv-catalog-slider__track');
     const prevBtn = node.querySelector('.cdlv-catalog-slider__arrow--prev');
     const nextBtn = node.querySelector('.cdlv-catalog-slider__arrow--next');
 
     if (!track || !prevBtn || !nextBtn) return;
 
-    // Calculate dynamic scroll distance
     const getScrollAmount = () => {
         const card = track.querySelector('.cdlv-catalog-slider__card');
         if (!card) return 0;
@@ -133,7 +117,6 @@ export function init(node, customConfig = {}) {
         return card.offsetWidth + gap;
     };
 
-    // DOM Update Logic
     const updateArrows = () => {
         const scrollLeft = Math.ceil(track.scrollLeft);
         const maxScroll = Math.floor(track.scrollWidth - track.clientWidth);
@@ -155,7 +138,6 @@ export function init(node, customConfig = {}) {
         }
     };
 
-    // Performance Optimization: Lock DOM updates to screen refresh rate
     let ticking = false;
     const onScrollOrResize = () => {
         if (!ticking) {
@@ -167,7 +149,6 @@ export function init(node, customConfig = {}) {
         }
     };
 
-    // Event Listeners
     prevBtn.addEventListener('click', () => {
         track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
     });
@@ -176,11 +157,8 @@ export function init(node, customConfig = {}) {
         track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
     });
 
-    // Use the rAF-optimized handler
     track.addEventListener('scroll', onScrollOrResize, { passive: true });
     window.addEventListener('resize', onScrollOrResize, { passive: true });
     
-    // Initial UI sync
     updateArrows();
-
 }
