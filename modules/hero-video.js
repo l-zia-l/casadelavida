@@ -23,9 +23,6 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
-/**
- * Validates URLs to ensure they only contain safe protocols.
- */
 const sanitizeUrl = (url) => {
     if (typeof url !== 'string') return '';
     const cleanUrl = sanitizeText(url);
@@ -41,41 +38,47 @@ const defaultConfig = {
     autoplay: true,
     loop: true,
     muted: true,
-    controls: false, // Set to true to show the custom pretty controls
-    buttonText: '',  // Leave empty to hide button
-    buttonLink: ''   // Leave empty to hide button
+    controls: false,
+    buttonText: '', 
+    buttonLink: ''   
 };
 
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     
-    // Construct safe attributes for the video element
+    // A11y: Check for user system preferences regarding motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    // Override autoplay if user prefers reduced motion (WCAG 2.2.2 compliance)
+    const willAutoplay = config.autoplay && !prefersReducedMotion;
+    
     const videoAttrs = [
-        'playsinline', // Crucial for iOS Safari inline playback
-        config.autoplay ? 'autoplay' : '',
+        'playsinline', 
+        willAutoplay ? 'autoplay' : '',
         config.loop ? 'loop' : '',
         config.muted ? 'muted' : ''
     ].filter(Boolean).join(' ');
 
-    // 1. Build Custom Controls HTML (Optional)
+    // A11y: Added aria-hidden="true" and focusable="false" to all SVGs.
+    // Dynamic aria-labels established on the buttons.
     const controlsHTML = config.controls ? `
-        <div class="cdlv-hero-video__controls" aria-label="Video Controls">
-            <button class="cdlv-hero-video__control-btn js-cdlv-play" aria-label="Play or Pause">
-                <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-play" viewBox="0 0 24 24" fill="currentColor">
+        <div class="cdlv-hero-video__controls" role="group" aria-label="Video Controls">
+            <button class="cdlv-hero-video__control-btn js-cdlv-play" aria-label="${willAutoplay ? 'Pause video' : 'Play video'}">
+                <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-play" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                 </svg>
-                <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-pause" viewBox="0 0 24 24" fill="currentColor">
+                <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-pause" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
                     <rect x="6" y="4" width="4" height="16"></rect>
                     <rect x="14" y="4" width="4" height="16"></rect>
                 </svg>
             </button>
-            <button class="cdlv-hero-video__control-btn js-cdlv-mute" aria-label="Mute or Unmute">
-                <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-unmute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square">
+            <button class="cdlv-hero-video__control-btn js-cdlv-mute" aria-label="${config.muted ? 'Unmute video' : 'Mute video'}">
+                <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-unmute" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square">
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
                 </svg>
-                <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square">
+                <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-mute" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square">
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                     <line x1="23" y1="1" x2="1" y2="23"></line>
                 </svg>
@@ -83,7 +86,6 @@ export const init = (node, customConfig = {}) => {
         </div>
     ` : '';
 
-    // 2. Build Optional Button HTML
     const buttonHTML = (config.buttonText && config.buttonLink) ? `
         <div class="cdlv-hero-video__action">
             <a href="${sanitizeUrl(config.buttonLink)}" class="cdlv-hero-video__btn-ghost">
@@ -92,17 +94,16 @@ export const init = (node, customConfig = {}) => {
         </div>
     ` : '';
 
-    // 3. Construct Main Fragment
-    // Note: Wrapping container requires .u-fill-screen (from global.css) to ensure 100vw/100vh
     const moduleHTML = `
-        <section class="cdlv-hero-video u-fill-screen ${config.autoplay ? 'is-playing' : ''} ${config.muted ? 'is-muted' : ''}" aria-label="Video Feature">
+        <section class="cdlv-hero-video u-fill-screen ${willAutoplay ? 'is-playing' : ''} ${config.muted ? 'is-muted' : ''}" aria-label="Video Feature Background">
             <video 
                 class="cdlv-hero-video__media" 
                 poster="${buildPath(config.posterSrc)}"
+                aria-hidden="true"
+                tabindex="-1"
                 ${videoAttrs}
             >
                 <source src="${buildPath(config.videoSrc)}" type="video/mp4">
-                Your browser does not support the video tag.
             </video>
             ${buttonHTML}
             ${controlsHTML}
@@ -111,7 +112,7 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = moduleHTML;
 
-    // 4. Bind Interactions (If controls are enabled)
+    // 4. Bind Interactions
     if (config.controls) {
         const section = node.querySelector('.cdlv-hero-video');
         const video = node.querySelector('.cdlv-hero-video__media');
@@ -123,9 +124,11 @@ export const init = (node, customConfig = {}) => {
                 if (video.paused) {
                     video.play();
                     section.classList.add('is-playing');
+                    playBtn.setAttribute('aria-label', 'Pause video');
                 } else {
                     video.pause();
                     section.classList.remove('is-playing');
+                    playBtn.setAttribute('aria-label', 'Play video');
                 }
             });
         }
@@ -135,8 +138,10 @@ export const init = (node, customConfig = {}) => {
                 video.muted = !video.muted;
                 if (video.muted) {
                     section.classList.add('is-muted');
+                    muteBtn.setAttribute('aria-label', 'Unmute video');
                 } else {
                     section.classList.remove('is-muted');
+                    muteBtn.setAttribute('aria-label', 'Mute video');
                 }
             });
         }
