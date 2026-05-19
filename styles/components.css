@@ -1219,7 +1219,7 @@
 
 .cdlv-catalog-grid__sub-text {
   font-size: clamp(0.75rem, 1vw, 0.875rem);
-  color: var(--color-neutral-bg); /* Mapped to the neutral green variable */
+  color: var(--color-accent);
   font-weight: 600;
   margin-bottom: calc(var(--spacing-xs) / 2);
 }
