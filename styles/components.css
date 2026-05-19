@@ -647,17 +647,18 @@
     color: var(--color-text-dark);
     text-align: center;
     /* Uses fluid layout variables for responsive padding */
-    padding: var(--spacing-lg) var(--layout-gutter); 
+    padding: var(--spacing-sm) var(--layout-gutter); 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
 }
 
 .cdlv-container-center-item__heading {
     margin-bottom: 0; /* Override default heading margin to rely on flex gap */
     font-size: var(--font-size-h3);
+    color: var(--color-text-dark)
 }
 
 .cdlv-container-center-item__text {
@@ -669,7 +670,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-primary);
+    background-color: var(--color-neutral-bg);
     color: var(--color-text-dark);
     padding: var(--spacing-xs) var(--spacing-md);
     border: 1px solid var(--color-text-dark);
