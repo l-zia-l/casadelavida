@@ -646,24 +646,26 @@
     background-color: var(--color-neutral-bg);
     color: var(--color-text-dark);
     text-align: center;
-    /* Uses fluid layout variables for responsive padding */
-    padding: var(--spacing-sm) var(--layout-gutter); 
+    /* Crushed vertical padding to create the 'thin strip' aesthetic */
+    padding: var(--spacing-xs) var(--layout-gutter); 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-sm);
+    /* Tightened the space between the heading, text, and button */
+    gap: var(--spacing-xs);
 }
 
 .cdlv-container-center-item__heading {
-    margin-bottom: 0; /* Override default heading margin to rely on flex gap */
-    font-size: var(--font-size-h3);
-    color: var(--color-text-dark)
+    margin-bottom: 0; 
+    /* Stepped down to h4 to save vertical space and reduce bulk */
+    font-size: var(--font-size-h4);
+    color: var(--color-text-dark);
 }
 
 .cdlv-container-center-item__text {
-    margin-bottom: 0; /* Override default paragraph margin */
-    max-width: 600px; /* Constrain line length for optimal reading experience */
+    margin-bottom: 0; 
+    max-width: 600px; 
 }
 
 .cdlv-container-center-item__btn {
@@ -678,14 +680,13 @@
     font-size: var(--font-size-body);
     font-weight: 500;
     text-decoration: none;
-    border-radius: var(--radius-strict); /* Enforce 0px radius */
+    border-radius: var(--radius-strict); 
     cursor: pointer;
     transition: background-color var(--transition-base), 
                 color var(--transition-base), 
                 transform var(--transition-fast);
 }
 
-/* Hover state utilizes motion DNA standards */
 .cdlv-container-center-item__btn:hover {
     background-color: var(--color-text-dark);
     color: var(--color-text-light);
