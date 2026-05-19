@@ -1018,3 +1018,39 @@
     display: none !important;
   }
 }
+
+/* Image Loading Spinners */
+/* Add a spinning loader background to image containers while things load */
+.cdlv-catalog-slider__image-box,
+.cdlv-category-3-grid__figure {
+  position: relative;
+  background-color: #f3f3f3;
+}
+
+/* The loading spinner pseudo-element */
+.cdlv-catalog-slider__image-box::before,
+.cdlv-category-3-grid__figure::before {
+  content: '';
+  position: absolute;
+  top: calc(50% - 12px);
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(71, 59, 117, 0.2); /* Light accent color track */
+  border-top-color: var(--color-accent); /* Solid accent color top */
+  border-radius: 50%;
+  animation: cdlv-spin 0.8s linear infinite;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Hide the loader spinner automatically the second the image finishes fading in */
+.cdlv-catalog-slider__image-box:has(img.is-loaded)::before,
+.cdlv-category-3-grid__figure:has(img.is-loaded)::before {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes cdlv-spin {
+  to { transform: rotate(360deg); }
+}
