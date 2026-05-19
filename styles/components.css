@@ -15,18 +15,18 @@
   background-color: transparent;
   transition: background-color var(--transition-base), 
               box-shadow var(--transition-base), 
-              transform var(--transition-base);
+              transform var(--transition-base),
+              visibility var(--transition-base);
 }
 
-/* Scrolled state applied via JS */
 #global-header.cdlv-header--scrolled {
   background-color: var(--color-primary);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-/* Hidden state applied via JS when scrolling down past the hero */
 #global-header.cdlv-header--hidden {
   transform: translateY(-100%);
+  visibility: hidden; /* Removes from tab order when scrolled out of view */
 }
 
 .cdlv-header__nav {
@@ -44,6 +44,7 @@
   align-items: center;
   gap: 1px; 
   text-decoration: none;
+  border-radius: var(--radius-strict);
 }
 
 .cdlv-header__logo-img {
@@ -85,9 +86,9 @@
   letter-spacing: 0.1em;
   padding: var(--spacing-xs) 0;
   position: relative;
+  border-radius: var(--radius-strict);
 }
 
-/* The Animated Underline Track */
 .cdlv-header__link::after {
   content: '';
   position: absolute;
@@ -104,43 +105,27 @@
   width: 100%;
 }
 
-/* Targets the actual SVG image file */
+/* --- CART ICON SPECIAL STYLES --- */
+.cdlv-header__link--cart {
+  font-size: 1.2rem; 
+}
+
+.cdlv-header__link--cart::after, 
+.cdlv-header__link--cart[aria-current="page"]::after {
+  display: none;
+}
+
+.cdlv-header__link--cart:hover .cdlv-header__cart-icon,
+.cdlv-header__link--cart:focus-visible .cdlv-header__cart-icon {
+  transform: scale(1.1); 
+}
+
 .cdlv-header__cart-icon {
   width: var(--icon-size-base);
   height: var(--icon-size-base);
   object-fit: contain; 
   display: block;
   transition: transform var(--transition-fast);
-}
-
-/* Keep the hover scale effect */
-.cdlv-header__link--cart:hover .cdlv-header__cart-icon {
-  transform: scale(1.1);
-}
-
-/* --- CART ICON SPECIAL STYLES --- */
-
-/* Targets the specific cart link */
-.cdlv-header__link--cart {
-  font-size: 1.2rem; 
-  color: var(--color-text-dark);
-}
-
-/* Disable the underline for the cart icon */
-.cdlv-header__link--cart::after, 
-.cdlv-header__link--cart[aria-current="page"]::after {
-  display: none;
-}
-
-/* Purple hover state for the icon */
-.cdlv-header__link--cart:hover {
-  color: var(--color-accent);
-  transform: scale(1.1); 
-}
-
-/* Ensure the icon color transition matches the rest of the nav */
-.cdlv-header__link--cart img {
-  transition: color var(--transition-fast);
 }
 
 .cdlv-header__menu-icon {
@@ -168,12 +153,42 @@
   border-radius: var(--radius-strict);
 }
 
-/* Hide mobile-only duplicates on desktop */
 .cdlv-header__item--mobile-only {
   display: none;
 }
 
-/* Hide desktop links on mobile */
+/* --- ACCESSIBILITY FOCUS RINGS --- */
+.cdlv-header__toggle:focus-visible,
+.cdlv-header__logo-link:focus-visible,
+.cdlv-header__link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* --- DYNAMIC INVERTED STATE --- */
+.cdlv-header--inverted .cdlv-header__link,
+.cdlv-header--inverted .cdlv-header__toggle,
+.cdlv-header--inverted .cdlv-header__logo-text {
+  color: var(--color-text-light);
+}
+
+.cdlv-header--inverted .cdlv-header__link::after {
+  background-color: var(--color-text-light);
+}
+
+.cdlv-header--inverted .cdlv-header__menu-icon,
+.cdlv-header--inverted .cdlv-header__cart-icon {
+  filter: brightness(0) invert(1);
+}
+
+/* Invert the focus ring to white when the background is dark */
+.cdlv-header--inverted .cdlv-header__toggle:focus-visible,
+.cdlv-header--inverted .cdlv-header__logo-link:focus-visible,
+.cdlv-header--inverted .cdlv-header__link:focus-visible {
+  outline-color: var(--color-text-light);
+}
+
+/* --- RESPONSIVE LAYOUTS --- */
 @media (max-width: 991px) {
   .cdlv-header__list--left,
   .cdlv-header__item--desktop-only {
@@ -190,25 +205,15 @@
   }
 
   .cdlv-header--menu-open .cdlv-header__nav {
-    grid-template-columns: 1fr auto 1fr;
     grid-template-rows: auto auto;
     padding-bottom: var(--spacing-md);
   }
 
   .cdlv-header--menu-open .cdlv-header__toggle {
     position: static;
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .cdlv-header--menu-open .cdlv-header__logo-link {
-    grid-column: 2;
-    grid-row: 1;
   }
 
   .cdlv-header--menu-open .cdlv-header__list--right {
-    grid-column: 3;
-    grid-row: 1;
     padding-top: 0;
   }
 
@@ -224,27 +229,6 @@
   }
 }
 
-/* DYNAMIC INVERTED STATE (FOR DARK BACKGROUNDS) */
-
-/* Change all text to white */
-.cdlv-header--inverted .cdlv-header__link,
-.cdlv-header--inverted .cdlv-header__toggle,
-.cdlv-header--inverted .cdlv-header__logo-text {
-  color: var(--color-text-light);
-}
-
-/* Change the animated hover underline to white */
-.cdlv-header--inverted .cdlv-header__link::after {
-  background-color: var(--color-text-light);
-}
-
-/* Force the SVG images to render as pure white */
-.cdlv-header--inverted .cdlv-header__menu-icon,
-.cdlv-header--inverted .cdlv-header__cart-icon {
-  filter: brightness(0) invert(1);
-}
-
-/* --- DESKTOP LAYOUT --- */
 @media (min-width: 992px) {  
   .cdlv-header__toggle {
     display: none; 

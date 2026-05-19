@@ -12,10 +12,6 @@
 
 import { buildPath } from '../utils/path.js';
 
-/**
- * Configuration Object
- * Defines the navigation structure. Use absolute paths based on the sitemap.
- */
 const config = {
     logo: {
         text: 'Casa De La Vida', 
@@ -44,8 +40,7 @@ const config = {
 const sanitizeData = (str) => {
     if (typeof str !== 'string') return str;
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', "/": '&#x2F;' };
-    const reg = /[&<>"'/]/ig;
-    return str.replace(reg, (match) => (map[match]));
+    return str.replace(/[&<>"'/]/ig, (match) => map[match]);
 };
 
 /**
@@ -58,9 +53,8 @@ const buildNavList = (links, alignment) => {
     const currentPath = window.location.pathname;
 
     const listItems = links.map(link => {
-        let displayClass = '';
-        if (link.desktopOnly) displayClass = 'cdlv-header__item--desktop-only';
-        if (link.mobileOnly) displayClass = 'cdlv-header__item--mobile-only';
+        let displayClass = link.desktopOnly ? 'cdlv-header__item--desktop-only' : 
+                           link.mobileOnly ? 'cdlv-header__item--mobile-only' : '';
         
         const cartClass = link.isCart ? 'cdlv-header__link--cart' : '';
         const cartDataAttr = link.isCart ? 'data-cart-toggle="true"' : '';
@@ -90,8 +84,6 @@ const buildNavList = (links, alignment) => {
  */
 const generateHeaderHTML = () => {
     const safeLogoText = sanitizeData(config.logo.text);
-    const safeLogoUrl = sanitizeData(config.logo.url);
-    const safeLogoSrc = sanitizeData(config.logo.src);
     
     return `
         <nav class="cdlv-header__nav" aria-label="Primary Navigation">
@@ -102,8 +94,8 @@ const generateHeaderHTML = () => {
 
             ${buildNavList(config.links.left, 'left')}
 
-            <a href="${safeLogoUrl}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
-                <img src="${safeLogoSrc}" alt="" aria-hidden="true" class="cdlv-header__logo-img" fetchpriority="high" loading="eager">
+            <a href="${sanitizeData(config.logo.url)}" class="cdlv-header__logo-link" aria-label="${safeLogoText} Home">
+                <img src="${sanitizeData(config.logo.src)}" alt="" aria-hidden="true" class="cdlv-header__logo-img" fetchpriority="high" loading="eager">
                 <span class="cdlv-header__logo-text">${safeLogoText}</span>
             </a>
 
@@ -195,9 +187,9 @@ export function init(element) {
     });
 
     document.addEventListener('click', (e) => {
-        const isMenuOpen = element.classList.contains('cdlv-header--menu-open');
-        const isClickInsideHeader = element.contains(e.target);
-        if (isMenuOpen && !isClickInsideHeader) closeMobileMenu();
+        if (element.classList.contains('cdlv-header--menu-open') && !element.contains(e.target)) {
+            closeMobileMenu();
+        }
     });
 
     window.addEventListener('pageshow', (e) => {
@@ -223,9 +215,7 @@ export function init(element) {
                 evaluateHeaderTheme();
             }
         });
-    }, { 
-        rootMargin: '-50px 0px -95% 0px' 
-    });
+    }, { rootMargin: '-50px 0px -95% 0px' });
 
     const initialSection = document.querySelector('[data-theme]');
     if (initialSection) {
@@ -233,7 +223,5 @@ export function init(element) {
         evaluateHeaderTheme();
     }
 
-    document.querySelectorAll('[data-theme]').forEach(section => {
-        themeObserver.observe(section);
-    });
+    document.querySelectorAll('[data-theme]').forEach(section => themeObserver.observe(section));
 }
