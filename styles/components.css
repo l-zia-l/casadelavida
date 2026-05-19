@@ -1037,6 +1037,95 @@
 }
 
 /* ==========================================================================
+   MODULE: ACCORDION
+   Architecture: Uses CSS Grid for performant vertical expansion.
+   Aesthetic: Strictly Black & White. Minimalist borders.
+   ========================================================================== */
+
+.cdlv-accordion {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* Subtle 10% opacity black for the top boundary */
+    border-top: 1px solid rgba(26, 26, 26, 0.1); 
+}
+
+.cdlv-accordion__item {
+    border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.cdlv-accordion__trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: var(--spacing-md) 0;
+    background: transparent;
+    border: none;
+    color: var(--color-text-dark);
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-h4);
+    cursor: pointer;
+    text-align: left;
+    transition: color var(--transition-fast);
+}
+
+.cdlv-accordion__trigger:hover {
+    color: rgba(26, 26, 26, 0.6);
+}
+
+.cdlv-accordion__icon {
+    width: var(--icon-size-base);
+    height: var(--icon-size-base);
+    transition: transform var(--transition-base);
+    flex-shrink: 0;
+    margin-left: var(--spacing-sm);
+}
+
+/* Rotate chevron when expanded */
+.cdlv-accordion__trigger[aria-expanded="true"] .cdlv-accordion__icon {
+    transform: rotate(180deg);
+}
+
+/* The Grid trick for smooth height animation */
+.cdlv-accordion__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--transition-base);
+}
+
+.cdlv-accordion__trigger[aria-expanded="true"] + .cdlv-accordion__panel {
+    grid-template-rows: 1fr;
+}
+
+/* Must have overflow hidden to mask the 0fr height */
+.cdlv-accordion__panel-inner {
+    overflow: hidden;
+}
+
+.cdlv-accordion__content {
+    padding-bottom: var(--spacing-md);
+    color: var(--color-text-dark);
+    /* Internal scrolling for dense text on mobile viewports */
+    max-height: 40vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-text-dark) transparent;
+}
+
+/* Custom scrollbar for Webkit to maintain stark aesthetic */
+.cdlv-accordion__content::-webkit-scrollbar {
+    width: 4px;
+}
+.cdlv-accordion__content::-webkit-scrollbar-track {
+    background: transparent;
+}
+.cdlv-accordion__content::-webkit-scrollbar-thumb {
+    background-color: var(--color-text-dark);
+    border-radius: var(--radius-strict);
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
