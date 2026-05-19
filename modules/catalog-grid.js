@@ -3,7 +3,8 @@
    Purpose: Renders a dynamic product grid based on external configuration.
    Architecture: ES Module. Imports global path builder for asset resolution.
    Security: Uses DOM-based sanitization to prevent XSS from config payloads.
-   A11y: WCAG compliant (ARIA landmarks, focus states, screen reader optimized)
+   A11y: WCAG compliant (ARIA landmarks, focus states, screen reader optimized).
+   Performance: Granular LCP prioritization and layout-shift prevention.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -50,8 +51,18 @@ export const init = (node, customConfig = {}) => {
         const basePrice = parseFloat(product.price || 0);
         const discount = product.subscriptionDiscount ? parseFloat(product.subscriptionDiscount) : 0;
         
-        const isVisible = index < 4;
-        const loadingStrategy = isVisible ? 'loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
+        // Granular Loading Strategy for Critical Rendering Path
+        let loadingStrategy = '';
+        if (index === 0) {
+            // Most likely LCP candidate: force highest network priority
+            loadingStrategy = 'loading="eager" fetchpriority="high" decoding="sync"';
+        } else if (index < 4) {
+            // Visible "above the fold" on desktop: load immediately, standard priority
+            loadingStrategy = 'loading="eager" fetchpriority="auto" decoding="sync"';
+        } else {
+            // Off-screen elements: defer completely until scrolled near
+            loadingStrategy = 'loading="lazy" fetchpriority="low" decoding="async"';
+        }
 
         let subInfoHTML = '';
         let actionBtnHTML = '';
@@ -99,6 +110,7 @@ export const init = (node, customConfig = {}) => {
         `;
     }).join('');
 
+    // Hook into the global image-render.js engine
     node.setAttribute('data-image-sync', 'true');
 
     // aria-labelledby connects the section to the h2 for semantic grouping

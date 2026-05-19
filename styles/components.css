@@ -1156,11 +1156,11 @@
   flex-direction: column;
   gap: var(--spacing-md);
   margin-block: var(--spacing-xl);
-  
-  /* Full-bleed breakout mechanics */
   width: 100vw;
   margin-left: calc(50% - 50vw);
   padding-inline: var(--layout-gutter);
+  content-visibility: auto;
+  contain-intrinsic-size: 800px;
 }
 
 .cdlv-catalog-grid__header {
