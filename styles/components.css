@@ -1318,6 +1318,39 @@
   }
 }
 
+/*  MODULE: CATALOG GRID (A11y Enhancements) */
+
+/* 1. Explicit Focus Management */
+.cdlv-catalog-grid__link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-strict);
+}
+
+.cdlv-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+/* 2. Motion Sensitivity Compliance */
+@media (prefers-reduced-motion: reduce) {
+  .cdlv-catalog-grid__card:hover {
+    transform: none;
+  }
+  
+  .cdlv-catalog-grid__img-wrapper img {
+    transition: none;
+  }
+  
+  .cdlv-catalog-grid__card:hover .cdlv-catalog-grid__img-wrapper img {
+    transform: none;
+  }
+  
+  .cdlv-btn {
+    transition: background-color 0ms, color 0ms;
+  }
+}
+
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */

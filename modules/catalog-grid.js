@@ -3,11 +3,11 @@
    Purpose: Renders a dynamic product grid based on external configuration.
    Architecture: ES Module. Imports global path builder for asset resolution.
    Security: Uses DOM-based sanitization to prevent XSS from config payloads.
+   A11y: WCAG compliant (ARIA landmarks, focus states, screen reader optimized)
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
 
-// Default configuration fallback
 const defaultConfig = {
     heading: 'Our Collection',
     products: []
@@ -31,7 +31,6 @@ function sanitizeHTML(str) {
  * @param {Object} customConfig - The configuration parsed from data-config.
  */
 export const init = (node, customConfig = {}) => {
-    // Merge provided config with defaults
     const config = { ...defaultConfig, ...customConfig };
     const products = customConfig.products || config.products;
 
@@ -41,8 +40,9 @@ export const init = (node, customConfig = {}) => {
     }
 
     const headingText = sanitizeHTML(config.heading);
+    // Generate a unique ID to link the section to its heading for screen readers
+    const headingId = `catalog-heading-${Math.random().toString(36).substring(2, 9)}`;
 
-    // Map through the products and build the HTML fragments
     const productsHTML = products.map((product, index) => {
         const title = sanitizeHTML(product.title);
         const safeImage = buildPath(product.image);
@@ -50,19 +50,17 @@ export const init = (node, customConfig = {}) => {
         const basePrice = parseFloat(product.price || 0);
         const discount = product.subscriptionDiscount ? parseFloat(product.subscriptionDiscount) : 0;
         
-        // Eager load the first 4 visible cards (desktop grid baseline), lazy load the rest
         const isVisible = index < 4;
         const loadingStrategy = isVisible ? 'loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
 
         let subInfoHTML = '';
         let actionBtnHTML = '';
 
-        // If actions are not hidden, process subscriptions and buttons
         if (!product.hideActions) {
             if (discount > 0) {
                 const subPrice = (basePrice - (basePrice * (discount / 100))).toFixed(2);
                 subInfoHTML = `
-                    <hr class="cdlv-catalog-grid__divider">
+                    <hr class="cdlv-catalog-grid__divider" aria-hidden="true">
                     <p class="cdlv-catalog-grid__sub-text">Subscribe for ${sanitizeHTML(discount)}% off + free shipping</p>
                     <p class="cdlv-catalog-grid__sub-price">from <strong>GHS ${sanitizeHTML(subPrice)}</strong></p>
                 `;
@@ -71,22 +69,22 @@ export const init = (node, customConfig = {}) => {
             const isOOS = product.isOutOfStock;
             const btnText = isOOS ? 'Out of Stock' : 'Add to Cart';
             const btnClass = isOOS ? 'cdlv-btn--disabled' : 'cdlv-btn--primary';
-            const ariaDisabled = isOOS ? 'aria-disabled="true" tabindex="-1"' : '';
+            // Strictly apply both aria-disabled and the HTML disabled attribute
+            const disabledState = isOOS ? 'disabled aria-disabled="true" tabindex="-1"' : '';
 
             actionBtnHTML = `
-                <button class="cdlv-btn ${btnClass}" ${ariaDisabled}>
+                <button type="button" class="cdlv-btn ${btnClass}" ${disabledState}>
                     ${sanitizeHTML(btnText)}
                 </button>
             `;
         }
 
-        // Assemble individual card fragment
         return `
             <article class="cdlv-catalog-grid__card">
-                <a href="${sanitizeHTML(safeLink)}" class="cdlv-catalog-grid__link">
+                <a href="${sanitizeHTML(safeLink)}" class="cdlv-catalog-grid__link" aria-label="View details for ${title}">
                     <figure class="cdlv-catalog-grid__img-wrapper u-img-loader">
                         <img src="${sanitizeHTML(safeImage)}" 
-                             alt="${title}" 
+                             alt="" 
                              class="u-img-reveal"
                              ${loadingStrategy}>
                     </figure>
@@ -101,14 +99,13 @@ export const init = (node, customConfig = {}) => {
         `;
     }).join('');
 
-    // Ensure data-image-sync is applied for the global image render engine
     node.setAttribute('data-image-sync', 'true');
 
-    // Build the grid structure natively within the target node
+    // aria-labelledby connects the section to the h2 for semantic grouping
     node.innerHTML = `
-        <section class="cdlv-catalog-grid animate-enter" aria-label="${headingText}">
+        <section class="cdlv-catalog-grid animate-enter" aria-labelledby="${headingId}">
             <header class="cdlv-catalog-grid__header">
-                <h2 class="cdlv-catalog-grid__title">${headingText}</h2>
+                <h2 id="${headingId}" class="cdlv-catalog-grid__title">${headingText}</h2>
             </header>
             <div class="cdlv-catalog-grid__items">
                 ${productsHTML}
