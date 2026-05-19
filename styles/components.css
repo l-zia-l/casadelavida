@@ -474,6 +474,8 @@
 
 .cdlv-hero {
   position: relative;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
   overflow: hidden;
   background-color: var(--color-neutral-bg);
 }
@@ -539,18 +541,14 @@
   padding: clamp(1.5rem, 3vw, 3rem) var(--layout-gutter); 
 }
 
-.cdlv-hero__tagline {
-  display: block;
-  font-family: var(--font-family-body);
-  font-size: var(--font-size-small);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-  color: var(--color-accent);
-  margin-bottom: var(--spacing-xs);
-  font-weight: 600;
+.cdlv-hero__title { 
+  font-size: clamp(2rem, 4vw + 1rem, 4.5rem);
+  margin-bottom: var(--spacing-sm); 
 }
 
 .cdlv-hero__description {
+  font-size: clamp(1rem, 1.2vw + 0.5rem, 1.25rem);
+  margin-bottom: var(--spacing-sm); 
   color: var(--color-text-dark);
   opacity: 0.9;
   max-width: 60ch; 
@@ -596,8 +594,6 @@
   background-color: var(--color-text-dark); 
   color: var(--color-primary); 
 }
-
-
 /* ==========================================================================
    MODULE: INFO BANNER (.cdlv-info-banner)
    ========================================================================== */
