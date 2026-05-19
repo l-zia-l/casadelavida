@@ -24,7 +24,33 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
+// Generates FAQ structured data for Search Engines
+const injectFAQSchema = (items) => {
+    const existingSchema = document.querySelector('script[data-schema="accordion-faq"]');
+    if (existingSchema) return; // Prevent duplicates if multiple accordions exist
+
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": items.map(item => ({
+            "@type": "Question",
+            "name": sanitizeText(item.title),
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": sanitizeText(item.content)
+            }
+        }))
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-schema', 'accordion-faq');
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+};
+
 const defaultConfig = {
+    headingLevel: "h3", // Semantic default for document outline
     items: [
         {
             title: "Why 'Casa De La Vida'?",
@@ -40,6 +66,12 @@ const defaultConfig = {
 
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
+    const H_TAG = config.headingLevel; // Extract configured heading level
+
+    // Inject SEO Schema automatically
+    if (config.items.length > 0) {
+        injectFAQSchema(config.items);
+    }
 
     const chevronIcon = `
         <svg class="cdlv-accordion__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
@@ -47,7 +79,7 @@ export const init = (node, customConfig = {}) => {
         </svg>
     `;
 
-    // 1. Build HTML
+    // 1. Build HTML with SEO Semantic Headings
     const accordionHTML = `
         <div class="cdlv-accordion">
             ${config.items.map((item, index) => {
@@ -55,10 +87,12 @@ export const init = (node, customConfig = {}) => {
                 const panelId = `cdlv-accordion-panel-${index}`;
                 return `
                     <div class="cdlv-accordion__item">
-                        <button id="${btnId}" class="cdlv-accordion__trigger" aria-expanded="false" aria-controls="${panelId}">
-                            <span class="cdlv-accordion__title">${sanitizeText(item.title)}</span>
-                            ${chevronIcon}
-                        </button>
+                        <${H_TAG} class="cdlv-accordion__heading">
+                            <button id="${btnId}" class="cdlv-accordion__trigger" aria-expanded="false" aria-controls="${panelId}">
+                                <span class="cdlv-accordion__title">${sanitizeText(item.title)}</span>
+                                ${chevronIcon}
+                            </button>
+                        </${H_TAG}>
                         <div id="${panelId}" class="cdlv-accordion__panel" role="region" aria-labelledby="${btnId}" hidden>
                             <div class="cdlv-accordion__panel-inner">
                                 <div class="cdlv-accordion__content">
@@ -77,14 +111,12 @@ export const init = (node, customConfig = {}) => {
     // 2. Performant Event Delegation (Click/Enter/Space)
     node.addEventListener('click', (event) => {
         const trigger = event.target.closest('.cdlv-accordion__trigger');
-        if (!trigger) return; // Exit if a non-trigger was clicked
+        if (!trigger) return;
 
         const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
         const panelId = trigger.getAttribute('aria-controls');
-        // document.getElementById is significantly faster than node.querySelector
         const panel = document.getElementById(panelId); 
 
-        // Auto-close currently open panel (if it's not the one just clicked)
         const activeTrigger = node.querySelector('.cdlv-accordion__trigger[aria-expanded="true"]');
         if (activeTrigger && activeTrigger !== trigger) {
             activeTrigger.setAttribute('aria-expanded', 'false');
@@ -96,10 +128,9 @@ export const init = (node, customConfig = {}) => {
                 if(activeTrigger.getAttribute('aria-expanded') === 'false') {
                     activePanel.setAttribute('hidden', 'true');
                 }
-            }, 300); // Matches var(--transition-base)
+            }, 300); 
         }
 
-        // Toggle the clicked panel
         trigger.setAttribute('aria-expanded', !isExpanded);
         
         if (!isExpanded) {
@@ -137,7 +168,7 @@ export const init = (node, customConfig = {}) => {
         }
 
         if (targetIndex !== null) {
-            e.preventDefault(); // Prevents the window from scrolling
+            e.preventDefault(); 
             triggers[targetIndex].focus();
         }
     });

@@ -1038,9 +1038,9 @@
 
 /* ==========================================================================
    MODULE: ACCORDION
-   Performance: Hardware-accelerated transforms for iconography. Native CSS 
-   Grid interpolation for height transitions (prevents JS layout thrashing).
-   A11y: Includes :focus-visible and prefers-reduced-motion checks.
+   SEO: Includes heading resets for semantic wrappers.
+   Performance: Hardware-accelerated transforms, Native CSS Grid Reflow.
+   A11y: :focus-visible and prefers-reduced-motion implemented.
    ========================================================================== */
 
 .cdlv-accordion {
@@ -1052,6 +1052,15 @@
 
 .cdlv-accordion__item {
     border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+/* SEO Reset: Removes default heading margins to maintain layout integrity */
+.cdlv-accordion__heading {
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
 }
 
 .cdlv-accordion__trigger {
@@ -1067,7 +1076,6 @@
     font-size: var(--font-size-h4);
     cursor: pointer;
     text-align: left;
-    /* Strictly target color to prevent the engine from interpolating 'all' */
     transition: color var(--transition-fast);
 }
 
@@ -1086,7 +1094,6 @@
     height: var(--icon-size-base);
     flex-shrink: 0;
     margin-left: var(--spacing-sm);
-    /* Hardware acceleration: Target transform specifically */
     transition: transform var(--transition-base);
 }
 
@@ -1097,7 +1104,6 @@
 .cdlv-accordion__panel {
     display: grid;
     grid-template-rows: 0fr;
-    /* Native engine reflow, avoids JS getBoundingClientRect thrashing */
     transition: grid-template-rows var(--transition-base);
 }
 
@@ -1129,7 +1135,6 @@
     border-radius: var(--radius-strict);
 }
 
-/* A11y: Motion Sensitivity */
 @media (prefers-reduced-motion: reduce) {
     .cdlv-accordion__panel {
         transition: none !important;
