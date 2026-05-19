@@ -1128,8 +1128,8 @@
 /* ==========================================================================
    MODULE: CATALOG GRID (.cdlv-catalog-grid)
    Purpose: Responsive 2-to-4 column product grid with a sticky left header.
-   Architecture: Mobile-first flexbox layout that shifts to a side-by-side 
-   configuration on desktop. Strict 0px border radius is enforced.
+   Architecture: Mobile-first layout that shifts to a strict grid on desktop.
+   Includes native full-bleed viewport breakout logic.
    ========================================================================== */
 
 .cdlv-catalog-grid {
@@ -1137,6 +1137,11 @@
   flex-direction: column;
   gap: var(--spacing-md);
   margin-block: var(--spacing-xl);
+  
+  /* Full-bleed breakout mechanics */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding-inline: var(--layout-gutter);
 }
 
 .cdlv-catalog-grid__header {
@@ -1229,7 +1234,7 @@
   margin-bottom: var(--spacing-sm);
 }
 
-/* Button Extracted as Reusable Component UI if not already existing */
+/* Button UI */
 .cdlv-btn {
   display: inline-flex;
   justify-content: center;
@@ -1244,12 +1249,12 @@
   cursor: pointer;
   border-radius: var(--radius-strict);
   width: 100%;
-  margin-top: auto; /* Pushes button to bottom of card */
+  margin-top: auto; 
   transition: background-color var(--transition-base), color var(--transition-base);
 }
 
 .cdlv-btn--primary {
-  background-color: var(--color-neutral-bg); /* Assigned neutral green from system */
+  background-color: var(--color-neutral-bg);
   color: var(--color-text-dark);
 }
 
@@ -1275,17 +1280,17 @@
 
 @media (min-width: 1024px) {
   .cdlv-catalog-grid {
-    /* Switch to Grid to lock down cross-module alignment */
     display: grid;
+    /* Keeps the header width rigid while passing remaining space to products */
     grid-template-columns: clamp(220px, 22vw, 320px) 1fr;
-    gap: var(--spacing-xl); /* Gives the products plenty of room to breathe */
+    gap: var(--spacing-xl);
     align-items: start;
   }
   
   .cdlv-catalog-grid__header {
     position: sticky;
     top: var(--header-offset);
-    padding-right: var(--spacing-md); /* Keeps text from bumping into the grid */
+    padding-right: var(--spacing-md);
   }
 
   .cdlv-catalog-grid__items {
