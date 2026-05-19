@@ -474,8 +474,6 @@
 
 .cdlv-hero {
   position: relative;
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
   overflow: hidden;
   background-color: var(--color-neutral-bg);
 }
@@ -541,21 +539,27 @@
   padding: clamp(1.5rem, 3vw, 3rem) var(--layout-gutter); 
 }
 
-.cdlv-hero__title { 
-  font-size: clamp(2rem, 4vw + 1rem, 4.5rem);
-  margin-bottom: var(--spacing-sm); 
+.cdlv-hero__tagline {
+  display: block;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-small);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-accent);
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
 }
 
 .cdlv-hero__description {
-  font-size: clamp(1rem, 1.2vw + 0.5rem, 1.25rem);
-  margin-bottom: var(--spacing-sm); 
   color: var(--color-text-dark);
   opacity: 0.9;
   max-width: 60ch; 
   margin-inline: auto;
 }
 
-.cdlv-hero--compact .cdlv-hero__description { margin-inline: 0; }
+.cdlv-hero--compact .cdlv-hero__description { 
+  margin-inline: 0; 
+}
 
 /* --- BUTTONS --- */
 .cdlv-hero__btn {
@@ -569,15 +573,29 @@
   letter-spacing: var(--letter-spacing-wide);
   font-weight: 600;
   border-radius: var(--radius-strict);
-  cursor: pointer;
   border: 2px solid transparent;
-  text-decoration: none;
 }
 
-.cdlv-hero__btn--primary { background-color: var(--color-accent); color: var(--color-text-light); }
-.cdlv-hero__btn--primary:hover { background-color: var(--color-text-dark); color: var(--color-primary); }
-.cdlv-hero__btn--secondary { background-color: transparent; color: var(--color-text-dark); border-color: var(--color-text-dark); border-radius: var(--radius-strict); }
-.cdlv-hero__btn--secondary:hover { background-color: var(--color-text-dark); color: var(--color-primary); }
+.cdlv-hero__btn--primary { 
+  background-color: var(--color-accent); 
+  color: var(--color-text-light); 
+}
+
+.cdlv-hero__btn--primary:hover { 
+  background-color: var(--color-text-dark); 
+  color: var(--color-primary); 
+}
+
+.cdlv-hero__btn--secondary { 
+  background-color: transparent; 
+  color: var(--color-text-dark); 
+  border-color: var(--color-text-dark); 
+}
+
+.cdlv-hero__btn--secondary:hover { 
+  background-color: var(--color-text-dark); 
+  color: var(--color-primary); 
+}
 
 
 /* ==========================================================================

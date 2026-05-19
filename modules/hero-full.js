@@ -14,7 +14,7 @@ const defaultConfig = {
   description: 'Curated in Ghana for a balanced life. Discover our signature collections.',
   ctaText: 'Begin Your Ritual',
   ctaLink: 'shop.html',
-  isPriority: true // Defaults to true for the main hero
+  isPriority: true 
 };
 
 /**
@@ -23,6 +23,7 @@ const defaultConfig = {
  * @returns {string} - Sanitized string safe for DOM injection
  */
 function sanitizeHTML(str) {
+  if (!str) return '';
   const temp = document.createElement('div');
   temp.textContent = str;
   return temp.innerHTML;
@@ -31,7 +32,6 @@ function sanitizeHTML(str) {
 export function init(node, customConfig = {}) {
   const config = { ...defaultConfig, ...customConfig };
 
-  // Determine loading strategy based on priority
   const loadingStrategy = config.isPriority 
     ? 'fetchpriority="high" loading="eager"' 
     : 'loading="lazy"';
@@ -39,9 +39,9 @@ export function init(node, customConfig = {}) {
   const safeBgImage = buildPath(config.bgImage);
   const safeCtaLink = buildPath(config.ctaLink);
 
+  // Added 'u-fill-width' to inherit the global breakout utility
   const html = `
-    <section class="cdlv-hero cdlv-hero--full animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
-      
+    <section class="cdlv-hero cdlv-hero--full u-fill-width animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
       <img src="${sanitizeHTML(safeBgImage)}" 
            alt="" 
            aria-hidden="true" 
