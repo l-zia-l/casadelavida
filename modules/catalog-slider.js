@@ -70,7 +70,7 @@ export function init(node, customConfig = {}) {
                 <a href="${sanitizeHTML(safeProductLink)}" class="cdlv-catalog-slider__image-box img-hover-scale" tabindex="-1" aria-hidden="true">
                     <img src="${sanitizeHTML(safeImage)}" 
                         alt="${sanitizeHTML(product.alt)}" 
-                        class="u-img-reveal"
+                        class="u-img-reveal u-img-loader"
                         ${imageLoadingStrategy}>
                 </a>
                 <div class="cdlv-catalog-slider__info">

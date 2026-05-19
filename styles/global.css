@@ -225,19 +225,52 @@ img, video {
 
 /* IMAGE REVEAL ENGINE */
 
-/* Initial state: Image is hidden and clipped to a tiny circle in the center */
+/* Initial state: Image is hidden and slightly scaled down */
 .u-img-reveal {
   opacity: 0;
-  clip-path: circle(0% at 50% 50%);
-  will-change: opacity, clip-path;
+  transform: scale(0.95);
+  will-change: opacity, transform;
   transition: opacity 0.6s var(--ease-professional), 
-              clip-path 1.2s var(--ease-professional);
+              transform 1.2s var(--ease-professional);
 }
 
-/* Loaded state: Image fades in and the circle expands beyond the corners */
+/* Loaded state: Image fades in and scales up to rest position */
 .u-img-reveal.is-loaded {
   opacity: 1;
-  clip-path: circle(150% at 50% 50%);
+  transform: scale(1);
+}
+
+/* ==========================================================================
+   UTILITY: GLOBAL IMAGE LOADER (.u-img-loader)
+   Add this class to any image wrapper (like a figure or div) in your catalogs.
+   ========================================================================== */
+
+/* The container needs relative positioning to center the absolute spinner */
+.u-img-loader {
+  position: relative;
+  background-color: #f3f3f3; /* Light gray placeholder */
+}
+
+/* The loading spinner pseudo-element */
+.u-img-loader::before {
+  content: '';
+  position: absolute;
+  top: calc(50% - 12px);
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(71, 59, 117, 0.2); /* Light accent color track */
+  border-top-color: var(--color-accent); /* Solid accent color top */
+  border-radius: 50%;
+  animation: cdlv-spin 0.8s linear infinite;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Hide the loader spinner automatically the second the child image finishes loading */
+.u-img-loader:has(img.is-loaded)::before {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ULTRA-WIDE SCREEN ADJUSTMENTS */
