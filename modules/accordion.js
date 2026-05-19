@@ -24,54 +24,37 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
-// Generates FAQ structured data for Search Engines
-const injectFAQSchema = (items) => {
-    const existingSchema = document.querySelector('script[data-schema="accordion-faq"]');
-    if (existingSchema) return; // Prevent duplicates if multiple accordions exist
-
-    const schema = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": items.map(item => ({
-            "@type": "Question",
-            "name": sanitizeText(item.title),
-            "acceptedAnswer": {
-                "@type": "Answer",
-                "text": sanitizeText(item.content)
-            }
-        }))
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.setAttribute('data-schema', 'accordion-faq');
-    script.textContent = JSON.stringify(schema);
-    document.head.appendChild(script);
-};
-
 const defaultConfig = {
-    headingLevel: "h3", // Semantic default for document outline
     items: [
         {
             title: "Why 'Casa De La Vida'?",
-            content: "Our name translates to 'House of Life'. We chose this because we view wellness not as a quick fix, but as a foundational home you build for your mind and body."
+            content: "Our name translates to 'House of Life'. We chose this because we view wellness not as a quick fix, but as a foundational home you build for your mind and body. Every product is curated to be a structural pillar in that daily routine."
+        },
+        {
+            title: "Where do you source your products?",
+            content: "We partner directly with organic farms and ethical apiaries across Ghana. For instance, our honey is harvested seasonally by local beekeepers, ensuring raw, unpasteurized quality that supports both the ecosystem and local economy."
+        },
+        {
+            title: "Why the stark, black and white design?",
+            content: "Life is noisy enough. We believe in removing visual clutter and distractions so the quality of the ingredients can speak for themselves. The contrast represents the balance we strive for in everyday wellness."
+        },
+        {
+            title: "How does delivery work?",
+            content: "We offer seamless local delivery in Accra and Tamale. Orders placed before 1 PM are eligible for same-day dispatch. We package everything in strictly minimalist, zero-waste materials because respecting the earth is part of the wellness cycle."
         }
     ]
 };
+
 /**
  * Core initialization function triggered by the global component loader.
  * @param {HTMLElement} node - The target DOM element.
  * @param {Object} customConfig - Optional JSON config from data-config.
  */
-
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
-    const H_TAG = config.headingLevel; // Extract configured heading level
-
-    // Inject SEO Schema automatically
-    if (config.items.length > 0) {
-        injectFAQSchema(config.items);
-    }
+    
+    // Generate a unique ID for this specific accordion instance to prevent ID clashing
+    const instanceId = Math.random().toString(36).substring(2, 9);
 
     const chevronIcon = `
         <svg class="cdlv-accordion__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
@@ -79,20 +62,18 @@ export const init = (node, customConfig = {}) => {
         </svg>
     `;
 
-    // 1. Build HTML with SEO Semantic Headings
+    // 1. Build HTML
     const accordionHTML = `
         <div class="cdlv-accordion">
             ${config.items.map((item, index) => {
-                const btnId = `cdlv-accordion-btn-${index}`;
-                const panelId = `cdlv-accordion-panel-${index}`;
+                const btnId = `cdlv-accordion-btn-${instanceId}-${index}`;
+                const panelId = `cdlv-accordion-panel-${instanceId}-${index}`;
                 return `
                     <div class="cdlv-accordion__item">
-                        <${H_TAG} class="cdlv-accordion__heading">
-                            <button id="${btnId}" class="cdlv-accordion__trigger" aria-expanded="false" aria-controls="${panelId}">
-                                <span class="cdlv-accordion__title">${sanitizeText(item.title)}</span>
-                                ${chevronIcon}
-                            </button>
-                        </${H_TAG}>
+                        <button id="${btnId}" class="cdlv-accordion__trigger" aria-expanded="false" aria-controls="${panelId}">
+                            <span class="cdlv-accordion__title">${sanitizeText(item.title)}</span>
+                            ${chevronIcon}
+                        </button>
                         <div id="${panelId}" class="cdlv-accordion__panel" role="region" aria-labelledby="${btnId}" hidden>
                             <div class="cdlv-accordion__panel-inner">
                                 <div class="cdlv-accordion__content">
@@ -111,18 +92,22 @@ export const init = (node, customConfig = {}) => {
     // 2. Performant Event Delegation (Click/Enter/Space)
     node.addEventListener('click', (event) => {
         const trigger = event.target.closest('.cdlv-accordion__trigger');
-        if (!trigger) return;
+        if (!trigger) return; 
 
         const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
         const panelId = trigger.getAttribute('aria-controls');
-        const panel = document.getElementById(panelId); 
+        
+        // BUG FIX: Reverted to node.querySelector to safely scope the search 
+        // to the fragment, avoiding unattached DOM null errors.
+        const panel = node.querySelector(`#${panelId}`); 
 
         const activeTrigger = node.querySelector('.cdlv-accordion__trigger[aria-expanded="true"]');
         if (activeTrigger && activeTrigger !== trigger) {
             activeTrigger.setAttribute('aria-expanded', 'false');
             activeTrigger.classList.remove('is-open');
+            
             const activePanelId = activeTrigger.getAttribute('aria-controls');
-            const activePanel = document.getElementById(activePanelId);
+            const activePanel = node.querySelector(`#${activePanelId}`);
             
             setTimeout(() => {
                 if(activeTrigger.getAttribute('aria-expanded') === 'false') {
