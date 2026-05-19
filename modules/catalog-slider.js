@@ -15,25 +15,25 @@ const defaultConfig = {
     products: [
         {
             title: 'The Fertility Wellness Box',
-            image: 'assets/images/products/box_1.png',
+            image: 'assets/images/products/box_1.webp',
             alt: 'Fertility Wellness Box packaged in premium materials',
             actionLink: 'shop/packages/fertility-wellness-box.html'
         },
         {
             title: 'Premium Herbal Infusion',
-            image: 'assets/images/products/item_2.2.1.jpg',
+            image: 'assets/images/products/item_2.2.1.webp',
             alt: 'The Premium Tea Leaves',
             actionLink: 'shop/products/premium-herbal-infusion.html'
         },
         {
             title: 'Honey Infused Tumeric',
-            image: 'assets/images/products/item_1.jpg',
+            image: 'assets/images/products/item_1.webp',
             alt: 'Glass jar of creamy tumeric paste and black paper',
             actionLink: 'shop/products/honey-infused-tumeric.html'
         },
         {
             title: 'Organic Honey',
-            image: 'assets/images/products/item_4.jpg',
+            image: 'assets/images/products/item_4.webp',
             alt: 'Premium organic honey',
             actionLink: 'shop/products/organic-honey.html'
         }

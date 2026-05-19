@@ -8,7 +8,7 @@
 import { buildPath } from '../utils/path.js';
 
 const defaultConfig = {
-  bgImage: 'assets/images/products/item_2.2.jpg',
+  bgImage: 'assets/images/products/item_2.2.webp',
   tagline: 'Sip • Soothe • Blossom',
   heading: 'Your wellness routine, in one box.',
   description: 'Curated in Ghana for a balanced life. Discover our signature collections.',

@@ -13,7 +13,7 @@ const defaultConfig = {
   categories: [
     {
       title: 'Tea Infusions',
-      image: 'assets/images/products/item_2.2.1.jpg',
+      image: 'assets/images/products/item_2.2.1.webp',
       alt: 'Assorted premium tea infusions',
       description: 'Limited-run blends featuring unique stems, handpicked and sure to sell out.',
       btnText: 'Shop Now',
@@ -21,7 +21,7 @@ const defaultConfig = {
     },
     {
       title: 'Wellness Boxes',
-      image: 'assets/images/products/box_1.png',
+      image: 'assets/images/products/box_1.webp',
       alt: 'Curated fertility wellness box',
       description: 'The ever-popular, always-sold-out variety that we just can\'t get enough of.',
       btnText: 'Shop Boxes',
@@ -29,7 +29,7 @@ const defaultConfig = {
     },
     {
       title: 'Candles & Oils',
-      image: 'assets/images/products/item_5.jpg',
+      image: 'assets/images/products/item_5.webp',
       alt: 'Vanilla scented candle',
       description: 'Event florals, oversized arrangements and more for your next celebration.',
       btnText: 'Shop Accessories',
