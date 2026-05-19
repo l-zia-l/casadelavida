@@ -41,12 +41,12 @@ and assign it to the `innerHTML` of the target container.
   
   <!-- Content Security Policy (CSP) -->
   <meta http-equiv="Content-Security-Policy" 
-        content="default-src 'self'; 
-                 script-src 'self' 'module';
-                 img-src 'self' data: https:; 
-                 connect-src 'self' https://*.supabase.co;">
+      content="default-src 'self'; 
+               script-src 'self';
+               img-src 'self' data: https:; 
+               connect-src 'self' https://*.supabase.co;">
 
-  <title>Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey</title>
+  <title>Casa De La Vida | All Products | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey</title>
 
   <meta name="title" content="Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey">
   <meta name="description" content="Discover premium wellness boxes, teas, and individual accessories designed to elevate your daily routine. Curated in Ghana for a balanced life.">
@@ -88,6 +88,8 @@ and assign it to the `innerHTML` of the target container.
   }
   </script>
 
+  <link rel="preload" as="image" href="assets/images/products/item_2.2.1.webp" fetchpriority="high">
+  
   <link rel="icon" href="assets/images/favicon.png" type="image/png">
   
   <link rel="apple-touch-icon" href="assets/images/favicon.png">
@@ -100,6 +102,7 @@ and assign it to the `innerHTML` of the target container.
   <link rel="stylesheet" href="styles/global.css">
   <!-- Shared UI Components -->
   <link rel="stylesheet" href="styles/components.css">
+  
 
   <!-- External Resources -->
 
@@ -107,6 +110,7 @@ and assign it to the `innerHTML` of the target container.
   <script type="module" src="utils/auth.js" defer></script>
   <script type="module" src="utils/cart.js" defer></script>
   <script type="module" src="utils/components.js" defer></script>
+  <script type="module" src="utils/path.js" defer></script>
   <script type="module" src="utils/image-render.js" defer></script>
 </head>
 
@@ -118,8 +122,34 @@ and assign it to the `innerHTML` of the target container.
   <main id="main-content" class="container">
     <div data-module="hero-compact" 
          data-theme="dark"
-         data-config='{"headingLevel": "h1", "heading": "Our Wellness Journey", "bgImage": "assets/images/products/items_2.jpg", "imageAlt": "Glass jars filled with artisanal loose leaf tea and dried rose petals", "description": "Casa De La Vida was created from our love for tea, natural living, and a desire to support the mind and body. Discover how every blend is crafted with purpose to promote holistic health and nurture your feminine wellness journey.", "ctaText": "Discover Our Story", "ctaLink": "about-us.html", "isPriority": true}'>
+         data-config='{"headingLevel": "h1", "heading": "Our Wellness Journey", "bgImage": "assets/images/products/items_2.webp", "imageAlt": "Glass jars filled with artisanal loose leaf tea and dried rose petals", "description": "Casa De La Vida was created from our love for tea, natural living, and a desire to support the mind and body. Discover how every blend is crafted with purpose to promote holistic health and nurture your feminine wellness journey.", "ctaText": "Discover Our Story", "ctaLink": "about-us.html", "isPriority": true}'>
     </div>
+
+    <div data-module="hero-video"
+     data-config='{
+       "videoSrc": "assets/videos/video_show_1.mp4",
+       "posterSrc": "assets/images/stock_2.webp",
+       "autoplay": true,
+       "loop": true,
+       "muted": true,
+       "controls": false,
+       "buttonText": "Explore the Routine",
+       "buttonLink": "about-us.html"
+     }'>
+    </div>
+
+    <div data-module="hero-video"
+     data-config='{
+       "videoSrc": "assets/videos/video_show_1.mp4",
+       "posterSrc": "assets/images/item_2.2.1.webp",
+       "autoplay": false,
+       "loop": false,
+       "muted": false,
+       "controls": true,
+       "buttonText": "",
+       "buttonLink": ""
+     }'>
+</div>
   </main>
 
   <!-- Footer Module Target -->
