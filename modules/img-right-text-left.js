@@ -36,7 +36,6 @@ const sanitizeUrl = (url) => {
 const defaultConfig = {
     subtitle: "Our Story",
     title: "Supporting Women's Health",
-    // Changed to an array: Each string represents a new paragraph
     content: [
         "Casa De La Vida was born from a simple but powerful intention: to remind women to slow down, to breathe, and to nurture themselves. In the middle of busy days, endless responsibilities, and constant giving, we so often forget to give back to ourselves. This is exactly where the journey of Casa De La Vida begins.",
         "What started as a personal passion for tea and natural living quickly blossomed into something much deeper—a desire to create profound moments of calm, softness, and true reconnection for women everywhere. Each signature blend and curated wellness box is designed with absolute care, not just to support the body, but to establish a sacred ritual. It is a dedicated moment to pause, to reset, and to reconnect with positive energy.",
@@ -65,9 +64,10 @@ export const init = (node, customConfig = {}) => {
     };
     
     // 1. Build HTML Structure
+    // Swapped .container for .container-fluid to break the max-width limits
     const template = `
         <section class="cdlv-img-right-text-left u-fill-width">
-            <div class="container cdlv-img-right-text-left__grid">
+            <div class="container-fluid cdlv-img-right-text-left__grid">
                 
                 <article class="cdlv-img-right-text-left__content animate-enter">
                     ${config.subtitle ? `<span class="cdlv-img-right-text-left__subtitle">${sanitizeText(config.subtitle)}</span>` : ''}
