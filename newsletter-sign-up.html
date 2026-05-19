@@ -41,10 +41,10 @@ and assign it to the `innerHTML` of the target container.
   
   <!-- Content Security Policy (CSP) -->
   <meta http-equiv="Content-Security-Policy" 
-      content="default-src 'self'; 
-               script-src 'self';
-               img-src 'self' data: https:; 
-               connect-src 'self' https://*.supabase.co;">
+        content="default-src 'self'; 
+                 script-src 'self' 'module';
+                 img-src 'self' data: https:; 
+                 connect-src 'self' https://*.supabase.co;">
 
   <title>Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey</title>
 
@@ -88,8 +88,6 @@ and assign it to the `innerHTML` of the target container.
   }
   </script>
 
-  <link rel="preload" as="image" href="assets/images/products/item_2.2.1.webp" fetchpriority="high">
-  
   <link rel="icon" href="assets/images/favicon.png" type="image/png">
   
   <link rel="apple-touch-icon" href="assets/images/favicon.png">
@@ -102,7 +100,6 @@ and assign it to the `innerHTML` of the target container.
   <link rel="stylesheet" href="styles/global.css">
   <!-- Shared UI Components -->
   <link rel="stylesheet" href="styles/components.css">
-  
 
   <!-- External Resources -->
 
@@ -110,7 +107,6 @@ and assign it to the `innerHTML` of the target container.
   <script type="module" src="utils/auth.js" defer></script>
   <script type="module" src="utils/cart.js" defer></script>
   <script type="module" src="utils/components.js" defer></script>
-  <script type="module" src="utils/path.js" defer></script>
   <script type="module" src="utils/image-render.js" defer></script>
 </head>
 
@@ -120,110 +116,11 @@ and assign it to the `innerHTML` of the target container.
 
   <!-- Page Fragment Target -->
   <main id="main-content" class="container">
-  <div data-module="hero-full" 
-     data-theme="dark" 
-     data-config='{"bgImage": "assets/images/products/item_2.2.1.webp", "tagline": "Sip • Soothe • Blossom", "heading": "Ghana’s Premier Wellness Hub", "description": "Curated in Ghana for a balanced life. Discover our signature collections.", "ctaText": "Shop New Arrivals", "ctaLink": "shop.html", "isPriority": true}'>
-  </div>
-
-
-  <div data-module="info-banner"></div>
-
-  <section data-module="catalog-slider" data-image-sync data-config='{
-    "products": [
-        {
-            "title": "The Fertility Wellness Routine",
-            "image": "assets/images/products/box_1.webp",
-            "alt": "Fertility Wellness Box packaged in premium materials",
-            "actionLink": "shop/packages/fertility-wellness-box.html"
-        },
-        {
-            "title": "Premium Herbal Infusion",
-            "image": "assets/images/products/item_2.2.1.webp",
-            "alt": "The Premium Tea Leaves",
-            "actionLink": "shop/products/premium-herbal-infusion.html"
-        },
-        {
-            "title": "Honey Infused Tumeric",
-            "image": "assets/images/products/item_1.webp",
-            "alt": "Glass jar of creamy tumeric paste and black paper",
-            "actionLink": "shop/products/honey-infused-tumeric.html"
-        },
-        {
-            "title": "Saffron Infused Honey",
-            "image": "assets/images/products/item_4.webp",
-            "alt": "Saffron Infused Honey",
-            "actionLink": "shop/products/saffron-infused-honey.html"
-        },
-        {
-            "title": "Blackseed Infused Honey",
-            "image": "assets/images/products/item_4.2.webp",
-            "alt": "Blackseed Infused Honey",
-            "actionLink": "shop/products/blackseed-infused-honey.html"
-        }
-    ]
-  }'></section>
-
-  <div data-module="category-3-grid"></div>
-
-  <section data-module="catalog-slider" data-config='{
-    "heading": "Essential Accessories",
-    "ctaText": "Shop Accessories",
-    "ctaLink": "shop/all-accessories.html",
-    "products": [
-        {
-            "title": "Tea Infuser",
-            "image": "assets/images/products/item_7.webp",
-            "actionLink": "shop/accessories/tea-infuser.html"
-        },
-        {
-            "title": "Vanilla Candle",
-            "image": "assets/images/products/item_6.webp",
-            "actionLink": "shop/accessories/vanilla-candle.html"
-        }
-    ]
-}'></section>
-
-  <div data-module="hero-compact" 
-         data-config='{"headingLevel": "h2", "heading": "Same-Day Delivery", "bgImage": "assets/images/products/stock_2.webp", "imageAlt": "Different teas prepared in luxury glass pots.", "description": "These ready-to-go infusions come when you need them most.", "ctaText": "Order Now", "ctaLink": "shop.html", "isPriority": true}'>
-    </div>
-
-  <section data-module="catalog-slider" data-config='{
-    "heading": "Essential Accessories",
-    "ctaText": "Shop Accessories",
-    "ctaLink": "shop/all-accessories.html",
-    "products": [
-        {
-            "title": "Tea Infuser",
-            "image": "assets/images/products/item_7.webp",
-            "actionLink": "shop/accessories/tea-infuser.html"
-        },
-        {
-            "title": "Vanilla Candle",
-            "image": "assets/images/products/item_6.webp",
-            "actionLink": "shop/accessories/vanilla-candle.html"
-        }
-    ]
-}'></section>
-
-  <div data-module="hero-compact" 
-         data-config='{"headingLevel": "h2", "heading": "Welcome to Casa De La Vida", "bgImage": "assets/images/products/stock_3.webp", "imageAlt": "Honey with a honey comb on a table with dried flowers.", "description": "We are a sanctuary born from a passion for natural living that invites you to slow down, breathe, and reclaim the beautiful necessity of nurturing yourself.", "ctaText": "Learn More", "ctaLink": "about-us.html", "isPriority": true}'>
-    </div>
-
-
-  <div data-module="container-center-item" 
-     data-config='{
-         "heading": "Brighten Up Your Inbox", 
-         "text": "Join our email list for fresh floral drops, curated picks and exclusive savings.", 
-         "buttonText": "Sign Up", 
-         "buttonLink": "newsletter-sign-up.html"
-     }'>
+    <div data-module="hero-compact" 
+         data-theme="dark"
+         data-config='{"headingLevel": "h1", "heading": "Sign Up For Our Newsletter", "description": "Be the first to receive the latest offers, blog posts, and wellness product drops.", "ctaText": "Explore FAQs", "ctaLink": "newsletter-sign-up.html", "isPriority": true}'>
     </div>
   </main>
-
-  <!-- <main id="main-content" class="container">
-  <div data-module="hero-compact"></div>
-  
-  </main> -->
 
   <!-- Footer Module Target -->
   <footer id="global-footer" class="container-fluid" data-module="footer"></footer>

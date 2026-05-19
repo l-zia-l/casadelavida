@@ -602,7 +602,7 @@
   width: 100vw;
   margin-left: calc(50% - 50vw);
   background-color: var(--color-neutral-bg);
-  color: var(--color-text-light); 
+  color: var(--color-text-dark); 
   padding: var(--spacing-sm) 0;
   overflow: hidden;
 }
@@ -633,6 +633,62 @@
     flex-direction: row;
     justify-content: space-evenly;
   }
+}
+
+/* ==========================================================================
+   MODULE: CONTAINER CENTER ITEM
+   Purpose: Full-width, centrally aligned banner for newsletter/CTAs.
+   Architecture: Inherits fluid typography and spacing from global.css.
+                 Uses flexbox for vertical rhythm.
+   ========================================================================== */
+
+.cdlv-container-center-item {
+    background-color: var(--color-neutral-bg);
+    color: var(--color-text-dark);
+    text-align: center;
+    /* Uses fluid layout variables for responsive padding */
+    padding: var(--spacing-lg) var(--layout-gutter); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.cdlv-container-center-item__heading {
+    margin-bottom: 0; /* Override default heading margin to rely on flex gap */
+    font-size: var(--font-size-h3);
+}
+
+.cdlv-container-center-item__text {
+    margin-bottom: 0; /* Override default paragraph margin */
+    max-width: 600px; /* Constrain line length for optimal reading experience */
+}
+
+.cdlv-container-center-item__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary);
+    color: var(--color-text-dark);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: 1px solid var(--color-text-dark);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body);
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: var(--radius-strict); /* Enforce 0px radius */
+    cursor: pointer;
+    transition: background-color var(--transition-base), 
+                color var(--transition-base), 
+                transform var(--transition-fast);
+}
+
+/* Hover state utilizes motion DNA standards */
+.cdlv-container-center-item__btn:hover {
+    background-color: var(--color-text-dark);
+    color: var(--color-text-light);
+    transform: translateY(-2px);
 }
 
 /* ==========================================================================
