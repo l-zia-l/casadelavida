@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MODULE: SHOP HEADER (modules/shop-header.js)
+   MODULE: SHOP HEADER (modules/header-shop.js)
    Architecture: ES Module, Dynamic DOM Injection
    Purpose: Renders the opaque navigation tailored for the shop experience,
    focusing on brand identity (left) and e-commerce utilities (right).
