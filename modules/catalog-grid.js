@@ -90,18 +90,23 @@ export const init = (node, customConfig = {}) => {
             `;
         }
 
+        // SEO: Fallback to the product title for alt text if a specific alt description isn't provided
+        const altText = sanitizeHTML(product.altText || product.title);
+
         return `
             <article class="cdlv-catalog-grid__card">
-                <a href="${sanitizeHTML(safeLink)}" class="cdlv-catalog-grid__link" aria-label="View details for ${title}">
+                <a href="${sanitizeHTML(safeLink)}" class="cdlv-catalog-grid__link" tabindex="-1" aria-hidden="true">
                     <figure class="cdlv-catalog-grid__img-wrapper u-img-loader">
                         <img src="${sanitizeHTML(safeImage)}" 
-                             alt="" 
+                             alt="${altText}" 
                              class="u-img-reveal"
                              ${loadingStrategy}>
                     </figure>
                 </a>
                 <div class="cdlv-catalog-grid__content">
-                    <h3 class="cdlv-catalog-grid__item-title">${title}</h3>
+                    <h3 class="cdlv-catalog-grid__item-title">
+                        <a href="${sanitizeHTML(safeLink)}">${title}</a>
+                    </h3>
                     <p class="cdlv-catalog-grid__price">from <strong>GHS ${sanitizeHTML(basePrice.toFixed(2))}</strong></p>
                     ${subInfoHTML}
                     ${actionBtnHTML}
