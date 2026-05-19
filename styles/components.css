@@ -848,13 +848,29 @@
 
 @media (min-width: 768px) {
   .cdlv-category-3-grid__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .cdlv-category-3-grid__card {
+    grid-column: span 2;
+  }
+  
+  .cdlv-category-3-grid__card:nth-child(3):last-child {
+    grid-column: 2 / span 2;
   }
 }
 
 @media (min-width: 1024px) {
   .cdlv-category-3-grid__grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .cdlv-category-3-grid__card {
+    grid-column: span 1;
+  }
+  
+  .cdlv-category-3-grid__card:nth-child(3):last-child {
+    grid-column: auto;
   }
 }
 
