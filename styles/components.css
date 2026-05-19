@@ -13,7 +13,6 @@
   width: 100%;
   z-index: 1000;
   background-color: transparent;
-  /* Added 'transform' to the transition list for smooth sliding */
   transition: background-color var(--transition-base), 
               box-shadow var(--transition-base), 
               transform var(--transition-base);
@@ -114,7 +113,7 @@
   transition: transform var(--transition-fast);
 }
 
-/* Optional: Keep the hover scale effect */
+/* Keep the hover scale effect */
 .cdlv-header__link--cart:hover .cdlv-header__cart-icon {
   transform: scale(1.1);
 }
@@ -127,7 +126,7 @@
   color: var(--color-text-dark);
 }
 
-/* Disable the underline for the cart icon (Added missing '.' here) */
+/* Disable the underline for the cart icon */
 .cdlv-header__link--cart::after, 
 .cdlv-header__link--cart[aria-current="page"]::after {
   display: none;
@@ -185,7 +184,6 @@
     display: flex;
   }
 
-  /* Fixed Vertical Mobile Menu Implementation - Specificity fixed here */
   #global-header.cdlv-header--menu-open {
     background-color: var(--color-primary); 
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -389,13 +387,12 @@
 
 .cdlv-footer-link:focus-visible {
   outline: 2px solid var(--color-text-light);
-  outline-offset: -2px; /* Prevents bounding box clipping */
+  outline-offset: -2px;
 }
 
 .cdlv-footer-link:hover,
 .cdlv-footer-link:focus-visible {
   opacity: 1;
-  color: var(--color-text-dark);
   color: var(--color-secondary);
 }
 
@@ -478,7 +475,6 @@
     gap: clamp(0.25rem, 0.5vw, 0.5rem);
   }
 
-  /* Force display block on desktop regardless of JS state */
   .cdlv-footer-column:not(.is-active) .cdlv-footer-list {
     display: flex;
   }
@@ -512,7 +508,6 @@
    Security: No external assets referenced outside of allowed CSP scope.
    ========================================================================== */
 
-/* Base hero block */
 .cdlv-hero {
   position: relative;
   width: 100vw;
@@ -533,12 +528,10 @@
 
 /* --- FULL-WIDTH HERO MODIFIER --- */
 .cdlv-hero--full {
-  /* Locks height to 60% of the screen, with a 500px safety net to prevent content crushing */
   min-height: max(60vh, 500px); 
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Smart padding considering header */
   padding: calc(var(--header-offset) + var(--spacing-md)) var(--layout-gutter) var(--spacing-md);
 }
 
@@ -547,7 +540,6 @@
   z-index: 2; 
   background-color: rgba(255, 255, 255, 0.9);
   width: min(90vw, 1000px); 
-  /* Reduced vertical padding from --spacing-xl to --spacing-md to prevent cut-offs */
   padding: var(--spacing-md) var(--layout-gutter);
   text-align: center;
   border-radius: var(--radius-strict);
@@ -555,50 +547,44 @@
 
 /* --- COMPACT HERO MODIFIER --- */
 .cdlv-hero--compact {
-  /* 40vh height with a 400px fallback so it doesn't crush on small devices */
   min-height: max(40vh, 400px);
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Aligns the overlay to the left */
-  /* Smart padding considering header */
+  justify-content: flex-start; 
   padding: calc(var(--header-offset) + var(--spacing-sm)) var(--layout-gutter) var(--spacing-sm);
 }
 
-/* New Overlay Box specific to the Compact Hero */
 .cdlv-hero__compact-overlay {
   position: relative;
   z-index: 2;
   background-color: rgba(255, 255, 255, 0.9);
-  width: 100%; /* Mobile: stretches to fill width minus standard layout margins */
+  width: 100%; 
   padding: var(--spacing-md);
   border-radius: var(--radius-strict);
 }
 
 @media (min-width: 992px) {
   .cdlv-hero__compact-overlay {
-    width: max(45%, 450px); /* Desktop: Caps the width and leaves it on the left */
+    width: max(45%, 450px); 
   }
 }
 
 /* --- HERO TYPOGRAPHY & ELEMENTS --- */
 .cdlv-hero__overlay-box,
 .cdlv-hero__compact-overlay {
-  max-height: 85vh; /* Prevents the box from ever being taller than the screen */
-  overflow-y: auto; /* Adds a scrollbar inside the box ONLY if things get too tight */
-  padding: clamp(1.5rem, 3vw, 3rem) var(--layout-gutter); /* Tighter vertical padding */
+  max-height: 85vh; 
+  overflow-y: auto; 
+  padding: clamp(1.5rem, 3vw, 3rem) var(--layout-gutter); 
 }
 
-/* 2. Tame the heading size specifically for the hero */
 .cdlv-hero__title { 
-  /* Overrides the global 7vw growth rate to a much calmer 4vw */
   font-size: clamp(2rem, 4vw + 1rem, 4.5rem);
   margin-bottom: var(--spacing-sm); 
 }
 
-/* 3. Tighten the description size and spacing */
 .cdlv-hero__description {
   font-size: clamp(1rem, 1.2vw + 0.5rem, 1.25rem);
-  margin-bottom: var(--spacing-sm); /* Reduced from --spacing-md to save vertical space */
+  margin-bottom: var(--spacing-sm); 
   color: var(--color-text-dark);
   opacity: 0.9;
   max-width: 60ch; 
@@ -626,7 +612,7 @@
 
 .cdlv-hero__btn--primary { background-color: var(--color-accent); color: var(--color-text-light); }
 .cdlv-hero__btn--primary:hover { background-color: var(--color-text-dark); color: var(--color-primary); }
-.cdlv-hero__btn--secondary { background-color: transparent; color: var(--color-text-dark); border-color: var(--color-text-dark); }
+.cdlv-hero__btn--secondary { background-color: transparent; color: var(--color-text-dark); border-color: var(--color-text-dark); border-radius: var(--radius-strict); }
 .cdlv-hero__btn--secondary:hover { background-color: var(--color-text-dark); color: var(--color-primary); }
 
 
@@ -664,7 +650,6 @@
   letter-spacing: var(--letter-spacing-wide);
 }
 
-/* --- DESKTOP LAYOUT --- */
 @media (min-width: 768px) {
   .cdlv-info-banner__inner {
     flex-direction: row;
@@ -754,16 +739,18 @@
   outline-offset: 4px;
 }
 
+/* OPTIMIZATION: Local transition string trimmed to isolate cleanly with your global image reveal system assets */
 .cdlv-catalog-slider__image-box img {
   width: 100%;
   height: 100%;
   object-fit: cover; 
   border-radius: var(--radius-strict);
-  transition: transform var(--transition-slow), opacity var(--transition-base);
+  transition: transform var(--transition-slow);
 }
 
-.img-hover-scale:hover img {
-  transform: scale(1.03) translateZ(0);
+/* FIX: Unified conflicting hover animations to prevent engine juddering */
+.cdlv-catalog-slider__image-box:hover img {
+  transform: scale(1.03);
 }
 
 .cdlv-catalog-slider__info {
@@ -783,7 +770,7 @@
   margin: 0;
 }
 
-/* --- CAROUSEL CONTROLS (Moved to Header) --- */
+/* --- CAROUSEL CONTROLS --- */
 .cdlv-catalog-slider__controls {
   display: none;
 }
@@ -799,7 +786,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Static layout now, no more absolute positioning! */
     width: clamp(2.5rem, 3vw, 3.5rem);
     height: clamp(2.5rem, 3vw, 3.5rem);
     background-color: var(--color-primary);
@@ -873,14 +859,14 @@
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   .cdlv-catalog-slider__track {
-    scroll-behavior: auto; /* Disables smooth scroll natively */
+    scroll-behavior: auto; 
   }
 
   .cdlv-catalog-slider__image-box img,
   .cdlv-catalog-slider__arrow,
   .cdlv-catalog-slider__arrow-icon,
   .cdlv-catalog-slider__shop-all {
-    transition: none; /* Strips timing animations */
+    transition: none; 
   }
 }
 
@@ -892,18 +878,10 @@
    ========================================================================== */
 
 .cdlv-category-3-grid {
-  /* Vertical spacing */
   padding-block: var(--spacing-xl);
-  
-  /* Breakout Technique: Forces the container to stretch the full width of the 
-     viewport, bypassing the parent .container limits. */
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  
-  /* Re-applies the global gutter so the outer edges of the grid match 
-     the constrained content above and below it. */
   padding-inline: var(--layout-gutter);
-  
   background-color: transparent;
 }
 
@@ -919,21 +897,17 @@
 
 .cdlv-category-3-grid__grid {
   display: grid;
-  /* Mobile: 1 column stretching full width */
   grid-template-columns: 1fr;
-  /* Fluid gap based on global tokens to keep spacing proportional */
   gap: var(--spacing-sm);
   width: 100%;
 }
 
-/* Tablet: 2 columns */
 @media (min-width: 768px) {
   .cdlv-category-3-grid__grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Desktop: 3 columns, forcing them to evenly divide the space and stretch */
 @media (min-width: 1024px) {
   .cdlv-category-3-grid__grid {
     grid-template-columns: repeat(3, 1fr);
@@ -947,23 +921,23 @@
   overflow: hidden;
   text-decoration: none;
   background-color: var(--color-secondary);
-  width: 100%; /* Force card to stretch and fill its grid cell */
+  width: 100%; 
   transition: transform var(--transition-fast);
 }
 
 .cdlv-category-3-grid__figure {
   margin: 0;
   width: 100%;
-  /* A 1:1 or 4:5 aspect ratio ensures images take up significant vertical real estate */
   aspect-ratio: 1 / 1.1; 
   overflow: hidden;
-  background-color: rgba(0,0,0,0.05); /* Fallback placeholder color if image is missing */
+  background-color: rgba(0,0,0,0.05); 
 }
 
+/* OPTIMIZATION: Stripped native module opacity transition rules to prevent rendering engine lag */
 .cdlv-category-3-grid__image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Ensures the image fills the area without distortion */
+  object-fit: cover; 
   display: block;
   transition: transform var(--transition-slow);
 }
@@ -975,7 +949,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-grow: 1; /* Pushes content to fill the remaining box space evenly */
+  flex-grow: 1; 
 }
 
 .cdlv-category-3-grid__card-title {
@@ -1010,7 +984,6 @@
   border: 1px solid transparent;
 }
 
-/* Hover interactions */
 .cdlv-category-3-grid__card:hover {
   transform: translateY(-4px);
 }
@@ -1038,17 +1011,9 @@
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
-/* Hides the entire header navigation on extreme micro-screens to prevent UI breaking.
-   Note: Standard CSS does not support variables in media queries yet. */
 @media (max-width: 319px) {
-  #global-header {
-    display: none !important;
-  }
-
-  #global-footer {
-    display: none !important;
-  }
-
+  #global-header,
+  #global-footer,
   #main-content {
     display: none !important;
   }

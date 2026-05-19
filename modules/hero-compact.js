@@ -55,9 +55,9 @@ export function init(node, customConfig = {}) {
     `;
   }
 
-  // 2. Inject the dynamic imageHTML variable into the main template
+  // 2. Inject the template with synchronization tracking removed
   const html = `
-    <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}" data-image-sync>
+    <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
       
       ${imageHTML}
       

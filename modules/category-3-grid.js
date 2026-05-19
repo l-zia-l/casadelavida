@@ -3,7 +3,6 @@
    Purpose: Injects and manages the 3-column responsive category grid.
    Architecture: ES Module, Plug-and-Play. Uses semantic HTML5.
    Security: DOM elements are sanitized prior to injection to prevent XSS.
-             Uses data-image-sync to interface with the global image engine.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -92,10 +91,8 @@ export function init(node, customConfig = {}) {
     `;
   }).join('');
 
-  // The wrapper uses data-image-sync to alert image-render.js 
-  // to coordinate the reveal of these clustered images simultaneously.
   const html = `
-    <section class="cdlv-category-3-grid" aria-labelledby="category-grid-heading" data-image-sync>
+    <section class="cdlv-category-3-grid" aria-labelledby="category-grid-heading">
       <header class="cdlv-category-3-grid__header">
         <${validHeading} id="category-grid-heading" class="cdlv-category-3-grid__title">
           ${sanitizeHTML(config.heading)}
