@@ -65,15 +65,19 @@ export function init(node, customConfig = {}) {
     const safeImage = category.image?.trim() ? buildPath(category.image) : '';
     const safeLink = buildPath(category.btnLink);
     
+    // SEO FIX: Graceful fallback to the category title to ensure keywords are never dropped
+    const safeAltText = category.alt?.trim() ? category.alt : category.title;
+    
     const imageElement = safeImage 
       ? `<img src="${sanitizeHTML(safeImage)}" 
-              alt="${sanitizeHTML(category.alt)}" 
+              alt="${sanitizeHTML(safeAltText)}" 
               class="cdlv-category-3-grid__image u-img-reveal"
               ${imageLoadingStrategy}>`
       : ``; 
     
+    // SEO FIX: Added a descriptive 'title' attribute to provide search crawlers explicit link context
     return `
-      <a href="${sanitizeHTML(safeLink)}" class="cdlv-category-3-grid__card">
+      <a href="${sanitizeHTML(safeLink)}" class="cdlv-category-3-grid__card" title="Explore ${sanitizeHTML(category.title)}">
         <figure class="cdlv-category-3-grid__figure u-img-loader">
           ${imageElement}
         </figure>
