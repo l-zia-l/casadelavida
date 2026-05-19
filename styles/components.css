@@ -602,7 +602,7 @@
   width: 100vw;
   margin-left: calc(50% - 50vw);
   background-color: var(--color-neutral-bg);
-  color: var(--color-text-dark); 
+  color: var(--color-text-light); 
   padding: var(--spacing-sm) 0;
   overflow: hidden;
 }
@@ -646,13 +646,11 @@
     background-color: var(--color-neutral-bg);
     color: var(--color-text-dark);
     text-align: center;
-    /* Crushed vertical padding to create the 'thin strip' aesthetic */
     padding: var(--spacing-xs) var(--layout-gutter); 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* Tightened the space between the heading, text, and button */
     gap: var(--spacing-xs);
 }
 
@@ -664,8 +662,7 @@
 }
 
 .cdlv-container-center-item__text {
-    margin-bottom: 0; 
-    max-width: 600px; 
+    margin-bottom: 0;
 }
 
 .cdlv-container-center-item__btn {
