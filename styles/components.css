@@ -647,7 +647,7 @@
   transition: all var(--transition-base);
   
   /* Specific styling requested: White BG, Black Text, Black Border */
-  background-color: var(--color-primary); 
+  background-color: transparent; 
   color: var(--color-text-dark);
   border: 2px solid var(--color-text-dark);
   text-decoration: none;
