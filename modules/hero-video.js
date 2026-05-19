@@ -40,27 +40,27 @@ const defaultConfig = {
     muted: true,
     controls: false,
     buttonText: '', 
-    buttonLink: ''   
+    buttonLink: '',
+    isPriority: true // Added flag to control LCP fetchpriority
 };
 
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     
-    // A11y: Check for user system preferences regarding motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
-    // Override autoplay if user prefers reduced motion (WCAG 2.2.2 compliance)
     const willAutoplay = config.autoplay && !prefersReducedMotion;
+    
+    // Determine loading priority attributes based on config
+    const priorityAttrs = config.isPriority ? 'fetchpriority="high" preload="auto"' : 'preload="metadata"';
     
     const videoAttrs = [
         'playsinline', 
         willAutoplay ? 'autoplay' : '',
         config.loop ? 'loop' : '',
-        config.muted ? 'muted' : ''
+        config.muted ? 'muted' : '',
+        priorityAttrs
     ].filter(Boolean).join(' ');
 
-    // A11y: Added aria-hidden="true" and focusable="false" to all SVGs.
-    // Dynamic aria-labels established on the buttons.
     const controlsHTML = config.controls ? `
         <div class="cdlv-hero-video__controls" role="group" aria-label="Video Controls">
             <button class="cdlv-hero-video__control-btn js-cdlv-play" aria-label="${willAutoplay ? 'Pause video' : 'Play video'}">
@@ -112,7 +112,7 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = moduleHTML;
 
-    // 4. Bind Interactions
+    // 4. Bind Interactions (Using cached queries for performance)
     if (config.controls) {
         const section = node.querySelector('.cdlv-hero-video');
         const video = node.querySelector('.cdlv-hero-video__media');
@@ -121,28 +121,36 @@ export const init = (node, customConfig = {}) => {
 
         if (playBtn && video) {
             playBtn.addEventListener('click', () => {
-                if (video.paused) {
-                    video.play();
-                    section.classList.add('is-playing');
-                    playBtn.setAttribute('aria-label', 'Pause video');
-                } else {
-                    video.pause();
-                    section.classList.remove('is-playing');
-                    playBtn.setAttribute('aria-label', 'Play video');
-                }
+                const isPaused = video.paused;
+                // RequestAnimationFrame ensures UI updates sync cleanly with the display refresh rate
+                requestAnimationFrame(() => {
+                    if (isPaused) {
+                        video.play();
+                        section.classList.add('is-playing');
+                        playBtn.setAttribute('aria-label', 'Pause video');
+                    } else {
+                        video.pause();
+                        section.classList.remove('is-playing');
+                        playBtn.setAttribute('aria-label', 'Play video');
+                    }
+                });
             });
         }
 
         if (muteBtn && video) {
             muteBtn.addEventListener('click', () => {
-                video.muted = !video.muted;
-                if (video.muted) {
-                    section.classList.add('is-muted');
-                    muteBtn.setAttribute('aria-label', 'Unmute video');
-                } else {
-                    section.classList.remove('is-muted');
-                    muteBtn.setAttribute('aria-label', 'Mute video');
-                }
+                const willMute = !video.muted;
+                video.muted = willMute;
+                
+                requestAnimationFrame(() => {
+                    if (willMute) {
+                        section.classList.add('is-muted');
+                        muteBtn.setAttribute('aria-label', 'Unmute video');
+                    } else {
+                        section.classList.remove('is-muted');
+                        muteBtn.setAttribute('aria-label', 'Mute video');
+                    }
+                });
             });
         }
     }
