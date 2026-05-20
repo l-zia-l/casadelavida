@@ -25,8 +25,9 @@ const sanitizeText = (str) => {
 // Default configurable text parameters
 const defaultConfig = {
     headingLevel: "h2", // Configurable for strict SEO hierarchy
-    heading: "",
+    heading: "Brighten Up Your Inbox",
     text: "Join our email list for fresh floral drops, curated picks and exclusive savings.",
+    showButton: true, // Boolean to toggle button visibility
     buttonText: "Sign Up",
     buttonLink: "newsletter-sign-up.html"
 };
@@ -49,8 +50,18 @@ export const init = (node, customConfig = {}) => {
         ? config.headingLevel.toLowerCase() 
         : 'h2';
 
-    // Resolve absolute path for the CTA link based on environment
-    const absoluteLink = buildPath(config.buttonLink);
+    // Conditionally build the button HTML
+    let buttonHTML = '';
+    if (config.showButton && config.buttonText && config.buttonLink) {
+        const absoluteLink = buildPath(config.buttonLink);
+        buttonHTML = `
+            <a href="${sanitizeText(absoluteLink)}" 
+               class="cdlv-container-center-item__btn"
+               aria-label="${sanitizeText(config.buttonText)} for ${sanitizeText(config.heading)}">
+                ${sanitizeText(config.buttonText)}
+            </a>
+        `;
+    }
 
     const html = `
         <section class="cdlv-container-center-item" aria-labelledby="${uniqueId}">
@@ -60,11 +71,7 @@ export const init = (node, customConfig = {}) => {
             <p class="cdlv-container-center-item__text">
                 ${sanitizeText(config.text)}
             </p>
-            <a href="${sanitizeText(absoluteLink)}" 
-               class="cdlv-container-center-item__btn"
-               aria-label="${sanitizeText(config.buttonText)} for ${sanitizeText(config.heading)}">
-                ${sanitizeText(config.buttonText)}
-            </a>
+            ${buttonHTML}
         </section>
     `;
 

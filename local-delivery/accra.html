@@ -119,11 +119,12 @@ and assign it to the `innerHTML` of the target container.
   <main id="main-content" class="container">
     <div data-module="hero-compact" 
          data-theme=""
-         data-config='{"headingLevel": "h1", "heading": "Wellness Delivery in Accra", "bgImage": "assets/images/products/item_4.jpg", "imageAlt": "Glass jar of honey with honey comb.", "description": "Enjoy reliable local delivery of your premium herbal teas and fertility wellness boxes across Accra. Bring Ghana’s premier wellness rituals straight to your doorstep for a balanced soft life.", "ctaText": "Order Local Delivery", "ctaLink": "local-delivery/accra.html", "isPriority": true}'>
+         data-config='{"headingLevel": "h1", "heading": "Wellness Delivery in Accra", "bgImage": "assets/images/products/item_4.webp", "imageAlt": "Glass jar of honey with honey comb.", "description": "Enjoy reliable local delivery of your premium herbal teas and fertility wellness boxes across Accra. Bring Ghana’s premier wellness rituals straight to your doorstep for a balanced soft life.", "ctaText": "Order Local Delivery", "ctaLink": "local-delivery/accra.html", "isPriority": true}'>
     </div>
 
     <div data-module="container-center-item" 
      data-config='{
+         "showButton": false,
          "heading": "Please Note", 
          "text": "If a product is marked "NOT AVAILABLE", you can still place an order, however delivery will not be on the same day."
      }'>
@@ -217,6 +218,16 @@ and assign it to the `innerHTML` of the target container.
            "hideActions": false
          }
        ]
+     }'>
+    </div>
+
+    <div data-module="container-center-item" 
+     data-config='{
+         "showButton": true,
+         "heading": "", 
+         "text": "Because every woman deserves softness, care, and a moment to reconnect.", 
+         "buttonText": "Read about the benefits of our tea", 
+         "buttonLink": "blog/cultivating-your-daily-tea-ritual.html"
      }'>
     </div>
   </main>

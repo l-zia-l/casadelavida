@@ -119,11 +119,12 @@ and assign it to the `innerHTML` of the target container.
   <main id="main-content" class="container">
     <div data-module="hero-compact" 
          data-theme="dark"
-         data-config='{"headingLevel": "h1", "heading": "Wellness Delivery in Tamale", "bgImage": "assets/images/products/item_5.jpg", "imageAlt": "Small glass bottle of infused oil.", "description": "Get your favourite feminine wellness boxes and artisanal infusions delivered directly to your home in Tamale. Experience seamless access to natural self-care rituals designed to elevate your daily routine.", "ctaText": "Order Local Delivery", "ctaLink": "local-delivery/tamale.html", "isPriority": true}'>
+         data-config='{"headingLevel": "h1", "heading": "Wellness Delivery in Tamale", "bgImage": "assets/images/products/item_5.webp", "imageAlt": "Small glass bottle of infused oil.", "description": "Get your favourite feminine wellness boxes and artisanal infusions delivered directly to your home in Tamale. Experience seamless access to natural self-care rituals designed to elevate your daily routine.", "ctaText": "Order Local Delivery", "ctaLink": "local-delivery/tamale.html", "isPriority": true}'>
     </div>
 
     <div data-module="container-center-item" 
      data-config='{
+         "showButton": false,
          "heading": "Please Note", 
          "text": "If a product is marked "NOT AVAILABLE", you can still place an order, however delivery will not be on the same day."
      }'>
@@ -217,6 +218,16 @@ and assign it to the `innerHTML` of the target container.
            "hideActions": false
          }
        ]
+     }'>
+    </div>
+
+    <div data-module="container-center-item" 
+     data-config='{
+         "showButton": true,
+         "heading": "", 
+         "text": "Because every woman deserves softness, care, and a moment to reconnect.", 
+         "buttonText": "Read about the benefits of our tea", 
+         "buttonLink": "blog/cultivating-your-daily-tea-ritual.html"
      }'>
     </div>
   </main>
