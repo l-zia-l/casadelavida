@@ -34,6 +34,7 @@ const sanitizeUrl = (url) => {
 
 const defaultConfig = {
     videoSrc: 'assets/videos/default-hero.mp4',
+    videoSrcMobile: '', 
     posterSrc: 'assets/images/video-poster.jpg',
     autoplay: true,
     loop: true,
@@ -42,10 +43,9 @@ const defaultConfig = {
     buttonText: '', 
     buttonLink: '',
     isPriority: true,
-    // SEO-specific configurations
-    headingLevel: 'h1', // Change to h2, h3, etc., based on page placement
-    headingText: 'Casa De La Vida Premium Wellness', // Visually hidden outline anchor
-    seoDescription: 'Casa De La Vida background video featuring premium wellness products and tea.' // Crawler fallback
+    headingLevel: 'h1',
+    headingText: 'Casa De La Vida Premium Wellness',
+    seoDescription: 'Casa De La Vida background video featuring premium wellness products.'
 };
 
 export const init = (node, customConfig = {}) => {
@@ -56,6 +56,7 @@ export const init = (node, customConfig = {}) => {
     
     const priorityAttrs = config.isPriority ? 'fetchpriority="high" preload="auto"' : 'preload="metadata"';
     
+    // playsinline is non-negotiable for iOS to prevent fullscreen hijacking
     const videoAttrs = [
         'playsinline', 
         willAutoplay ? 'autoplay' : '',
@@ -97,7 +98,6 @@ export const init = (node, customConfig = {}) => {
         </div>
     ` : '';
 
-    // SEO: Validating and injecting the proper heading tag
     const validHeadings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     const safeHeadingLevel = validHeadings.includes(config.headingLevel.toLowerCase()) 
         ? config.headingLevel.toLowerCase() 
@@ -109,6 +109,12 @@ export const init = (node, customConfig = {}) => {
         </${safeHeadingLevel}>
     ` : '';
 
+    let sourcesHTML = '';
+    if (config.videoSrcMobile) {
+        sourcesHTML += `<source src="${buildPath(config.videoSrcMobile)}" media="(max-width: 768px)" type="video/mp4">\n`;
+    }
+    sourcesHTML += `<source src="${buildPath(config.videoSrc)}" type="video/mp4">`;
+
     const moduleHTML = `
         <section class="cdlv-hero-video u-fill-screen ${willAutoplay ? 'is-playing' : ''} ${config.muted ? 'is-muted' : ''}" aria-labelledby="hero-video-heading-${node.id || 'feature'}">
             ${headingHTML.replace('class="visually-hidden"', `id="hero-video-heading-${node.id || 'feature'}" class="visually-hidden"`)}
@@ -119,7 +125,7 @@ export const init = (node, customConfig = {}) => {
                 tabindex="-1"
                 ${videoAttrs}
             >
-                <source src="${buildPath(config.videoSrc)}" type="video/mp4">
+                ${sourcesHTML}
                 <p>${sanitizeText(config.seoDescription)}</p>
             </video>
             ${buttonHTML}
@@ -129,18 +135,42 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = moduleHTML;
 
-    // Bind Interactions
-    if (config.controls) {
-        const section = node.querySelector('.cdlv-hero-video');
-        const video = node.querySelector('.cdlv-hero-video__media');
+    // ==========================================
+    // THE IOS SAFARI HOTFIX
+    // ==========================================
+    const section = node.querySelector('.cdlv-hero-video');
+    const video = node.querySelector('.cdlv-hero-video__media');
+
+    if (video) {
+        // Fix 1: Explicitly force the DOM properties, bypassing HTML attributes
+        if (config.muted) {
+            video.muted = true;
+            video.defaultMuted = true;
+        }
+
+        // Fix 2: Manually kickstart the play Promise for injected elements
+        if (willAutoplay) {
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch((error) => {
+                    // iOS will throw this error if the phone is in Low Power Mode
+                    // The video will fail gracefully and show the poster image instead
+                    console.info('iOS Autoplay prevented (likely Low Power Mode):', error);
+                    section.classList.remove('is-playing');
+                });
+            }
+        }
+    }
+
+    // Bind Controls Interactions
+    if (config.controls && video) {
         const playBtn = node.querySelector('.js-cdlv-play');
         const muteBtn = node.querySelector('.js-cdlv-mute');
 
-        if (playBtn && video) {
+        if (playBtn) {
             playBtn.addEventListener('click', () => {
-                const isPaused = video.paused;
                 requestAnimationFrame(() => {
-                    if (isPaused) {
+                    if (video.paused) {
                         video.play();
                         section.classList.add('is-playing');
                         playBtn.setAttribute('aria-label', 'Pause video');
@@ -153,13 +183,11 @@ export const init = (node, customConfig = {}) => {
             });
         }
 
-        if (muteBtn && video) {
+        if (muteBtn) {
             muteBtn.addEventListener('click', () => {
-                const willMute = !video.muted;
-                video.muted = willMute;
-                
+                video.muted = !video.muted;
                 requestAnimationFrame(() => {
-                    if (willMute) {
+                    if (video.muted) {
                         section.classList.add('is-muted');
                         muteBtn.setAttribute('aria-label', 'Unmute video');
                     } else {
