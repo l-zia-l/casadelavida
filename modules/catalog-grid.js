@@ -5,6 +5,7 @@
    Security: Uses DOM-based sanitization to prevent XSS from config payloads.
    A11y: WCAG compliant (ARIA landmarks, focus states, screen reader optimized).
    Performance: Granular LCP prioritization and layout-shift prevention.
+   Local Delivery: Dynamically identifies city pages to show localized availability.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -41,8 +42,12 @@ export const init = (node, customConfig = {}) => {
     }
 
     const headingText = sanitizeHTML(config.heading);
-    // Generate a unique ID to link the section to its heading for screen readers
     const headingId = `catalog-heading-${Math.random().toString(36).substring(2, 9)}`;
+
+    // Detect delivery context automatically based on the current page URL path
+    const currentPath = window.location.pathname.toLowerCase();
+    const isAccraPage = currentPath.includes('accra.html');
+    const isTamalePage = currentPath.includes('tamale.html');
 
     const productsHTML = products.map((product, index) => {
         const title = sanitizeHTML(product.title);
@@ -51,21 +56,35 @@ export const init = (node, customConfig = {}) => {
         const basePrice = parseFloat(product.price || 0);
         const discount = product.subscriptionDiscount ? parseFloat(product.subscriptionDiscount) : 0;
         
-        // Granular Loading Strategy for Critical Rendering Path
         let loadingStrategy = '';
         if (index === 0) {
-            // Most likely LCP candidate: force highest network priority
             loadingStrategy = 'loading="eager" fetchpriority="high" decoding="sync"';
         } else if (index < 4) {
-            // Visible "above the fold" on desktop: load immediately, standard priority
             loadingStrategy = 'loading="eager" fetchpriority="auto" decoding="sync"';
         } else {
-            // Off-screen elements: defer completely until scrolled near
             loadingStrategy = 'loading="lazy" fetchpriority="low" decoding="async"';
         }
 
         let subInfoHTML = '';
+        let availabilityHTML = '';
         let actionBtnHTML = '';
+
+        // Local Delivery Logic: Evaluate product restrictions based on the page context
+        let isAvailableLocally = true;
+        if (isAccraPage && product.hasOwnProperty('inAccra') && !product.inAccra) {
+            isAvailableLocally = false;
+        } else if (isTamalePage && product.hasOwnProperty('inTamale') && !product.inTamale) {
+            isAvailableLocally = false;
+        }
+
+        // Render localized alert if product is excluded from the current city
+        if (!isAvailableLocally) {
+            availabilityHTML = `
+                <div class="cdlv-catalog-grid__status-banner" role="alert">
+                    NOT AVAILABLE
+                </div>
+            `;
+        }
 
         if (!product.hideActions) {
             if (discount > 0) {
@@ -80,7 +99,6 @@ export const init = (node, customConfig = {}) => {
             const isOOS = product.isOutOfStock;
             const btnText = isOOS ? 'Out of Stock' : 'Add to Cart';
             const btnClass = isOOS ? 'cdlv-btn--disabled' : 'cdlv-btn--primary';
-            // Strictly apply both aria-disabled and the HTML disabled attribute
             const disabledState = isOOS ? 'disabled aria-disabled="true" tabindex="-1"' : '';
 
             actionBtnHTML = `
@@ -90,7 +108,6 @@ export const init = (node, customConfig = {}) => {
             `;
         }
 
-        // SEO: Fallback to the product title for alt text if a specific alt description isn't provided
         const altText = sanitizeHTML(product.altText || product.title);
 
         return `
@@ -109,16 +126,15 @@ export const init = (node, customConfig = {}) => {
                     </h3>
                     <p class="cdlv-catalog-grid__price">from <strong>GHS ${sanitizeHTML(basePrice.toFixed(2))}</strong></p>
                     ${subInfoHTML}
+                    ${availabilityHTML}
                     ${actionBtnHTML}
                 </div>
             </article>
         `;
     }).join('');
 
-    // Hook into the global image-render.js engine
     node.setAttribute('data-image-sync', 'true');
 
-    // aria-labelledby connects the section to the h2 for semantic grouping
     node.innerHTML = `
         <section class="cdlv-catalog-grid animate-enter" aria-labelledby="${headingId}">
             <header class="cdlv-catalog-grid__header">

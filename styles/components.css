@@ -1387,6 +1387,20 @@
   display: block;
 }
 
+.cdlv-catalog-grid__status-banner {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-accent); /* High-contrast core palette matching the headers */
+  padding-block: var(--spacing-xs);
+  margin-top: auto; /* Pushes the notice down directly above the button */
+  margin-bottom: var(--spacing-xs);
+}
+
 .cdlv-catalog-grid__price {
   font-size: var(--font-size-small);
   color: var(--color-text-dark);
