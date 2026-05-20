@@ -1659,9 +1659,17 @@ stacking that expands to a side-by-side layout on desktop.
 
 .cdlv-article-feed {
 width: 100%;
-max-width: 1500px;
+max-width: 2000px;
 margin-inline: auto;
 padding-block: var(--spacing-md);
+}
+
+.cdlv-article-feed__heading {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-h2);
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-md);
+    line-height: 1.2;
 }
 
 .cdlv-article-feed__list {

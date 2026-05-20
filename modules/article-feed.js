@@ -22,6 +22,7 @@ const sanitizeText = (str) => {
 };
 
 const defaultConfig = {
+    heading: "All Posts",
     articles: [
         {
             title: "The Art of the Morning Ritual",
@@ -67,7 +68,13 @@ export const init = (node, customConfig = {}) => {
 
     // Build the structural HTML using template literals
     const moduleHTML = `
-        <section class="cdlv-article-feed" aria-label="Latest Articles">
+        <section class="cdlv-article-feed" aria-labelledby="article-feed-heading">
+            ${config.heading ? `
+                <h2 id="article-feed-heading" class="cdlv-article-feed__heading">
+                    ${sanitizeText(config.heading)}
+                </h2>
+            ` : ''}
+            
             <ul class="cdlv-article-feed__list">
                 ${config.articles.map(article => `
                     <li class="cdlv-article-feed__item">
