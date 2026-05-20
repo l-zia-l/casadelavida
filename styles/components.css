@@ -1302,6 +1302,8 @@
   flex-direction: column;
   gap: var(--spacing-md);
   margin-block: var(--spacing-xl);
+  
+  /* Full-bleed breakout mechanics */
   width: 100vw;
   margin-left: calc(50% - 50vw);
   padding-inline: var(--layout-gutter);
@@ -1320,8 +1322,9 @@
 
 .cdlv-catalog-grid__items {
   display: grid;
-  /* Baseline mobile: 2 columns */
   grid-template-columns: repeat(2, 1fr);
+  /* HARDENING: Forces Safari to calculate a fixed track height boundary for rows */
+  grid-auto-rows: 1fr;
   gap: var(--spacing-sm);
   width: 100%;
 }
@@ -1333,7 +1336,10 @@
   border-radius: var(--radius-strict);
   overflow: hidden;
   transition: transform var(--transition-base);
-  height: 100%; 
+  
+  /* HARDENING: Prevents infinite height expansion in WebKit engines */
+  height: 100%;
+  min-height: 0;
 }
 
 .cdlv-catalog-grid__card:hover {
@@ -1363,7 +1369,8 @@
   padding-block: var(--spacing-sm);
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  /* HARDENING: Establishes a predictable, uncollapsible interior flexible container */
+  flex: 1 1 auto;
   min-height: 0;
 }
 
@@ -1371,8 +1378,13 @@
   font-family: var(--font-family-body);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
-  color: var(--color-text-dark);
   margin-bottom: calc(var(--spacing-xs) / 2);
+}
+
+/* HARDENING: Prevents link element color inheritance dropouts on mobile Safari */
+.cdlv-catalog-grid__item-title a {
+  color: var(--color-text-dark);
+  display: block;
 }
 
 .cdlv-catalog-grid__price {
@@ -1414,7 +1426,7 @@
   cursor: pointer;
   border-radius: var(--radius-strict);
   width: 100%;
-  margin-top: auto; 
+  margin-top: auto; /* Clean baseline alignment across rows */
   transition: background-color var(--transition-base), color var(--transition-base);
 }
 
@@ -1435,6 +1447,18 @@
   pointer-events: none;
 }
 
+/* Focus and Accessibility Management */
+.cdlv-catalog-grid__link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-strict);
+}
+
+.cdlv-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
 /* Responsive Scaling to 4 Columns & Side Header Shift */
 @media (min-width: 768px) {
   .cdlv-catalog-grid__items {
@@ -1446,7 +1470,6 @@
 @media (min-width: 1024px) {
   .cdlv-catalog-grid {
     display: grid;
-    /* Keeps the header width rigid while passing remaining space to products */
     grid-template-columns: clamp(220px, 22vw, 320px) 1fr;
     gap: var(--spacing-xl);
     align-items: start;
@@ -1464,21 +1487,7 @@
   }
 }
 
-/*  MODULE: CATALOG GRID (A11y Enhancements) */
-
-/* 1. Explicit Focus Management */
-.cdlv-catalog-grid__link:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 4px;
-  border-radius: var(--radius-strict);
-}
-
-.cdlv-btn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 4px;
-}
-
-/* 2. Motion Sensitivity Compliance */
+/* Motion Sensitivity Compliance */
 @media (prefers-reduced-motion: reduce) {
   .cdlv-catalog-grid__card:hover {
     transform: none;
