@@ -33,7 +33,8 @@ const sanitizeUrl = (url) => {
 };
 
 const defaultConfig = {
-    headingLevel: "h2", // SEO: Allows h1, h2, h3, etc., based on page placement
+    layout: "image-right", // Options: "image-right" | "image-left"
+    headingLevel: "h2", 
     subtitle: "Our Story",
     title: "Supporting Women's Health",
     content: [
@@ -43,8 +44,9 @@ const defaultConfig = {
     ],
     imageSrc: "assets/images/logo.png",
     imageAlt: "Casa De La Vida Logo",
-    ctaText: "", // SEO: Optional crawlable anchor text
-    ctaLink: "", // SEO: Optional crawlable href destination
+    showCTA: true, // Toggle to quickly enable/disable the button
+    ctaText: "Discover More", 
+    ctaLink: "about-us.html", 
     isLCP: false 
 };
 
@@ -66,8 +68,9 @@ export const init = (node, customConfig = {}) => {
     const imageLoaderClass = config.isLCP ? '' : 'u-img-loader';
     const textAnimateClass = config.isLCP ? '' : 'animate-enter';
 
-    // SEO: Ensure heading level is strictly alphanumeric to prevent injection, default to h2
     const safeHeadingLevel = /^[a-zA-Z0-9]+$/.test(config.headingLevel) ? config.headingLevel.toLowerCase() : 'h2';
+    // Ensure the layout class is safe and fallback to default if a typo occurs
+    const layoutModifier = config.layout === "image-left" ? "image-left" : "image-right";
 
     const renderContent = (contentData) => {
         if (Array.isArray(contentData)) {
@@ -78,16 +81,15 @@ export const init = (node, customConfig = {}) => {
         return `<p class="cdlv-img-right-text-left__body">${sanitizeText(contentData)}</p>`;
     };
 
-    // SEO: Semantic internal linking (Only renders if both text and link are provided)
     const renderCTA = () => {
-        if (config.ctaText && config.ctaLink) {
+        if (config.showCTA && config.ctaText && config.ctaLink) {
             return `<a href="${sanitizeUrl(config.ctaLink)}" class="cdlv-img-right-text-left__cta">${sanitizeText(config.ctaText)}</a>`;
         }
         return '';
     };
 
     const template = `
-        <section class="cdlv-img-right-text-left u-fill-width" aria-labelledby="${titleId}">
+        <section class="cdlv-img-right-text-left cdlv-img-right-text-left--${layoutModifier} u-fill-width" aria-labelledby="${titleId}">
             <div class="container-fluid cdlv-img-right-text-left__grid">
                 
                 <article class="cdlv-img-right-text-left__content ${textAnimateClass}">

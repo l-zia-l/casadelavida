@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MODULE: HERO VIDEO (modules/hero-video.js)
+   MODULE: HERO VIDEO (modules/hero-video.js) 
    Architecture: Exportable ES Module. Injects a full-width video block.
    Security: Implements DOMPurify-style text sanitization to mitigate XSS 
    vulnerabilities. Validates URL structures before DOM insertion.
@@ -56,7 +56,6 @@ export const init = (node, customConfig = {}) => {
     
     const priorityAttrs = config.isPriority ? 'fetchpriority="high" preload="auto"' : 'preload="metadata"';
     
-    // playsinline is non-negotiable for iOS to prevent fullscreen hijacking
     const videoAttrs = [
         'playsinline', 
         willAutoplay ? 'autoplay' : '',
@@ -67,6 +66,13 @@ export const init = (node, customConfig = {}) => {
 
     const controlsHTML = config.controls ? `
         <div class="cdlv-hero-video__controls" role="group" aria-label="Video Controls">
+            <button class="cdlv-hero-video__control-btn js-cdlv-rewind" aria-label="Rewind 10 seconds">
+                <svg class="cdlv-hero-video__control-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 19 2 12 11 5 11 19"></polygon>
+                    <polygon points="22 19 13 12 22 5 22 19"></polygon>
+                </svg>
+            </button>
+
             <button class="cdlv-hero-video__control-btn js-cdlv-play" aria-label="${willAutoplay ? 'Pause video' : 'Play video'}">
                 <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-play" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="currentColor">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -76,6 +82,14 @@ export const init = (node, customConfig = {}) => {
                     <rect x="14" y="4" width="4" height="16"></rect>
                 </svg>
             </button>
+
+            <button class="cdlv-hero-video__control-btn js-cdlv-forward" aria-label="Skip forward 10 seconds">
+                <svg class="cdlv-hero-video__control-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 19 22 12 13 5 13 19"></polygon>
+                    <polygon points="2 19 11 12 2 5 2 19"></polygon>
+                </svg>
+            </button>
+
             <button class="cdlv-hero-video__control-btn js-cdlv-mute" aria-label="${config.muted ? 'Unmute video' : 'Mute video'}">
                 <svg class="cdlv-hero-video__control-icon cdlv-hero-video__icon-unmute" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square">
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -115,8 +129,9 @@ export const init = (node, customConfig = {}) => {
     }
     sourcesHTML += `<source src="${buildPath(config.videoSrc)}" type="video/mp4">`;
 
+    // Replaced .u-fill-screen with .u-fill-width to allow the 60vh constraint to apply
     const moduleHTML = `
-        <section class="cdlv-hero-video u-fill-screen ${willAutoplay ? 'is-playing' : ''} ${config.muted ? 'is-muted' : ''}" aria-labelledby="hero-video-heading-${node.id || 'feature'}">
+        <section class="cdlv-hero-video u-fill-width ${willAutoplay ? 'is-playing' : ''} ${config.muted ? 'is-muted' : ''}" aria-labelledby="hero-video-heading-${node.id || 'feature'}">
             ${headingHTML.replace('class="visually-hidden"', `id="hero-video-heading-${node.id || 'feature'}" class="visually-hidden"`)}
             <video 
                 class="cdlv-hero-video__media" 
@@ -136,36 +151,50 @@ export const init = (node, customConfig = {}) => {
     node.innerHTML = moduleHTML;
 
     // ==========================================
-    // THE IOS SAFARI HOTFIX
+    // BIND INTERACTIONS & IOS FIX
     // ==========================================
     const section = node.querySelector('.cdlv-hero-video');
     const video = node.querySelector('.cdlv-hero-video__media');
 
     if (video) {
-        // Fix 1: Explicitly force the DOM properties, bypassing HTML attributes
         if (config.muted) {
             video.muted = true;
             video.defaultMuted = true;
         }
 
-        // Fix 2: Manually kickstart the play Promise for injected elements
         if (willAutoplay) {
             const playPromise = video.play();
             if (playPromise !== undefined) {
                 playPromise.catch((error) => {
-                    // iOS will throw this error if the phone is in Low Power Mode
-                    // The video will fail gracefully and show the poster image instead
-                    console.info('iOS Autoplay prevented (likely Low Power Mode):', error);
+                    console.info('Autoplay prevented:', error);
                     section.classList.remove('is-playing');
                 });
             }
         }
     }
 
-    // Bind Controls Interactions
     if (config.controls && video) {
         const playBtn = node.querySelector('.js-cdlv-play');
         const muteBtn = node.querySelector('.js-cdlv-mute');
+        const rewindBtn = node.querySelector('.js-cdlv-rewind');
+        const forwardBtn = node.querySelector('.js-cdlv-forward');
+
+        const SKIP_TIME = 10; // Jump by 10 seconds
+
+        if (rewindBtn) {
+            rewindBtn.addEventListener('click', () => {
+                video.currentTime = Math.max(0, video.currentTime - SKIP_TIME);
+            });
+        }
+
+        if (forwardBtn) {
+            forwardBtn.addEventListener('click', () => {
+                // Ensure we don't skip past the end of the video duration
+                if (video.duration) {
+                    video.currentTime = Math.min(video.duration, video.currentTime + SKIP_TIME);
+                }
+            });
+        }
 
         if (playBtn) {
             playBtn.addEventListener('click', () => {

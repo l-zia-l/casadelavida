@@ -596,7 +596,7 @@
 }
 
 /* ==========================================================================
-   MODULE: HERO VIDEO (styles/components.css) - PERFORMANCE OPTIMIZED
+   MODULE: HERO VIDEO (styles/components.css) - 60VH & EXTENDED CONTROLS
    Architecture: BEM Naming Convention.
    Performance: Hardware acceleration forced via translateZ(0) for GPU 
    layering. Layout thrashing eliminated by restricting animations to 
@@ -606,6 +606,9 @@
 .cdlv-hero-video {
   position: relative;
   overflow: hidden;
+  /* Limits height to 60% of the viewport */
+  height: 60vh;
+  height: 60svh; 
   background-color: var(--color-neutral-bg);
   display: flex;
   align-items: flex-end; 
@@ -701,6 +704,10 @@
 .cdlv-hero-video__control-btn:hover {
   color: var(--color-text-dark);
   transform: scale(1.1) translateZ(0); /* Hardware accelerated scale */
+}
+
+.cdlv-hero-video__control-btn:active {
+  transform: scale(0.95) translateZ(0); /* Visual feedback for rapid tapping on skip */
 }
 
 .cdlv-hero-video__control-btn:focus-visible {
@@ -1491,10 +1498,8 @@
 
 /* ==========================================================================
    COMPONENT: IMAGE RIGHT TEXT LEFT
-   Architecture: Fluid CSS Grid layout. Mobile-first stacking, seamlessly 
-   expanding to a two-column full-bleed layout on larger viewports.
-   Performance: Hardware-accelerated transforms for entrance animations 
-   and native Grid interpolation to avoid JavaScript layout thrashing.
+   Architecture: Fluid CSS Grid layout. Mobile-first stacking.
+   Modifiers: Controls visual order via `--image-left` and `--image-right`.
    ========================================================================== */
 
 .cdlv-img-right-text-left {
@@ -1511,10 +1516,30 @@
     align-items: center;
 }
 
+/* 
+   DESKTOP GRID LOGIC:
+   By default (Image Right), Content is column 1 (1.1fr) and Media is column 2 (1fr).
+*/
 @media (min-width: 992px) {
-    .cdlv-img-right-text-left__grid {
-        grid-template-columns: 1.1fr 1fr;
+    /* DEFAULT: Image Right Layout */
+    .cdlv-img-right-text-left--image-right .cdlv-img-right-text-left__grid {
+        grid-template-columns: 1.1fr 1fr; 
         gap: var(--spacing-sm); 
+    }
+
+    /* MODIFIER: Image Left Layout */
+    .cdlv-img-right-text-left--image-left .cdlv-img-right-text-left__grid {
+        grid-template-columns: 1fr 1.1fr; /* Image gets 1fr, Text gets 1.1fr */
+        gap: var(--spacing-sm); 
+    }
+
+    /* Visually swap the order using Flex/Grid order */
+    .cdlv-img-right-text-left--image-left .cdlv-img-right-text-left__content {
+        order: 2; /* Move text to the right side */
+    }
+
+    .cdlv-img-right-text-left--image-left .cdlv-img-right-text-left__media {
+        order: 1; /* Move image to the left side */
     }
 }
 
@@ -1523,7 +1548,7 @@
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    grid-row: 2; 
+    grid-row: 2; /* Mobile: Text is always below the image */
     width: 100%;
     margin-inline: auto;
 }
@@ -1556,10 +1581,10 @@
     margin-bottom: var(--spacing-sm);
 }
 
-/* --- SEO: CRAWLABLE ANCHOR LINK STYLING --- */
+/* --- BUTTON / CTA --- */
 .cdlv-img-right-text-left__cta {
     display: inline-block;
-    align-self: center; /* Center horizontally since text-align is center */
+    align-self: center; 
     margin-top: var(--spacing-xs);
     padding: 0.75rem 2rem;
     background-color: var(--color-accent);
@@ -1584,7 +1609,7 @@
     width: 100%;
     border-radius: var(--radius-strict);
     overflow: hidden;
-    grid-row: 1;
+    grid-row: 1; /* Mobile: Image is always on top */
     display: flex;
     justify-content: center;
     align-items: center;
