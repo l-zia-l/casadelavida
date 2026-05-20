@@ -7,7 +7,7 @@
                 with the global image engine for grouped lazy-loading/reveals.
    ========================================================================== */
 
-import { buildPath } from '../utils/paths.js';
+import { buildPath } from '../utils/path.js';
 
 /**
  * Strips HTML tags from strings to prevent XSS injection via configs.
