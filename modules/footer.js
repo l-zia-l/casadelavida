@@ -25,16 +25,7 @@ const footerConfig = {
       links: [
         { label: 'About Us', url: buildPath('about-us.html') },
         { label: 'Blog', url: buildPath('blog/index.html') },
-        { label: 'Shop All', url: buildPath('shop.html') }
-      ]
-    },
-    {
-      title: 'Services',
-      id: 'col-services',
-      links: [
-        { label: 'Wellness Boxes', url: buildPath('shop/wellness-boxes.html') },
-        { label: 'Teas & More', url: buildPath('shop/individual-wellness-products.html') },
-        { label: 'Accessories', url: buildPath('shop/all-accessories.html') },
+        { label: 'Shop All', url: buildPath('shop.html') },
         { label: 'Book A Consultation', url: buildPath('appointments.html') }
       ]
     },
