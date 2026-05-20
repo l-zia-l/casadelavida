@@ -24,7 +24,7 @@ const footerConfig = {
       id: 'col-brand',
       links: [
         { label: 'About Us', url: buildPath('about-us.html') },
-        { label: 'Blog', url: buildPath('blog.html') },
+        { label: 'Blog', url: buildPath('blog/index.html') },
         { label: 'Shop All', url: buildPath('shop.html') }
       ]
     },
