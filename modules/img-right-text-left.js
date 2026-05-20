@@ -33,6 +33,7 @@ const sanitizeUrl = (url) => {
 };
 
 const defaultConfig = {
+    headingLevel: "h2", // SEO: Allows h1, h2, h3, etc., based on page placement
     subtitle: "Our Story",
     title: "Supporting Women's Health",
     content: [
@@ -42,7 +43,9 @@ const defaultConfig = {
     ],
     imageSrc: "assets/images/logo.png",
     imageAlt: "Casa De La Vida Logo",
-    isLCP: false // PERFORMANCE: Set to true if this module is placed above the fold
+    ctaText: "", // SEO: Optional crawlable anchor text
+    ctaLink: "", // SEO: Optional crawlable href destination
+    isLCP: false 
 };
 
 /**
@@ -53,17 +56,18 @@ const defaultConfig = {
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     
-    // A11y Setup
     const instanceId = Math.random().toString(36).substring(2, 9);
     const titleId = `cdlv-section-title-${instanceId}`;
     const safeAlt = sanitizeText(config.imageAlt);
     const ariaHiddenAttr = safeAlt === "" ? `aria-hidden="true" role="presentation"` : "";
     
-    // Performance: Optimize image loading strategy based on viewport position
     const imageLoadingAttr = config.isLCP ? 'fetchpriority="high"' : 'loading="lazy"';
     const imageRevealClass = config.isLCP ? '' : 'u-img-reveal';
     const imageLoaderClass = config.isLCP ? '' : 'u-img-loader';
-    const textAnimateClass = config.isLCP ? '' : 'animate-enter'; // Skip text animation if above fold for instant FCP
+    const textAnimateClass = config.isLCP ? '' : 'animate-enter';
+
+    // SEO: Ensure heading level is strictly alphanumeric to prevent injection, default to h2
+    const safeHeadingLevel = /^[a-zA-Z0-9]+$/.test(config.headingLevel) ? config.headingLevel.toLowerCase() : 'h2';
 
     const renderContent = (contentData) => {
         if (Array.isArray(contentData)) {
@@ -74,14 +78,23 @@ export const init = (node, customConfig = {}) => {
         return `<p class="cdlv-img-right-text-left__body">${sanitizeText(contentData)}</p>`;
     };
 
+    // SEO: Semantic internal linking (Only renders if both text and link are provided)
+    const renderCTA = () => {
+        if (config.ctaText && config.ctaLink) {
+            return `<a href="${sanitizeUrl(config.ctaLink)}" class="cdlv-img-right-text-left__cta">${sanitizeText(config.ctaText)}</a>`;
+        }
+        return '';
+    };
+
     const template = `
         <section class="cdlv-img-right-text-left u-fill-width" aria-labelledby="${titleId}">
             <div class="container-fluid cdlv-img-right-text-left__grid">
                 
                 <article class="cdlv-img-right-text-left__content ${textAnimateClass}">
                     ${config.subtitle ? `<span class="cdlv-img-right-text-left__subtitle">${sanitizeText(config.subtitle)}</span>` : ''}
-                    <h2 id="${titleId}" class="cdlv-img-right-text-left__title">${sanitizeText(config.title)}</h2>
+                    <${safeHeadingLevel} id="${titleId}" class="cdlv-img-right-text-left__title">${sanitizeText(config.title)}</${safeHeadingLevel}>
                     ${renderContent(config.content)}
+                    ${renderCTA()}
                 </article>
 
                 <figure class="cdlv-img-right-text-left__media ${imageLoaderClass}">

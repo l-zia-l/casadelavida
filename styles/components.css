@@ -1556,6 +1556,29 @@
     margin-bottom: var(--spacing-sm);
 }
 
+/* --- SEO: CRAWLABLE ANCHOR LINK STYLING --- */
+.cdlv-img-right-text-left__cta {
+    display: inline-block;
+    align-self: center; /* Center horizontally since text-align is center */
+    margin-top: var(--spacing-xs);
+    padding: 0.75rem 2rem;
+    background-color: var(--color-accent);
+    color: var(--color-text-light);
+    font-family: var(--font-family-body);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-radius: var(--radius-strict);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    cursor: pointer;
+}
+
+.cdlv-img-right-text-left__cta:hover,
+.cdlv-img-right-text-left__cta:focus-visible {
+    background-color: var(--color-secondary);
+    color: var(--color-text-dark);
+    transform: translateY(-2px);
+}
+
 .cdlv-img-right-text-left__media {
     position: relative;
     width: 100%;
@@ -1581,7 +1604,6 @@
     border-radius: var(--radius-strict);
 }
 
-/* --- A11Y: REDUCED MOTION SAFEGUARD --- */
 @media (prefers-reduced-motion: reduce) {
     .cdlv-img-right-text-left__content.animate-enter {
         animation: none !important;
