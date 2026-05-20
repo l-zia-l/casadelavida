@@ -1501,6 +1501,7 @@
     padding-block: var(--spacing-md);
     background-color: var(--color-primary);
     overflow: hidden; 
+    contain: layout style;
 }
 
 .cdlv-img-right-text-left__grid {
@@ -1510,12 +1511,9 @@
     align-items: center;
 }
 
-/* Fluid expansion to dual-column layout for desktop environments */
 @media (min-width: 992px) {
     .cdlv-img-right-text-left__grid {
-        /* Gives slightly more space to the text column to balance the huge image */
         grid-template-columns: 1.1fr 1fr;
-        /* Using a larger gap since the layout is wider now */
         gap: var(--spacing-sm); 
     }
 }
@@ -1558,16 +1556,12 @@
     margin-bottom: var(--spacing-sm);
 }
 
-/* --- UPDATED IMAGE LOGIC BELOW --- */
-
 .cdlv-img-right-text-left__media {
     position: relative;
     width: 100%;
-    /* Removed the fixed min-height. The container will now naturally hug the image. */
     border-radius: var(--radius-strict);
     overflow: hidden;
     grid-row: 1;
-    /* Center the image within the grid cell if it's narrower than the column */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1580,12 +1574,20 @@
 }
 
 .cdlv-img-right-text-left__image {
-    /* Removed position: absolute; top: 0; left: 0; height: 100%; */
     display: block;
     width: 100%;
-    height: auto; /* This guarantees the image maintains its exact proportions */
-    object-fit: contain; /* Failsafe: ensures no cropping happens under any circumstance */
+    height: auto; 
+    object-fit: contain; 
     border-radius: var(--radius-strict);
+}
+
+/* --- A11Y: REDUCED MOTION SAFEGUARD --- */
+@media (prefers-reduced-motion: reduce) {
+    .cdlv-img-right-text-left__content.animate-enter {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
 }
 
 /* ==========================================================================

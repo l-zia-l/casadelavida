@@ -32,7 +32,6 @@ const sanitizeUrl = (url) => {
     return encodeURI(cleanUrl);
 };
 
-// Default configuration providing the brand's origin story
 const defaultConfig = {
     subtitle: "Our Story",
     title: "Supporting Women's Health",
@@ -42,7 +41,8 @@ const defaultConfig = {
         "Because taking care of yourself is never a luxury; it is an absolute necessity. Casa De La Vida stands as an open invitation to step into the soft life—to slow down, deeply nurture your body, and beautifully recharge for everything that life asks of you."
     ],
     imageSrc: "assets/images/logo.png",
-    imageAlt: "Casa De La Vida Logo"
+    imageAlt: "Casa De La Vida Logo",
+    isLCP: false // PERFORMANCE: Set to true if this module is placed above the fold
 };
 
 /**
@@ -53,7 +53,18 @@ const defaultConfig = {
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     
-    // Helper to render content whether it's a string or an array of paragraphs
+    // A11y Setup
+    const instanceId = Math.random().toString(36).substring(2, 9);
+    const titleId = `cdlv-section-title-${instanceId}`;
+    const safeAlt = sanitizeText(config.imageAlt);
+    const ariaHiddenAttr = safeAlt === "" ? `aria-hidden="true" role="presentation"` : "";
+    
+    // Performance: Optimize image loading strategy based on viewport position
+    const imageLoadingAttr = config.isLCP ? 'fetchpriority="high"' : 'loading="lazy"';
+    const imageRevealClass = config.isLCP ? '' : 'u-img-reveal';
+    const imageLoaderClass = config.isLCP ? '' : 'u-img-loader';
+    const textAnimateClass = config.isLCP ? '' : 'animate-enter'; // Skip text animation if above fold for instant FCP
+
     const renderContent = (contentData) => {
         if (Array.isArray(contentData)) {
             return contentData.map(paragraph => 
@@ -62,30 +73,28 @@ export const init = (node, customConfig = {}) => {
         }
         return `<p class="cdlv-img-right-text-left__body">${sanitizeText(contentData)}</p>`;
     };
-    
-    // 1. Build HTML Structure
-    // Swapped .container for .container-fluid to break the max-width limits
+
     const template = `
-        <section class="cdlv-img-right-text-left u-fill-width">
+        <section class="cdlv-img-right-text-left u-fill-width" aria-labelledby="${titleId}">
             <div class="container-fluid cdlv-img-right-text-left__grid">
                 
-                <article class="cdlv-img-right-text-left__content animate-enter">
+                <article class="cdlv-img-right-text-left__content ${textAnimateClass}">
                     ${config.subtitle ? `<span class="cdlv-img-right-text-left__subtitle">${sanitizeText(config.subtitle)}</span>` : ''}
-                    <h2 class="cdlv-img-right-text-left__title">${sanitizeText(config.title)}</h2>
+                    <h2 id="${titleId}" class="cdlv-img-right-text-left__title">${sanitizeText(config.title)}</h2>
                     ${renderContent(config.content)}
                 </article>
 
-                <figure class="cdlv-img-right-text-left__media u-img-loader">
+                <figure class="cdlv-img-right-text-left__media ${imageLoaderClass}">
                     <img src="${sanitizeUrl(config.imageSrc)}" 
-                         alt="${sanitizeText(config.imageAlt)}" 
-                         class="cdlv-img-right-text-left__image u-img-reveal" 
-                         loading="lazy">
+                         alt="${safeAlt}" 
+                         ${ariaHiddenAttr}
+                         ${imageLoadingAttr}
+                         class="cdlv-img-right-text-left__image ${imageRevealClass}">
                 </figure>
                 
             </div>
         </section>
     `;
 
-    // 2. Inject Fragment
     node.innerHTML = template;
 };
