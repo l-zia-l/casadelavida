@@ -1648,6 +1648,126 @@
 }
 
 /* ==========================================================================
+CSS BLOCK: ARTICLE FEED (styles/components.css)
+Architecture: BEM methodology (.cdlv-article-feed) for strict encapsulation.
+Uses native CSS Grid for layout interpolation and structural
+integrity. Relies on global CSS variables for fluid typography,
+spacing, and color palettes.
+Aesthetics: Strict box model (0px border-radius), high contrast, mobile-first
+stacking that expands to a side-by-side layout on desktop.
+========================================================================== */
+
+.cdlv-article-feed {
+width: 100%;
+max-width: 1500px;
+margin-inline: auto;
+padding-block: var(--spacing-md);
+}
+
+.cdlv-article-feed__list {
+list-style: none;
+display: flex;
+flex-direction: column;
+}
+
+.cdlv-article-feed__item {
+position: relative;
+border-bottom: 1px solid var(--color-text-dark);
+transition: background-color var(--transition-fast);
+}
+
+.cdlv-article-feed__item:first-child {
+border-top: 1px solid var(--color-text-dark);
+}
+
+.cdlv-article-feed__item:hover {
+background-color: rgba(174, 191, 178, 0.1);
+}
+
+.cdlv-article-feed__article {
+display: grid;
+grid-template-columns: 1fr;
+gap: var(--spacing-sm);
+padding-block: var(--spacing-md);
+}
+
+/* Tablet & Desktop Layout */
+@media (min-width: 768px) {
+.cdlv-article-feed__article {
+grid-template-columns: min(25vw, 300px) 1fr;
+gap: var(--spacing-md);
+align-items: center;
+}
+}
+
+.cdlv-article-feed__image-wrapper {
+width: 100%;
+aspect-ratio: 16 / 9;
+overflow: hidden;
+background-color: var(--color-neutral-bg);
+}
+
+@media (min-width: 768px) {
+.cdlv-article-feed__image-wrapper {
+aspect-ratio: 4 / 3;
+}
+}
+
+.cdlv-article-feed__image {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.cdlv-article-feed__content {
+display: flex;
+flex-direction: column;
+justify-content: center;
+}
+
+.cdlv-article-feed__title {
+font-family: var(--font-family-heading);
+font-size: var(--font-size-h3);
+color: var(--color-accent);
+margin-bottom: var(--spacing-xs);
+line-height: 1.1;
+}
+
+/* Pseudo-element to make the whole card clickable via the title link */
+.cdlv-article-feed__link::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 1;
+}
+
+.cdlv-article-feed__tags {
+list-style: none;
+display: flex;
+flex-wrap: wrap;
+gap: calc(var(--spacing-xs) / 2);
+margin-top: var(--spacing-xs);
+position: relative;
+z-index: 2; /* Keeps tags above the full-card clickable area in case we add hover states to them later */
+}
+
+.cdlv-article-feed__tag {
+background-color: var(--color-secondary);
+color: var(--color-text-light);
+font-size: var(--font-size-small);
+font-family: var(--font-family-body);
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: var(--letter-spacing-wide);
+padding: 0.25rem 0.75rem;
+border-radius: var(--radius-strict);
+display: inline-block;
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 

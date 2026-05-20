@@ -40,11 +40,11 @@ and assign it to the `innerHTML` of the target container.
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- Content Security Policy (CSP) -->
-  <meta http-equiv="Content-Security-Policy" 
-        content="default-src 'self'; 
-                 script-src 'self' 'module';
-                 img-src 'self' data: https:; 
-                 connect-src 'self' https://*.supabase.co;">
+   <meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; 
+               script-src 'self';
+               img-src 'self' data: https:; 
+               connect-src 'self' https://*.supabase.co;">
 
   <title>Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey</title>
 
@@ -88,9 +88,9 @@ and assign it to the `innerHTML` of the target container.
   }
   </script>
 
-  <link rel="icon" href="assets/images/favicon.png" type="image/png">
+  <link rel="icon" href="../assets/images/favicon.png" type="image/png">
   
-  <link rel="apple-touch-icon" href="assets/images/favicon.png">
+  <link rel="apple-touch-icon" href="../assets/images/favicon.png">
 
   <link rel="preconnect" href="https://*.supabase.co" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -107,6 +107,7 @@ and assign it to the `innerHTML` of the target container.
   <script type="module" src="../utils/auth.js" defer></script>
   <script type="module" src="../utils/cart.js" defer></script>
   <script type="module" src="../utils/components.js" defer></script>
+  <script type="module" src="../utils/path.js" defer></script>
   <script type="module" src="../utils/image-render.js" defer></script>
 </head>
 
@@ -118,80 +119,8 @@ and assign it to the `innerHTML` of the target container.
   <main id="main-content" class="container">
     <div data-module="hero-compact" 
          data-theme="dark"
-         data-config='{"headingLevel": "h1", "heading": "The Wellness Journal", "bgImage": "assets/images/products/item_6.webp", "imageAlt": "Aesthetic shot of a burning candle", "description": "Immerse yourself in the soft life lifestyle with articles on holistic health, tea rituals, and feminine wellness. Explore expert tips on fertility support, gentle detox, and mindful weight care.", "ctaText": "Join our newsletter for weekly wellness tips", "ctaLink": "newsletter-sign-up.html", "isPriority": true}'>
+         data-config='{"headingLevel": "h1", "heading": "5 Ways to Detoxify Naturally", "bgImage": "assets/images/products/item_7.jpg", "imageAlt": "Glass tea infuser", "description": "Explore how transforming your herbal tea consumption into an intentional ritual of comfort can promote deep mental relaxation. Discover the holistic benefits of incorporating feminine wellness practices into your daily soft life routine.", "ctaText": "Read Full Post", "ctaLink": "blog/cultivating-your-daily-tea-ritual.html", "isPriority": true}'>
     </div>
-
-    <div data-module="img-right-text-left" 
-     data-config='{
-       "layout": "image-left",
-       "subtitle": "Featured Article",
-       "title": "A Guide to Your First Fertility Ritual",
-       "content": "Learn about...",
-       "imageSrc": "assets/images/backgrounds/stock_3.webp",
-       "imageAlt": "Honey with a honey comb on a table with dried flowers.",
-       "showCTA": true,
-       "ctaText": "Read Now",
-       "ctaLink": "blog/cultivating-your-daily-tea-ritual.html"
-     }'>
-    </div>
-
-    <!-- Article Feed Module Injection -->
-    <div data-module="article-feed" 
-     data-config='{
-       "articles": [
-         {
-           "title": "The Science Behind Our Sleep Tea Blend",
-           "image": "assets/images/backgrounds/stock_2.webp",
-           "imageAlt": "A cup of calming chamomile tea before bed",
-           "link": "blog/the-science-behind-our-sleep-tea-blend.html",
-           "tags": ["Wellness", "Sleep"]
-         },
-         {
-           "title": "Why Raw Honey is Liquid Gold",
-           "image": "assets/images/products/item_4.webp",
-           "imageAlt": "Golden raw honey dripping from a wooden dipper",
-           "link": "blog/why-raw-honey-is-liquid-gold.html",
-           "tags": ["Sourcing", "Nutrition"]
-         },
-         {
-           "title": "5 Ways to Detoxify Naturally",
-           "image": "assets/images/backgrounds/stock_4.webp",
-           "imageAlt": "Fresh lemons and herbs on a cutting board",
-           "link": "blog/post-5-ways-to-detoxify-naturally.html",
-           "tags": ["Health", "Nutrition"]
-         }
-       ]
-     }'>
-    </div>
-
-    <section data-module="catalog-slider" data-image-sync data-config='{
-    "products": [
-        {
-            "title": "Premium Herbal Infusion",
-            "image": "assets/images/products/item_2.2.1.webp",
-            "alt": "The Premium Tea Leaves",
-            "actionLink": "shop/products/premium-herbal-infusion.html"
-        },
-        {
-            "title": "Honey Infused Tumeric",
-            "image": "assets/images/products/item_1.webp",
-            "alt": "Glass jar of creamy tumeric paste and black paper",
-            "actionLink": "shop/products/honey-infused-tumeric.html"
-        },
-        {
-            "title": "Saffron Infused Honey",
-            "image": "assets/images/products/item_4.webp",
-            "alt": "Saffron Infused Honey",
-            "actionLink": "shop/products/saffron-infused-honey.html"
-        },
-        {
-            "title": "Blackseed Infused Honey",
-            "image": "assets/images/products/item_4.2.webp",
-            "alt": "Blackseed Infused Honey",
-            "actionLink": "shop/products/blackseed-infused-honey.html"
-        }
-    ]
-    }'></section>
   </main>
 
   <!-- Footer Module Target -->
