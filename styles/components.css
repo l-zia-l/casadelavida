@@ -1498,7 +1498,7 @@
    ========================================================================== */
 
 .cdlv-img-right-text-left {
-    padding-block: var(--spacing-xl);
+    padding-block: var(--spacing-sm);
     background-color: var(--color-primary);
     overflow: hidden; 
 }
@@ -1526,7 +1526,7 @@
     justify-content: center;
     grid-row: 2; 
     /* Ensures text line-length remains optimal for reading even on ultra-wides */
-    max-width: 1200px;
+    width: 100%;
     margin-inline: auto;
 }
 
