@@ -35,10 +35,6 @@ const defaultConfig = {
             content: "We partner directly with organic farms and ethical apiaries across Ghana. For instance, our honey is harvested seasonally by local beekeepers, ensuring raw, unpasteurized quality that supports both the ecosystem and local economy."
         },
         {
-            title: "Why the stark, black and white design?",
-            content: "Life is noisy enough. We believe in removing visual clutter and distractions so the quality of the ingredients can speak for themselves. The contrast represents the balance we strive for in everyday wellness."
-        },
-        {
             title: "How does delivery work?",
             content: "We offer seamless local delivery in Accra and Tamale. Orders placed before 1 PM are eligible for same-day dispatch. We package everything in strictly minimalist, zero-waste materials because respecting the earth is part of the wellness cycle."
         }

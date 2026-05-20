@@ -1681,22 +1681,49 @@ flex-direction: column;
 .cdlv-article-feed__item {
 position: relative;
 border-bottom: 1px solid var(--color-text-dark);
-transition: background-color var(--transition-fast);
 }
 
 .cdlv-article-feed__item:first-child {
 border-top: 1px solid var(--color-text-dark);
 }
 
-.cdlv-article-feed__item:hover {
-background-color: rgba(174, 191, 178, 0.1);
+.cdlv-article-feed__item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(174, 191, 178, 0.1);
+    opacity: 0;
+    z-index: 0; /* Sits beneath the article content */
+    pointer-events: none; /* Prevents interference with clicks */
+    transition: opacity var(--transition-fast);
+    /* Note: We omit 'will-change' as requested; 'opacity' already defaults to the GPU compositor */
+}
+
+/* Trigger the GPU-accelerated opacity change on hover and keyboard focus */
+.cdlv-article-feed__item:hover::after,
+.cdlv-article-feed__item:focus-within::after {
+    opacity: 1;
+}
+
+/* Add this right below your existing .cdlv-article-feed__item:hover rule */
+
+.cdlv-article-feed__item:focus-within {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+}
+
+/* Optional: Remove the default focus ring from the actual text link so we don't have double outlines */
+.cdlv-article-feed__link:focus-visible {
+    outline: none; 
 }
 
 .cdlv-article-feed__article {
-display: grid;
-grid-template-columns: 1fr;
-gap: var(--spacing-sm);
-padding-block: var(--spacing-md);
+    display: grid;
+    position: relative;
+    z-index: 1; /* Elevates content above the pseudo-element */
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+    padding-block: var(--spacing-md);
 }
 
 /* Tablet & Desktop Layout */
@@ -1736,7 +1763,7 @@ justify-content: center;
 .cdlv-article-feed__title {
 font-family: var(--font-family-heading);
 font-size: var(--font-size-h3);
-color: var(--color-accent);
+color: var(--color-text-dark);
 margin-bottom: var(--spacing-xs);
 line-height: 1.1;
 }
@@ -1773,6 +1800,16 @@ letter-spacing: var(--letter-spacing-wide);
 padding: 0.25rem 0.75rem;
 border-radius: var(--radius-strict);
 display: inline-block;
+}
+
+.cdlv-article-feed__date {
+    display: block;
+    font-size: var(--font-size-small);
+    color: var(--color-text-dark);
+    opacity: 0.7;
+    margin-bottom: calc(var(--spacing-xs) / 2);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
 }
 
 /* ==========================================================================

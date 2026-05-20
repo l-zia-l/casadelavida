@@ -7,7 +7,7 @@
                 with the global image engine for grouped lazy-loading/reveals.
    ========================================================================== */
 
-import { buildPath } from '../utils/path.js';
+import { buildPath } from '../utils/paths.js';
 
 /**
  * Strips HTML tags from strings to prevent XSS injection via configs.
@@ -21,29 +21,25 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
+const sanitizeHeadingLevel = (level) => {
+    const validHeadings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+    return validHeadings.includes(level) ? level : 'h2';
+};
+
 const defaultConfig = {
     heading: "All Posts",
+    headingLevel: "h2", 
+    articleHeadingLevel: "h3", 
+    isPriority: false,
     articles: [
         {
             title: "The Art of the Morning Ritual",
+            date: "2026-05-15", // ISO 8601 format for search engines
+            displayDate: "May 15, 2026", // Human-readable format
             image: "assets/images/blog/morning-ritual.jpg",
-            imageAlt: "A steaming cup of tea next to a journal",
+            imageAlt: "A steaming cup of tea next to a wellness journal",
             link: "blog/post_1.html",
             tags: ["Wellness", "Routines"]
-        },
-        {
-            title: "Why Raw Honey is Liquid Gold",
-            image: "assets/images/blog/raw-honey.jpg",
-            imageAlt: "Golden raw honey dripping from a wooden dipper",
-            link: "blog/post_2.html",
-            tags: ["Nutrition", "Sourcing"]
-        },
-        {
-            title: "Holistic Approaches to Feminine Health",
-            image: "assets/images/blog/feminine-health.jpg",
-            imageAlt: "Botanical herbs spread out on a white surface",
-            link: "blog/post_3.html",
-            tags: ["Health", "Herbalism"]
         }
     ]
 };
@@ -54,50 +50,64 @@ const defaultConfig = {
  * @param {Object} customConfig - User-provided configuration.
  */
 export const init = (node, customConfig = {}) => {
-    // Data Validation
     if (customConfig.articles && !Array.isArray(customConfig.articles)) {
         console.error("Article Feed: 'articles' config must be an array.");
         customConfig.articles = defaultConfig.articles;
     }
 
     const config = { ...defaultConfig, ...customConfig };
+    const MainHeadingTag = sanitizeHeadingLevel(config.headingLevel);
+    const ArticleHeadingTag = sanitizeHeadingLevel(config.articleHeadingLevel);
 
-    // Set data-image-sync so the global observer (image-render.js)
-    // knows to reveal these images together.
     node.setAttribute('data-image-sync', 'true');
 
-    // Build the structural HTML using template literals
     const moduleHTML = `
         <section class="cdlv-article-feed" aria-labelledby="article-feed-heading">
             ${config.heading ? `
-                <h2 id="article-feed-heading" class="cdlv-article-feed__heading">
+                <${MainHeadingTag} id="article-feed-heading" class="cdlv-article-feed__heading">
                     ${sanitizeText(config.heading)}
-                </h2>
+                </${MainHeadingTag}>
             ` : ''}
             
             <ul class="cdlv-article-feed__list">
-                ${config.articles.map(article => `
+                ${config.articles.map((article, index) => {
+                    const isLcpElement = config.isPriority && index === 0;
+                    const loadingAttr = isLcpElement ? 'eager' : 'lazy';
+                    const fetchPriority = isLcpElement ? 'fetchpriority="high"' : '';
+                    
+                    return `
                     <li class="cdlv-article-feed__item">
                         <article class="cdlv-article-feed__article">
                             
-                            <div class="cdlv-article-feed__image-wrapper u-img-loader">
+                            <div class="cdlv-article-feed__image-wrapper u-img-loader" aria-hidden="true">
                                 <img 
                                     src="${buildPath(sanitizeText(article.image))}" 
-                                    alt="${sanitizeText(article.imageAlt)}" 
+                                    alt="${sanitizeText(article.imageAlt || '')}" 
                                     class="cdlv-article-feed__image u-img-reveal"
-                                    loading="lazy"
+                                    width="800" 
+                                    height="450"
+                                    loading="${loadingAttr}"
+                                    ${fetchPriority}
                                 />
                             </div>
 
                             <div class="cdlv-article-feed__content">
-                                <h3 class="cdlv-article-feed__title">
-                                    <a href="${buildPath(sanitizeText(article.link))}" class="cdlv-article-feed__link">
+                                <!-- SEO: Time element with machine-readable datetime -->
+                                ${article.date ? `
+                                    <time datetime="${sanitizeText(article.date)}" class="cdlv-article-feed__date">
+                                        ${sanitizeText(article.displayDate || article.date)}
+                                    </time>
+                                ` : ''}
+
+                                <${ArticleHeadingTag} class="cdlv-article-feed__title">
+                                    <!-- SEO: rel="bookmark" designates the permalink -->
+                                    <a href="${buildPath(sanitizeText(article.link))}" class="cdlv-article-feed__link" rel="bookmark">
                                         ${sanitizeText(article.title)}
                                     </a>
-                                </h3>
+                                </${ArticleHeadingTag}>
 
                                 ${article.tags && article.tags.length > 0 ? `
-                                    <ul class="cdlv-article-feed__tags" aria-label="Article tags">
+                                    <ul class="cdlv-article-feed__tags" aria-label="Tags for ${sanitizeText(article.title)}">
                                         ${article.tags.map(tag => `
                                             <li class="cdlv-article-feed__tag">${sanitizeText(tag)}</li>
                                         `).join('')}
@@ -107,11 +117,10 @@ export const init = (node, customConfig = {}) => {
 
                         </article>
                     </li>
-                `).join('')}
+                `}).join('')}
             </ul>
         </section>
     `;
 
-    // Inject fragment into the target node
     node.innerHTML = moduleHTML;
 };
