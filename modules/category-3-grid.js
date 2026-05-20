@@ -10,7 +10,7 @@
 
 const defaultConfig = {
   headingLevel: 'h2',
-  heading: 'New & Noteworthy',
+  heading: 'Ready to Start Your Journey?',
   isPriority: false, // NEW: Defaults to false, but allows eager loading if placed above the fold
   categories: [
     {

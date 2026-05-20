@@ -22,7 +22,7 @@ const sanitizeText = (str) => {
 // Default configurable text parameters
 const defaultConfig = {
     headingLevel: "h2", // Configurable for strict SEO hierarchy
-    heading: "Brighten Up Your Inbox",
+    heading: "",
     text: "Join our email list for fresh floral drops, curated picks and exclusive savings.",
     buttonText: "Sign Up",
     buttonLink: "newsletter-sign-up.html"
