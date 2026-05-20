@@ -253,7 +253,7 @@
   background-color: var(--color-accent);
   color: var(--color-text-light);
   font-family: var(--font-family-body);
-  margin-inline: calc(var(--layout-gutter) * -1);
+  margin-inline: var(--layout-gutter);
 }
 
 .cdlv-footer-heading {
