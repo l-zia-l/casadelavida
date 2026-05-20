@@ -22,7 +22,7 @@ const config = {
         left: [
             { label: 'Shop', url: buildPath('shop.html') },
             { label: 'Subscriptions', url: buildPath('subscriptions.html') },
-            { label: 'Blog', url: buildPath('blog/index.html') },
+            { label: 'Wellness Routine', url: buildPath('blog/index.html') },
             { label: 'Account', url: buildPath('account/index.html'), mobileOnly: true } 
         ],
         right: [
