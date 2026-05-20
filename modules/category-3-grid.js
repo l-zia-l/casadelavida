@@ -6,7 +6,7 @@
              Uses data-image-sync to interface with the global image engine.
    ========================================================================== */
 
-   import { buildPath } from '../utils/path.js';
+import { buildPath } from '../utils/path.js';
 
 const defaultConfig = {
   headingLevel: 'h2',

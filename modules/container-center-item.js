@@ -5,7 +5,10 @@
    Security: Implements DOM-based text sanitization.
    A11y: Dynamic ID generation for ARIA labeling.
    SEO: Dynamic heading level mapping to prevent skipped hierarchy.
+   Routing: Uses path.js to ensure robust internal linking across deep directories.
    ========================================================================== */
+
+import { buildPath } from '../utils/path.js';
 
 /**
  * Sanitizes input strings by converting them to text nodes, neutralizing HTML execution.
@@ -46,6 +49,9 @@ export const init = (node, customConfig = {}) => {
         ? config.headingLevel.toLowerCase() 
         : 'h2';
 
+    // Resolve absolute path for the CTA link based on environment
+    const absoluteLink = buildPath(config.buttonLink);
+
     const html = `
         <section class="cdlv-container-center-item" aria-labelledby="${uniqueId}">
             <${semanticTag} id="${uniqueId}" class="cdlv-container-center-item__heading">
@@ -54,7 +60,7 @@ export const init = (node, customConfig = {}) => {
             <p class="cdlv-container-center-item__text">
                 ${sanitizeText(config.text)}
             </p>
-            <a href="${sanitizeText(config.buttonLink)}" 
+            <a href="${sanitizeText(absoluteLink)}" 
                class="cdlv-container-center-item__btn"
                aria-label="${sanitizeText(config.buttonText)} for ${sanitizeText(config.heading)}">
                 ${sanitizeText(config.buttonText)}

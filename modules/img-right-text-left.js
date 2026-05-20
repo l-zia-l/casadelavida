@@ -9,11 +9,13 @@
    Performance: Uses native CSS Grid for fluid layout scaling. 
    ========================================================================== */
 
-/**
+   /**
  * Basic text sanitizer to prevent HTML injection from config strings.
  * @param {string} str - Raw input string
  * @returns {string} - Sanitized string safe for DOM insertion
  */
+import { buildPath } from '../utils/path.js';
+
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
     const tempDiv = document.createElement('div');
@@ -44,7 +46,7 @@ const defaultConfig = {
     ],
     imageSrc: "assets/images/logo.png",
     imageAlt: "Casa De La Vida Logo",
-    showCTA: true, // Toggle to quickly enable/disable the button
+    showCTA: true, 
     ctaText: "Discover More", 
     ctaLink: "about-us.html", 
     isLCP: false 
@@ -69,8 +71,10 @@ export const init = (node, customConfig = {}) => {
     const textAnimateClass = config.isLCP ? '' : 'animate-enter';
 
     const safeHeadingLevel = /^[a-zA-Z0-9]+$/.test(config.headingLevel) ? config.headingLevel.toLowerCase() : 'h2';
-    // Ensure the layout class is safe and fallback to default if a typo occurs
     const layoutModifier = config.layout === "image-left" ? "image-left" : "image-right";
+
+    // CORE UPDATE: Run paths through path.js utility before final sanitization
+    const resolvedImageSrc = sanitizeUrl(buildPath(config.imageSrc));
 
     const renderContent = (contentData) => {
         if (Array.isArray(contentData)) {
@@ -83,7 +87,9 @@ export const init = (node, customConfig = {}) => {
 
     const renderCTA = () => {
         if (config.showCTA && config.ctaText && config.ctaLink) {
-            return `<a href="${sanitizeUrl(config.ctaLink)}" class="cdlv-img-right-text-left__cta">${sanitizeText(config.ctaText)}</a>`;
+            // CORE UPDATE: Resolve CTA link path dynamically
+            const resolvedCtaLink = sanitizeUrl(buildPath(config.ctaLink));
+            return `<a href="${resolvedCtaLink}" class="cdlv-img-right-text-left__cta">${sanitizeText(config.ctaText)}</a>`;
         }
         return '';
     };
@@ -100,7 +106,7 @@ export const init = (node, customConfig = {}) => {
                 </article>
 
                 <figure class="cdlv-img-right-text-left__media ${imageLoaderClass}">
-                    <img src="${sanitizeUrl(config.imageSrc)}" 
+                    <img src="${resolvedImageSrc}" 
                          alt="${safeAlt}" 
                          ${ariaHiddenAttr}
                          ${imageLoadingAttr}
