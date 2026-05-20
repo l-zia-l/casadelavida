@@ -21,11 +21,12 @@ const config = {
     links: {
         left: [
             { label: 'Shop', url: buildPath('shop.html') },
-            { label: 'Subscriptions', url: buildPath('subscriptions.html') },
+            { label: 'Subscriptions', url: buildPath('subscriptions.html'), mobileOnly: true },
             { label: 'Wellness Routine', url: buildPath('blog/index.html') },
             { label: 'Account', url: buildPath('account/index.html'), mobileOnly: true } 
         ],
         right: [
+            { label: 'Subscriptions', url: buildPath('subscriptions.html'), desktopOnly: true },
             { label: 'Account', url: buildPath('account/index.html'), desktopOnly: true },
             { label: 'Cart', url: buildPath('shopping-cart.html'), isCart: true }
         ]

@@ -253,7 +253,7 @@
   background-color: var(--color-accent);
   color: var(--color-text-light);
   font-family: var(--font-family-body);
-  margin-inline: var(--layout-gutter);
+  margin-inline: calc(var(--layout-gutter) * -1);
 }
 
 .cdlv-footer-heading {
@@ -418,7 +418,7 @@
 @media (min-width: 992px) {
   .cdlv-footer-nav {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: var(--spacing-md);
     border-top: none;
   }
