@@ -2138,7 +2138,8 @@ display: inline-block;
 
 .cdlv-template-legal {
     display: grid;
-    grid-template-columns: 1fr;
+    /* FIX: minmax(0, 1fr) prevents the horizontally scrolling child from blowing out the grid width */
+    grid-template-columns: minmax(0, 1fr); 
     gap: var(--spacing-lg);
     padding-block: var(--spacing-md) var(--spacing-xl);
     align-items: start;
@@ -2147,8 +2148,8 @@ display: inline-block;
 
 @media (min-width: 992px) {
     .cdlv-template-legal {
-        /* Desktop: 1 part sidebar, 3 parts content */
-        grid-template-columns: minmax(220px, 1fr) 3fr;
+        /* FIX: Applied minmax(0, ...) to the content column as well for safety */
+        grid-template-columns: minmax(220px, 1fr) minmax(0, 3fr);
     }
 }
 
@@ -2158,6 +2159,8 @@ display: inline-block;
     top: calc(var(--header-offset) + var(--spacing-sm));
     z-index: 10;
     background-color: var(--color-primary);
+    width: 100%;
+    min-width: 0; /* FIX: Prevents flex children from overriding container bounds */
 }
 
 .cdlv-template-legal__nav-list {
@@ -2232,10 +2235,19 @@ display: inline-block;
 
 /* --- Document Content Area --- */
 .cdlv-template-legal__content {
-    /* Strict ch-unit max-width ensures 60-75 characters per line */
-    max-width: 75ch;
-    margin-inline: auto 0; /* Align left alongside the sidebar */
     width: 100%;
+    /* FIX: Force 100% max-width on mobile, rely on ch units only on desktop */
+    max-width: 100%; 
+    min-width: 0; 
+    margin-inline: 0; /* FIX: Resetting any margin tricks that cause right-shifting */
+    overflow-wrap: break-word; /* FIX: Prevents long URLs or unbroken text from forcing horizontal scroll */
+}
+
+@media (min-width: 992px) {
+    .cdlv-template-legal__content {
+        /* Re-apply the strict reading width only when we have the real estate */
+        max-width: 75ch; 
+    }
 }
 
 .cdlv-template-legal__meta {
