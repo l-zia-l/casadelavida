@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MODULE: PATH RESOLVER (utils/paths.js)
+   MODULE: PATH RESOLVER (utils/path.js)
    Purpose: Dynamically generates absolute URLs for assets and links, ensuring
    they work across local environments, GitHub Pages, and custom domains.
    ========================================================================== */

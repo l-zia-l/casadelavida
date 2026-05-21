@@ -4,8 +4,10 @@
    category drill-downs, search results, and specific answer views dynamically based 
    on URL query parameters.
    Security: DOMPurify-style sanitization for text content.
-   Performance: Integrates seamlessly with global image-render.js via data-image-sync.
+   Dependencies: Uses path.js for dynamic asset routing (answer images).
    ========================================================================== */
+
+import { buildPath } from '../utils/path.js';
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
@@ -14,7 +16,6 @@ const sanitizeText = (str) => {
     return temp.innerHTML;
 };
 
-// Safe highlight function for search results view
 const highlightKeywords = (text, query) => {
     const safeText = sanitizeText(text);
     const safeQuery = sanitizeText(query).trim();
@@ -30,27 +31,42 @@ const defaultConfig = {
             id: "my-account",
             title: "My Account",
             questions: [
-                { id: "login-help", title: "How do I log into my account?", answer: "To log into your account, visit the homepage and click the silhouette icon.", image: "assets/images/backgrounds/stock_1.webp" },
-                { id: "update-password", title: "How do I update my password?", answer: "Go to your account settings to reset your password securely." },
-                { id: "unsubscribe", title: "How do I unsubscribe from emails?", answer: "Click the unsubscribe link at the bottom of any of our promotional emails." },
-                { id: "manage-contacts", title: "How do I manage my contacts?", answer: "Visit the address book section in your account dashboard." }
+                { 
+                    id: "login-help", 
+                    title: "How do I log into my account?", 
+                    answer: "To log into your account, visit the homepage and click the silhouette icon.", 
+                    // Wrap assets in the config with buildPath
+                    image: buildPath("assets/images/backgrounds/stock_1.wbp") 
+                },
+                { 
+                    id: "update-password", 
+                    title: "How do I update my password?", 
+                    answer: "Go to your account settings to reset your password securely." 
+                },
+                { 
+                    id: "unsubscribe", 
+                    title: "How do I unsubscribe from emails?", 
+                    answer: "Click the unsubscribe link at the bottom of any of our promotional emails." 
+                },
+                { 
+                    id: "manage-contacts", 
+                    title: "How do I manage my contacts?", 
+                    answer: "Visit the address book section in your account dashboard." 
+                }
             ]
         }
-        // Add more categories here per the config schema
+        // Additional categories map here
     ]
 };
 
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     
-    // Ensure image synchronization for dynamic rendering
     node.setAttribute('data-image-sync', 'true');
     node.classList.add('cdlv-faq');
 
-    // Flatten all questions for easy lookups
     const allQuestions = config.categories.flatMap(cat => cat.questions);
 
-    // Core Render Engine
     const render = () => {
         const params = new URLSearchParams(window.location.search);
         const answerId = params.get('a');
@@ -60,7 +76,6 @@ export const init = (node, customConfig = {}) => {
 
         let html = '';
 
-        // 1. ANSWER VIEW (?a=...)
         if (answerId) {
             const question = allQuestions.find(q => q.id === answerId);
             if (question) {
@@ -74,8 +89,6 @@ export const init = (node, customConfig = {}) => {
                 `;
             }
         } 
-        
-        // 2. SEARCH RESULTS VIEW (?s=...)
         else if (searchQuery) {
             const matches = allQuestions.filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase()));
             html = `
@@ -92,8 +105,6 @@ export const init = (node, customConfig = {}) => {
                 </div>
             `;
         }
-        
-        // 3. CATEGORY "SEE MORE" VIEW (?g=...)
         else if (categoryId) {
             const category = config.categories.find(c => c.id === categoryId);
             if (category) {
@@ -112,8 +123,6 @@ export const init = (node, customConfig = {}) => {
                 `;
             }
         }
-        
-        // 4. "SEE ALL" INDEX VIEW (?index=true)
         else if (showIndex) {
             html = `
                 <div class="cdlv-faq__list-view">
@@ -129,8 +138,6 @@ export const init = (node, customConfig = {}) => {
                 </div>
             `;
         }
-        
-        // 5. DEFAULT DASHBOARD VIEW
         else {
             html = `
                 <div class="cdlv-faq__grid">
@@ -160,13 +167,11 @@ export const init = (node, customConfig = {}) => {
 
         node.innerHTML = html;
         
-        // Notify global image renderer if new DOM is painted
         if (window.initImageRenderer) {
             window.initImageRenderer();
         }
     };
 
-    // Routing Event Delegation
     node.addEventListener('click', (e) => {
         const routeTarget = e.target.closest('[data-route]');
         if (!routeTarget) return;
@@ -175,21 +180,16 @@ export const init = (node, customConfig = {}) => {
         const route = routeTarget.getAttribute('data-route');
 
         if (route === 'back') {
-            // Revert to dashboard
             const base = window.location.pathname;
             window.history.pushState({ path: base }, '', base);
         } else {
-            // Push new parameter state
             const newUrl = `${window.location.pathname}${route}`;
             window.history.pushState({ path: newUrl }, '', newUrl);
         }
         
-        render(); // Re-trigger UI draw
+        render(); 
     });
 
-    // Listen to global history state changes (including from the search-engine)
     window.addEventListener('popstate', render);
-
-    // Initial load
     render();
 };

@@ -6,7 +6,7 @@
    Dependencies: Uses path.js for dynamic asset routing (cancel.svg).
    ========================================================================== */
 
-import { buildPath } from '../utils/paths.js';
+import { buildPath } from '../utils/path.js';
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
@@ -33,7 +33,7 @@ const defaultConfig = {
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     
-    // Dynamically resolve the icon path
+    // Dynamically resolve the icon path using the utility
     const cancelIconPath = buildPath('assets/icons/cancel.svg');
     
     const html = `
@@ -47,7 +47,7 @@ export const init = (node, customConfig = {}) => {
                     autocomplete="off"
                 >
                 <button type="button" class="cdlv-search__btn-clear" aria-label="Clear search" hidden>
-                    <img src="${cancelIconPath}" alt="" class="cdlv-search__icon" aria-hidden="true">
+                    <img src="${sanitizeText(cancelIconPath)}" alt="" class="cdlv-search__icon" aria-hidden="true">
                 </button>
             </div>
             <div class="cdlv-search__dropdown" hidden aria-live="polite">
@@ -64,20 +64,17 @@ export const init = (node, customConfig = {}) => {
     const dropdown = node.querySelector('.cdlv-search__dropdown');
     const suggestionsList = node.querySelector('.cdlv-search__suggestions');
     
-    // Handle Input & Real-time suggestions
     input.addEventListener('input', (e) => {
         const value = e.target.value;
         const trimmedValue = value.trim();
         const words = trimmedValue.split(/\s+/);
         
-        // Toggle Clear Button
         if (value.length > 0) {
             clearBtn.removeAttribute('hidden');
         } else {
             clearBtn.setAttribute('hidden', '');
         }
         
-        // Trigger suggestions logic
         if (words.length >= 2 || trimmedValue.length >= 3) {
             const matches = config.dataset.filter(item => 
                 item.title.toLowerCase().includes(trimmedValue.toLowerCase())
@@ -100,14 +97,12 @@ export const init = (node, customConfig = {}) => {
         }
     });
     
-    // Clear Button Logic
     clearBtn.addEventListener('click', () => {
         input.value = '';
         clearBtn.setAttribute('hidden', '');
         dropdown.setAttribute('hidden', '');
         input.focus();
         
-        // Optional: If you want clearing the input to also clear the search view on the page
         const params = new URLSearchParams(window.location.search);
         if (params.has('s')) {
             const newUrl = window.location.pathname;
@@ -116,14 +111,12 @@ export const init = (node, customConfig = {}) => {
         }
     });
     
-    // Close dropdown on outside click
     document.addEventListener('click', (e) => {
         if (!node.contains(e.target)) {
             dropdown.setAttribute('hidden', '');
         }
     });
     
-    // Handle form submit
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const value = input.value.trim();
