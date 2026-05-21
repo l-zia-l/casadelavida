@@ -2156,11 +2156,25 @@ display: inline-block;
 /* --- Navigation Sidebar --- */
 .cdlv-template-legal__sidebar {
     position: sticky;
-    top: calc(var(--header-offset) + var(--spacing-sm));
+    /* FIX: Snap exactly to the header offset. Removes the transparent gap where text was bleeding through. */
+    top: var(--header-offset);
     z-index: 10;
     background-color: var(--color-primary);
     width: 100%;
     min-width: 0; /* FIX: Prevents flex children from overriding container bounds */
+    
+    /* FIX: Add solid padding block. This ensures the background color is tall enough to mask scrolling text perfectly. */
+    padding-top: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+}
+
+@media (min-width: 992px) {
+    .cdlv-template-legal__sidebar {
+        /* Desktop: Restore the aesthetic top gap since the sidebar sits on the left, not over the text */
+        top: calc(var(--header-offset) + var(--spacing-md));
+        padding-top: 0;
+        padding-bottom: 0;
+    }
 }
 
 .cdlv-template-legal__nav-list {
