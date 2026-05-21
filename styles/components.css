@@ -2037,6 +2037,7 @@ display: inline-block;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    text-decoration: none; /* Added to normalize <a> tags to look like the previous button */
 }
 
 .cdlv-faq__btn-back:hover {
@@ -2077,7 +2078,10 @@ display: inline-block;
     outline: none;
 }
 
-/* Explicit focus rings for keyboard navigation */
+/* --- ACCESSIBILITY & PERFORMANCE UTILITIES --- */
+
+/* [OPTIMIZATION]: Using 'outline' guarantees zero layout shift (CLS) 
+   because it sits outside the box model. Do not use 'border' for focus states here. */
 .cdlv-faq__link:focus-visible,
 .cdlv-faq__btn-back:focus-visible {
     outline: 2px solid var(--color-accent);
@@ -2085,9 +2089,14 @@ display: inline-block;
     border-radius: var(--radius-strict);
 }
 
-/* Your global CSS handles prefers-reduced-motion for the base * selector, 
-  but this ensures specific opacity transitions in this module respect it.
-*/
+/* Hardware-accelerated hover transitions only */
+.cdlv-faq__link {
+    color: #6B21A8; 
+    cursor: pointer;
+    font-size: var(--font-size-body);
+    transition: opacity var(--transition-fast); /* GPU Handled */
+}
+
 @media (prefers-reduced-motion: reduce) {
     .cdlv-faq__link,
     .cdlv-faq__btn-back {
