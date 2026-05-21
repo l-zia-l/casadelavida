@@ -3,7 +3,7 @@
    Architecture: Standalone input module. Pushes search parameters to the URL
    to be consumed by other modules.
    Security: Strict HTML sanitization on query inputs to prevent XSS.
-   Dependencies: Uses path.js for dynamic asset routing (cancel.svg).
+   Dependencies: Uses path.js for dynamic asset routing (cancel.svg, search.svg).
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -33,21 +33,27 @@ const defaultConfig = {
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     
-    // Dynamically resolve the icon path using the utility
+    // Dynamically resolve both icon paths
     const cancelIconPath = buildPath('assets/icons/cancel.svg');
+    const searchIconPath = buildPath('assets/icons/search.svg');
     
     const html = `
         <form class="cdlv-search" action="" role="search">
             <div class="cdlv-search__wrapper">
-                <input 
-                    type="text" 
-                    class="cdlv-search__input" 
-                    placeholder="${sanitizeText(config.placeholder)}" 
-                    aria-label="Search"
-                    autocomplete="off"
-                >
-                <button type="button" class="cdlv-search__btn-clear" aria-label="Clear search" hidden>
-                    <img src="${sanitizeText(cancelIconPath)}" alt="" class="cdlv-search__icon" aria-hidden="true">
+                <div class="cdlv-search__input-group">
+                    <input 
+                        type="text" 
+                        class="cdlv-search__input" 
+                        placeholder="${sanitizeText(config.placeholder)}" 
+                        aria-label="Search"
+                        autocomplete="off"
+                    >
+                    <button type="button" class="cdlv-search__btn-clear" aria-label="Clear search" hidden>
+                        <img src="${sanitizeText(cancelIconPath)}" alt="" class="cdlv-search__icon" aria-hidden="true">
+                    </button>
+                </div>
+                <button type="submit" class="cdlv-search__btn-submit" aria-label="Submit search">
+                    <img src="${sanitizeText(searchIconPath)}" alt="" class="cdlv-search__icon" aria-hidden="true">
                 </button>
             </div>
             <div class="cdlv-search__dropdown" hidden aria-live="polite">
@@ -64,6 +70,7 @@ export const init = (node, customConfig = {}) => {
     const dropdown = node.querySelector('.cdlv-search__dropdown');
     const suggestionsList = node.querySelector('.cdlv-search__suggestions');
     
+    // Handle Input & Real-time suggestions
     input.addEventListener('input', (e) => {
         const value = e.target.value;
         const trimmedValue = value.trim();
@@ -97,6 +104,7 @@ export const init = (node, customConfig = {}) => {
         }
     });
     
+    // Clear Button Logic
     clearBtn.addEventListener('click', () => {
         input.value = '';
         clearBtn.setAttribute('hidden', '');
@@ -111,12 +119,14 @@ export const init = (node, customConfig = {}) => {
         }
     });
     
+    // Close dropdown on outside click
     document.addEventListener('click', (e) => {
         if (!node.contains(e.target)) {
             dropdown.setAttribute('hidden', '');
         }
     });
     
+    // Handle form submit (triggers either via "Enter" key or clicking the new Search button)
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const value = input.value.trim();

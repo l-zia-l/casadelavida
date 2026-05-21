@@ -36,7 +36,7 @@ const defaultConfig = {
                     title: "How do I log into my account?", 
                     answer: "To log into your account, visit the homepage and click the silhouette icon.", 
                     // Wrap assets in the config with buildPath
-                    image: buildPath("assets/images/backgrounds/stock_1.wbp") 
+                    image: buildPath("assets/images/backgrounds/stock_1.webp") 
                 },
                 { 
                     id: "update-password", 
