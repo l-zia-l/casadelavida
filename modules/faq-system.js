@@ -81,20 +81,26 @@ export const init = (node, customConfig = {}) => {
             if (question) {
                 html = `
                     <div class="cdlv-faq__answer-view">
-                        <button class="cdlv-faq__btn-back" data-route="back">← Go Back</button>
-                        <h2 class="cdlv-faq__answer-title">${sanitizeText(question.title)}</h2>
+                        <button class="cdlv-faq__btn-back" data-route="back" aria-label="Go back to FAQ dashboard">
+                            <span aria-hidden="true">←</span> Go Back
+                        </button>
+                        <h2 class="cdlv-faq__answer-title" tabindex="-1" id="cdlv-focus-target">${sanitizeText(question.title)}</h2>
                         <p>${sanitizeText(question.answer)}</p>
-                        ${question.image ? `<img src="${sanitizeText(question.image)}" alt="${sanitizeText(question.title)}" class="cdlv-faq__answer-image">` : ''}
+                        ${question.image ? `<img src="${sanitizeText(question.image)}" alt="" class="cdlv-faq__answer-image">` : ''}
                     </div>
                 `;
+                // Note: Image alt is intentionally empty if the image is just decorative context to the text below it.
+                // If the image contains vital instructions, it should mirror the text.
             }
         } 
         else if (searchQuery) {
             const matches = allQuestions.filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase()));
             html = `
                 <div class="cdlv-faq__list-view">
-                    <button class="cdlv-faq__btn-back" data-route="back">← Go Back</button>
-                    <h2>Search Results for "${sanitizeText(searchQuery)}"</h2>
+                    <button class="cdlv-faq__btn-back" data-route="back" aria-label="Go back to FAQ dashboard">
+                        <span aria-hidden="true">←</span> Go Back
+                    </button>
+                    <h2 tabindex="-1" id="cdlv-focus-target">Search Results for "${sanitizeText(searchQuery)}"</h2>
                     <ul class="cdlv-faq__list">
                         ${matches.map(q => `
                             <li class="cdlv-faq__list-item">
@@ -110,8 +116,10 @@ export const init = (node, customConfig = {}) => {
             if (category) {
                 html = `
                     <div class="cdlv-faq__list-view">
-                        <button class="cdlv-faq__btn-back" data-route="back">← Go Back</button>
-                        <h2>${sanitizeText(category.title)}</h2>
+                        <button class="cdlv-faq__btn-back" data-route="back" aria-label="Go back to FAQ dashboard">
+                            <span aria-hidden="true">←</span> Go Back
+                        </button>
+                        <h2 tabindex="-1" id="cdlv-focus-target">${sanitizeText(category.title)}</h2>
                         <ul class="cdlv-faq__list">
                             ${category.questions.map(q => `
                                 <li class="cdlv-faq__list-item">
@@ -126,8 +134,10 @@ export const init = (node, customConfig = {}) => {
         else if (showIndex) {
             html = `
                 <div class="cdlv-faq__list-view">
-                    <button class="cdlv-faq__btn-back" data-route="back">← Go Back</button>
-                    <h2>All Frequently Asked Questions</h2>
+                    <button class="cdlv-faq__btn-back" data-route="back" aria-label="Go back to FAQ dashboard">
+                        <span aria-hidden="true">←</span> Go Back
+                    </button>
+                    <h2 tabindex="-1" id="cdlv-focus-target">All Frequently Asked Questions</h2>
                     <ul class="cdlv-faq__list">
                         ${allQuestions.map(q => `
                             <li class="cdlv-faq__list-item">
@@ -167,6 +177,15 @@ export const init = (node, customConfig = {}) => {
 
         node.innerHTML = html;
         
+        // --- ACCESSIBILITY FOCUS MANAGEMENT ---
+        // Find the newly injected heading (if it exists) and shift focus to it
+        // so screen readers announce the new context and keyboard users aren't lost.
+        const focusTarget = node.querySelector('#cdlv-focus-target');
+        if (focusTarget) {
+            // We use setTimeout to ensure the DOM has painted before focusing
+            setTimeout(() => focusTarget.focus(), 50);
+        }
+
         if (window.initImageRenderer) {
             window.initImageRenderer();
         }

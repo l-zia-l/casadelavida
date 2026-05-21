@@ -2021,7 +2021,7 @@ display: inline-block;
 
 /* Answer View */
 .cdlv-faq__answer-view {
-    max-width: 800px;
+    width: 100%;
     margin: 0 auto;
 }
 
@@ -2066,6 +2066,33 @@ display: inline-block;
 
 .cdlv-faq__see-all-wrapper {
     margin-top: var(--spacing-lg);
+}
+
+/* --- ACCESSIBILITY UTILITIES --- */
+
+/* Ensures dynamically focused headings don't show an ugly default outline 
+  when programmatically focused via JS.
+*/
+#cdlv-focus-target:focus {
+    outline: none;
+}
+
+/* Explicit focus rings for keyboard navigation */
+.cdlv-faq__link:focus-visible,
+.cdlv-faq__btn-back:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: var(--radius-strict);
+}
+
+/* Your global CSS handles prefers-reduced-motion for the base * selector, 
+  but this ensures specific opacity transitions in this module respect it.
+*/
+@media (prefers-reduced-motion: reduce) {
+    .cdlv-faq__link,
+    .cdlv-faq__btn-back {
+        transition: none !important;
+    }
 }
 
 /* ==========================================================================
