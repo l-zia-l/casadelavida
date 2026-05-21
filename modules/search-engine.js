@@ -4,7 +4,8 @@
    product pages, blog posts, or specific FAQ views based on config URLs.
    Security: Strict HTML sanitization on query inputs to prevent XSS.
    Accessibility: WCAG Combobox pattern with live region announcers.
-   Dependencies: Uses path.js for dynamic asset routing (cancel.svg, search.svg).
+   Performance: Implements input debouncing to protect the main thread, 
+   idempotent mounting to prevent memory leaks, and LCP asset prioritization.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -26,17 +27,27 @@ const highlightKeywords = (text, query) => {
     return safeText.replace(regex, '<strong class="cdlv-highlight">$1</strong>');
 };
 
+// [OPTIMIZATION]: A utility to delay expensive operations until the user pauses typing,
+// preventing the browser from recalculating layout on every single millisecond keystroke.
+const debounce = (func, delay = 200) => {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+};
+
 const defaultConfig = {
     placeholder: "Search...",
-    dataset: [
-        // Example configuration showing how to route to different areas
-        // { title: "Organic Green Tea", url: "shop/products/green-tea.html" },
-        // { title: "Morning Routines", url: "blog/post_1.html" },
-        // { title: "How to login", url: "help-center.html?a=login-help" }
-    ] 
+    dataset: [] 
 };
 
 export const init = (node, customConfig = {}) => {
+    // [OPTIMIZATION]: Idempotent Initialization. Prevents silent memory leaks by 
+    // ensuring event listeners are only attached once if the SPA remounts the node.
+    if (node.dataset.initialized === 'true') return;
+    node.dataset.initialized = 'true';
+
     const config = { ...defaultConfig, ...customConfig };
     
     const cancelIconPath = buildPath('assets/icons/cancel.svg');
@@ -45,38 +56,40 @@ export const init = (node, customConfig = {}) => {
     const listboxId = `cdlv-search-listbox-${Math.random().toString(36).substr(2, 9)}`;
     const announcerId = `cdlv-search-announcer-${Math.random().toString(36).substr(2, 9)}`;
     
-    // Tracks the current matches so the form submit knows where to go
     let currentMatches = [];
     
     const html = `
-        <form class="cdlv-search" action="" role="search">
-            <div class="visually-hidden" aria-live="polite" id="${announcerId}"></div>
-            
-            <div class="cdlv-search__wrapper">
-                <div class="cdlv-search__input-group">
-                    <input 
-                        type="text" 
-                        class="cdlv-search__input" 
-                        placeholder="${sanitizeText(config.placeholder)}" 
-                        aria-label="Search"
-                        autocomplete="off"
-                        role="combobox"
-                        aria-expanded="false"
-                        aria-controls="${listboxId}"
-                        aria-autocomplete="list"
-                    >
-                    <button type="button" class="cdlv-search__btn-clear" aria-label="Clear search" hidden>
-                        <img src="${sanitizeText(cancelIconPath)}" alt="" class="cdlv-search__icon" aria-hidden="true">
+        <search class="cdlv-search-container">
+            <form class="cdlv-search" action="/search" role="search">
+                <div class="visually-hidden" aria-live="polite" id="${announcerId}"></div>
+                
+                <div class="cdlv-search__wrapper">
+                    <div class="cdlv-search__input-group">
+                        <input 
+                            type="search" 
+                            name="q"
+                            class="cdlv-search__input" 
+                            placeholder="${sanitizeText(config.placeholder)}" 
+                            aria-label="Search"
+                            autocomplete="off"
+                            role="combobox"
+                            aria-expanded="false"
+                            aria-controls="${listboxId}"
+                            aria-autocomplete="list"
+                        >
+                        <button type="button" class="cdlv-search__btn-clear" aria-label="Clear search" hidden>
+                            <img src="${sanitizeText(cancelIconPath)}" alt="" class="cdlv-search__icon" aria-hidden="true" loading="lazy" decoding="async">
+                        </button>
+                    </div>
+                    <button type="submit" class="cdlv-search__btn-submit" aria-label="Submit search">
+                        <img src="${sanitizeText(searchIconPath)}" alt="" class="cdlv-search__icon" aria-hidden="true" loading="eager" fetchpriority="high" decoding="sync">
                     </button>
                 </div>
-                <button type="submit" class="cdlv-search__btn-submit" aria-label="Submit search">
-                    <img src="${sanitizeText(searchIconPath)}" alt="" class="cdlv-search__icon" aria-hidden="true">
-                </button>
-            </div>
-            <div class="cdlv-search__dropdown" hidden>
-                <ul class="cdlv-search__suggestions" id="${listboxId}" role="listbox" aria-label="Search suggestions"></ul>
-            </div>
-        </form>
+                <div class="cdlv-search__dropdown" hidden>
+                    <ul class="cdlv-search__suggestions" id="${listboxId}" role="listbox" aria-label="Search suggestions"></ul>
+                </div>
+            </form>
+        </search>
     `;
     
     node.innerHTML = html;
@@ -98,35 +111,32 @@ export const init = (node, customConfig = {}) => {
         input.setAttribute('aria-expanded', 'true');
     };
 
-    input.addEventListener('input', (e) => {
-        const value = e.target.value;
-        const trimmedValue = value.trim();
+    // [OPTIMIZATION]: Separate the cheap UI updates from the expensive DOM rewriting.
+    // The filter and DOM rewrite is wrapped in a debounce so it only fires when the user pauses.
+    const executeSearchFiltering = debounce((trimmedValue) => {
         const words = trimmedValue.split(/\s+/);
-        
-        if (value.length > 0) {
-            clearBtn.removeAttribute('hidden');
-        } else {
-            clearBtn.setAttribute('hidden', '');
-        }
-        
+
         if (words.length >= 2 || trimmedValue.length >= 3) {
             currentMatches = config.dataset.filter(item => 
                 item.title.toLowerCase().includes(trimmedValue.toLowerCase())
             );
             
             if (currentMatches.length > 0) {
-                // Dynamically resolve the absolute path for each item
-                suggestionsList.innerHTML = currentMatches.map((match, index) => {
-                    const safeUrl = buildPath(sanitizeText(match.url));
-                    return `
-                        <li class="cdlv-search__item" role="presentation">
-                            <a href="${safeUrl}" class="cdlv-search__link" role="option" id="${listboxId}-option-${index}">
-                                ${highlightKeywords(match.title, trimmedValue)}
-                            </a>
-                        </li>
-                    `;
-                }).join('');
-                openDropdown();
+                // [OPTIMIZATION]: Using requestAnimationFrame ensures the DOM update 
+                // happens right before the next repaint, preventing forced synchronous layout.
+                requestAnimationFrame(() => {
+                    suggestionsList.innerHTML = currentMatches.map((match, index) => {
+                        const safeUrl = buildPath(sanitizeText(match.url));
+                        return `
+                            <li class="cdlv-search__item" role="presentation">
+                                <a href="${safeUrl}" class="cdlv-search__link" role="option" id="${listboxId}-option-${index}">
+                                    ${highlightKeywords(match.title, trimmedValue)}
+                                </a>
+                            </li>
+                        `;
+                    }).join('');
+                    openDropdown();
+                });
                 announcer.textContent = `${currentMatches.length} suggestions found. Use up and down arrows to review.`;
             } else {
                 closeDropdown();
@@ -137,6 +147,20 @@ export const init = (node, customConfig = {}) => {
             closeDropdown();
             announcer.textContent = "";
         }
+    }, 150); // 150ms delay is imperceptible to users but saves dozens of render cycles
+
+    input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        
+        // Fast UI Update (Synchronous)
+        if (value.length > 0) {
+            clearBtn.removeAttribute('hidden');
+        } else {
+            clearBtn.setAttribute('hidden', '');
+        }
+        
+        // Expensive Update (Debounced)
+        executeSearchFiltering(value.trim());
     });
     
     node.addEventListener('keydown', (e) => {
@@ -181,17 +205,13 @@ export const init = (node, customConfig = {}) => {
         }
     });
     
-    // DIRECT NAVIGATION ROUTING
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        // If there are matches in the dropdown, navigate directly to the first one
         if (currentMatches.length > 0) {
             const firstMatchUrl = buildPath(sanitizeText(currentMatches[0].url));
             window.location.href = firstMatchUrl;
         } else {
-            // Optional: If no matches, you could flash a "No results found" visual 
-            // inside the input or play a subtle shake animation.
             input.focus();
         }
     });
