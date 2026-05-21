@@ -159,7 +159,7 @@ export const init = (node, customConfig = {}) => {
                         `;
                     }).join('')}
                 </div>
-                <div style="margin-top: var(--spacing-lg);">
+                <div class="cdlv-faq__see-all-wrapper">
                     <a href="?index=true" class="cdlv-faq__link cdlv-faq__link--more" data-route="?index=true">See all FAQs</a>
                 </div>
             `;

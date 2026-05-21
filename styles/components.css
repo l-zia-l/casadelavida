@@ -1827,7 +1827,7 @@ display: inline-block;
 }
 
 /* ==========================================================================
-   MODULES: SEARCH ENGINE & FAQ SYSTEM
+   MODULES: SEARCH ENGINE
    Architecture: Scoped BEM methodology. Utilizes global CSS variables for 
    fluidity and strict thematic adherence (0px radius).
    ========================================================================== */
@@ -2062,6 +2062,10 @@ display: inline-block;
     list-style-type: disc;
     margin-left: var(--spacing-md);
     margin-bottom: var(--spacing-sm);
+}
+
+.cdlv-faq__see-all-wrapper {
+    margin-top: var(--spacing-lg);
 }
 
 /* ==========================================================================
