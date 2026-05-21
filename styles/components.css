@@ -2130,6 +2130,164 @@ display: inline-block;
 }
 
 /* ==========================================================================
+   MODULE: TEMPLATE LEGAL (.cdlv-template-legal)
+   Purpose: Highly readable, structured layout for long-form text documents.
+   Architecture: CSS Grid layout. Sticky navigation adapts from horizontal 
+                 scroll (mobile) to vertical sidebar (desktop).
+   ========================================================================== */
+
+.cdlv-template-legal {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+    padding-block: var(--spacing-md) var(--spacing-xl);
+    align-items: start;
+    width: 100%;
+}
+
+@media (min-width: 992px) {
+    .cdlv-template-legal {
+        /* Desktop: 1 part sidebar, 3 parts content */
+        grid-template-columns: minmax(220px, 1fr) 3fr;
+    }
+}
+
+/* --- Navigation Sidebar --- */
+.cdlv-template-legal__sidebar {
+    position: sticky;
+    top: calc(var(--header-offset) + var(--spacing-sm));
+    z-index: 10;
+    background-color: var(--color-primary);
+}
+
+.cdlv-template-legal__nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-sm);
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--color-neutral-bg);
+    /* Hide scrollbar for clean look */
+    scrollbar-width: none;
+}
+
+.cdlv-template-legal__nav-list::-webkit-scrollbar {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .cdlv-template-legal__nav-list {
+        flex-direction: column;
+        overflow-x: visible;
+        white-space: normal;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
+
+.cdlv-template-legal__nav-link {
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    color: var(--color-text-dark);
+    opacity: 0.6;
+    transition: all var(--transition-fast);
+    display: block;
+    border-bottom: 2px solid transparent;
+    padding-bottom: var(--spacing-xs);
+}
+
+@media (min-width: 992px) {
+    .cdlv-template-legal__nav-link {
+        border-bottom: none;
+        border-left: 2px solid transparent;
+        padding-bottom: 0;
+        padding-left: var(--spacing-xs);
+    }
+}
+
+.cdlv-template-legal__nav-link:hover,
+.cdlv-template-legal__nav-link:focus-visible {
+    opacity: 1;
+    color: var(--color-accent);
+}
+
+.cdlv-template-legal__nav-link.is-active {
+    opacity: 1;
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+/* Adjust active border based on viewport */
+.cdlv-template-legal__nav-link.is-active {
+    border-bottom-color: var(--color-accent);
+}
+@media (min-width: 992px) {
+    .cdlv-template-legal__nav-link.is-active {
+        border-bottom-color: transparent;
+        border-left-color: var(--color-accent);
+    }
+}
+
+/* --- Document Content Area --- */
+.cdlv-template-legal__content {
+    /* Strict ch-unit max-width ensures 60-75 characters per line */
+    max-width: 75ch;
+    margin-inline: auto 0; /* Align left alongside the sidebar */
+    width: 100%;
+}
+
+.cdlv-template-legal__meta {
+    font-size: var(--font-size-small);
+    color: var(--color-text-dark);
+    opacity: 0.7;
+    margin-bottom: var(--spacing-md);
+    font-style: italic;
+}
+
+.cdlv-template-legal__intro {
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-body);
+    line-height: 1.7;
+}
+
+.cdlv-template-legal__section {
+    margin-bottom: var(--spacing-lg);
+    /* Ensures anchored sections aren't hidden behind the global header */
+    scroll-margin-top: calc(var(--header-offset) + var(--spacing-lg));
+}
+
+.cdlv-template-legal__section-title {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-h3);
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Rich Text Formatting inside Sections */
+.cdlv-template-legal__section p {
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.7;
+}
+
+.cdlv-template-legal__section ul,
+.cdlv-template-legal__section ol {
+    margin-bottom: var(--spacing-sm);
+    padding-left: var(--spacing-md);
+    line-height: 1.7;
+}
+
+.cdlv-template-legal__section li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.cdlv-template-legal__section strong {
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
