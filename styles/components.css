@@ -2266,7 +2266,9 @@ body:has(#global-header.cdlv-header--hidden) .cdlv-template-legal__sidebar {
 
 @media (min-width: 992px) {
     .cdlv-template-legal__content {
-        max-width: 75ch; 
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      padding-inline: var(--layout-gutter);
     }
 }
 
