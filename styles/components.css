@@ -1968,6 +1968,31 @@ display: inline-block;
     color: var(--color-text-dark);
 }
 
+/* --- ACCESSIBILITY & MOTION UTILITIES (SEARCH) --- */
+
+/* Explicit focus rings for keyboard navigation */
+.cdlv-search__btn-clear:focus-visible,
+.cdlv-search__btn-submit:focus-visible,
+.cdlv-search__link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-strict);
+}
+
+/* Ensure the link focus ring isn't cut off by the list item container */
+.cdlv-search__link:focus-visible {
+    outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cdlv-search__input,
+    .cdlv-search__btn-clear,
+    .cdlv-search__btn-submit,
+    .cdlv-search__link {
+        transition: none !important;
+    }
+}
+
 /* ==========================================================================
    MODULES:  FAQ SYSTEM
    Architecture: Scoped BEM methodology. Utilizes global CSS variables for 
