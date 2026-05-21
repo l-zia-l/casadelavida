@@ -30,7 +30,7 @@ const defaultConfig = {
             id: "my-account",
             title: "My Account",
             questions: [
-                { id: "login-help", title: "How do I log into my account?", answer: "To log into your account, visit the homepage and click the silhouette icon.", image: "assets/images/faq-login.jpg" },
+                { id: "login-help", title: "How do I log into my account?", answer: "To log into your account, visit the homepage and click the silhouette icon.", image: "assets/images/backgrounds/stock_1.webp" },
                 { id: "update-password", title: "How do I update my password?", answer: "Go to your account settings to reset your password securely." },
                 { id: "unsubscribe", title: "How do I unsubscribe from emails?", answer: "Click the unsubscribe link at the bottom of any of our promotional emails." },
                 { id: "manage-contacts", title: "How do I manage my contacts?", answer: "Visit the address book section in your account dashboard." }

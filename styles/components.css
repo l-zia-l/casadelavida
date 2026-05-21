@@ -1838,11 +1838,12 @@ display: inline-block;
     width: 100%;
     max-width: 800px;
     margin-bottom: var(--spacing-lg);
+    margin-top: var(--spacing-md);
 }
 
 .cdlv-search__input {
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-sm) calc(var(--spacing-md) + 32px) var(--spacing-sm) var(--spacing-md);
     font-family: var(--font-family-body);
     font-size: var(--font-size-body);
     border: 2px solid var(--color-neutral-bg);
@@ -1852,9 +1853,43 @@ display: inline-block;
     transition: border-color var(--transition-base);
 }
 
+.cdlv-search__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
 .cdlv-search__input:focus {
     outline: none;
     border-color: var(--color-accent);
+}
+
+.cdlv-search__btn-clear {
+    position: absolute;
+    right: var(--spacing-xs);
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+}
+
+.cdlv-search__btn-clear:hover {
+    opacity: 1;
+}
+
+.cdlv-search__btn-clear[hidden] {
+    display: none;
+}
+
+.cdlv-search__icon {
+    width: var(--icon-size-base);
+    height: var(--icon-size-base);
+    pointer-events: none;
 }
 
 .cdlv-search__dropdown {
@@ -1887,7 +1922,7 @@ display: inline-block;
 
 .cdlv-search__link {
     display: block;
-    color: #6B21A8; /* Accessible Purple */
+    color: #6B21A8;
     text-decoration: none;
     font-size: var(--font-size-small);
 }
@@ -1908,7 +1943,7 @@ display: inline-block;
    fluidity and strict thematic adherence (0px radius).
    ========================================================================== */
    
-   
+
 .cdlv-faq {
     width: 100%;
 }
