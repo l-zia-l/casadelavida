@@ -2138,7 +2138,6 @@ display: inline-block;
 
 .cdlv-template-legal {
     display: grid;
-    /* FIX: minmax(0, 1fr) prevents the horizontally scrolling child from blowing out the grid width */
     grid-template-columns: minmax(0, 1fr); 
     gap: var(--spacing-lg);
     padding-block: var(--spacing-md) var(--spacing-xl);
@@ -2148,7 +2147,6 @@ display: inline-block;
 
 @media (min-width: 992px) {
     .cdlv-template-legal {
-        /* FIX: Applied minmax(0, ...) to the content column as well for safety */
         grid-template-columns: minmax(220px, 1fr) minmax(0, 3fr);
     }
 }
@@ -2156,24 +2154,35 @@ display: inline-block;
 /* --- Navigation Sidebar --- */
 .cdlv-template-legal__sidebar {
     position: sticky;
-    /* FIX: Snap exactly to the header offset. Removes the transparent gap where text was bleeding through. */
     top: var(--header-offset);
     z-index: 10;
     background-color: var(--color-primary);
     width: 100%;
-    min-width: 0; /* FIX: Prevents flex children from overriding container bounds */
-    
-    /* FIX: Add solid padding block. This ensures the background color is tall enough to mask scrolling text perfectly. */
+    min-width: 0; 
     padding-top: var(--spacing-sm);
     padding-bottom: var(--spacing-xs);
+    /* FIX: Match the animation timing of the global header */
+    transition: top var(--transition-base);
 }
 
 @media (min-width: 992px) {
     .cdlv-template-legal__sidebar {
-        /* Desktop: Restore the aesthetic top gap since the sidebar sits on the left, not over the text */
         top: calc(var(--header-offset) + var(--spacing-md));
         padding-top: 0;
         padding-bottom: 0;
+    }
+}
+
+/* FIX: Dynamic Sticky Tracking. 
+   When the global header receives the hidden class, slide the sticky nav up. */
+body:has(#global-header.cdlv-header--hidden) .cdlv-template-legal__sidebar {
+    top: 0;
+}
+
+@media (min-width: 992px) {
+    body:has(#global-header.cdlv-header--hidden) .cdlv-template-legal__sidebar {
+        /* On desktop, keep a little breathing room even when the header is gone */
+        top: var(--spacing-md);
     }
 }
 
@@ -2186,7 +2195,6 @@ display: inline-block;
     white-space: nowrap;
     padding-bottom: var(--spacing-xs);
     border-bottom: 1px solid var(--color-neutral-bg);
-    /* Hide scrollbar for clean look */
     scrollbar-width: none;
 }
 
@@ -2236,10 +2244,10 @@ display: inline-block;
     font-weight: 600;
 }
 
-/* Adjust active border based on viewport */
 .cdlv-template-legal__nav-link.is-active {
     border-bottom-color: var(--color-accent);
 }
+
 @media (min-width: 992px) {
     .cdlv-template-legal__nav-link.is-active {
         border-bottom-color: transparent;
@@ -2250,16 +2258,14 @@ display: inline-block;
 /* --- Document Content Area --- */
 .cdlv-template-legal__content {
     width: 100%;
-    /* FIX: Force 100% max-width on mobile, rely on ch units only on desktop */
     max-width: 100%; 
     min-width: 0; 
-    margin-inline: 0; /* FIX: Resetting any margin tricks that cause right-shifting */
-    overflow-wrap: break-word; /* FIX: Prevents long URLs or unbroken text from forcing horizontal scroll */
+    margin-inline: 0; 
+    overflow-wrap: break-word; 
 }
 
 @media (min-width: 992px) {
     .cdlv-template-legal__content {
-        /* Re-apply the strict reading width only when we have the real estate */
         max-width: 75ch; 
     }
 }
@@ -2280,7 +2286,6 @@ display: inline-block;
 
 .cdlv-template-legal__section {
     margin-bottom: var(--spacing-lg);
-    /* Ensures anchored sections aren't hidden behind the global header */
     scroll-margin-top: calc(var(--header-offset) + var(--spacing-lg));
 }
 
@@ -2291,7 +2296,6 @@ display: inline-block;
     margin-bottom: var(--spacing-sm);
 }
 
-/* Rich Text Formatting inside Sections */
 .cdlv-template-legal__section p {
     margin-bottom: var(--spacing-sm);
     line-height: 1.7;
@@ -2312,6 +2316,7 @@ display: inline-block;
     font-weight: 600;
     color: var(--color-text-dark);
 }
+
 
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
