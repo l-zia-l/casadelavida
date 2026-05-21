@@ -1827,6 +1827,178 @@ display: inline-block;
 }
 
 /* ==========================================================================
+   MODULES: SEARCH ENGINE & FAQ SYSTEM
+   Architecture: Scoped BEM methodology. Utilizes global CSS variables for 
+   fluidity and strict thematic adherence (0px radius).
+   ========================================================================== */
+
+/* --- SEARCH ENGINE --- */
+.cdlv-search {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: var(--spacing-lg);
+}
+
+.cdlv-search__input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body);
+    border: 2px solid var(--color-neutral-bg);
+    border-radius: var(--radius-strict);
+    background-color: transparent;
+    color: var(--color-text-dark);
+    transition: border-color var(--transition-base);
+}
+
+.cdlv-search__input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.cdlv-search__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--color-primary);
+    border: 1px solid var(--color-neutral-bg);
+    border-top: none;
+    border-radius: var(--radius-strict);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    z-index: 100;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.cdlv-search__dropdown[hidden] {
+    display: none;
+}
+
+.cdlv-search__item {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-bottom: 1px solid var(--color-neutral-bg);
+}
+
+.cdlv-search__item:last-child {
+    border-bottom: none;
+}
+
+.cdlv-search__link {
+    display: block;
+    color: #6B21A8; /* Accessible Purple */
+    text-decoration: none;
+    font-size: var(--font-size-small);
+}
+
+.cdlv-search__link:hover {
+    color: var(--color-accent);
+}
+
+/* Specific Highlight requested */
+.cdlv-highlight {
+    font-weight: 700;
+    color: var(--color-text-dark);
+}
+
+/* ==========================================================================
+   MODULES:  FAQ SYSTEM
+   Architecture: Scoped BEM methodology. Utilizes global CSS variables for 
+   fluidity and strict thematic adherence (0px radius).
+   ========================================================================== */
+   
+   
+.cdlv-faq {
+    width: 100%;
+}
+
+/* Dashboard Grid */
+.cdlv-faq__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg) var(--spacing-md);
+}
+
+.cdlv-faq__category-title {
+    font-size: var(--font-size-h4);
+    margin-bottom: var(--spacing-xs);
+    border-bottom: 2px solid var(--color-text-dark);
+    padding-bottom: var(--spacing-xs);
+}
+
+.cdlv-faq__list {
+    list-style: none;
+}
+
+.cdlv-faq__list-item {
+    margin-bottom: var(--spacing-xs);
+}
+
+.cdlv-faq__link {
+    color: #6B21A8; /* Accessible Purple */
+    cursor: pointer;
+    font-size: var(--font-size-body);
+    transition: opacity var(--transition-fast);
+}
+
+.cdlv-faq__link:hover {
+    opacity: 0.7;
+}
+
+.cdlv-faq__link--more {
+    font-weight: 700;
+    color: var(--color-text-dark);
+    margin-top: var(--spacing-xs);
+    display: inline-block;
+}
+
+/* Answer View */
+.cdlv-faq__answer-view {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.cdlv-faq__btn-back {
+    background: transparent;
+    border: none;
+    color: var(--color-text-dark);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: var(--spacing-md);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cdlv-faq__btn-back:hover {
+    color: var(--color-accent);
+}
+
+.cdlv-faq__answer-title {
+    margin-bottom: var(--spacing-md);
+}
+
+/* Strict 40vw Image Constraint */
+.cdlv-faq__answer-image {
+    width: 40vw; 
+    height: auto;
+    object-fit: contain;
+    border-radius: var(--radius-strict);
+    margin: var(--spacing-md) 0;
+    display: block;
+}
+
+/* See More / Search Results Container */
+.cdlv-faq__list-view .cdlv-faq__list-item {
+    list-style-type: disc;
+    margin-left: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
