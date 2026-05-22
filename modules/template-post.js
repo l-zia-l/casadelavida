@@ -1,18 +1,7 @@
 /* ==========================================================================
    MODULE: TEMPLATE LEGAL / BLOG LAYOUT (modules/cdlv-template-post.js)
-   Architecture: DOM Transclusion Engine. Wraps raw HTML content in a 
-                 navigable grid layout. Supports nested modules and dynamic 
-                 pathing.
-   Security: Sanitizes config inputs. Uses Document Fragments to safely 
-             move existing DOM nodes without stringifying/re-parsing them, 
-             preventing XSS from the content area.
-   Dependencies: 
-   - `utils/path.js` (for dynamic image routing)
-   - `utils/components.js` (to wake up nested modules)
    ========================================================================== */
-
 import { buildPath } from '../utils/path.js';
-import { initializeComponents } from '../utils/components.js';
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
@@ -25,31 +14,26 @@ const defaultConfig = {
     showMeta: false,
     author: "",
     date: "",
-    shareUrl: "", // Overrides current URL if provided
+    shareUrl: "",
     shareTitle: "Casa De La Vida Wellness"
 };
 
-export const init = (node, customConfig = {}) => {
+// Notice the 'async' added here so we can dynamically import the component loader
+export const init = async (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
 
-    // 1. SAFELY EXTRACT EXISTING DOM
-    // We move the children into a fragment. This empties the node safely 
-    // without destroying event listeners or re-parsing HTML strings.
     const fragment = document.createDocumentFragment();
     const sections = [];
     
     while (node.firstChild) {
         const child = node.firstChild;
-        // Track valid sections for the sidebar
         if (child.nodeType === 1 && child.classList.contains('cdlv-template-post__section')) {
             sections.push(child);
-            // Ensure section has an ID for the anchor links
             if (!child.id) child.id = `section-${Math.random().toString(36).substring(2, 9)}`;
         }
         fragment.appendChild(child);
     }
 
-    // 2. BUILD SIDEBAR NAVIGATION
     const navItemsHTML = sections.map((section, index) => {
         const isActive = index === 0 ? 'is-active' : '';
         const title = section.getAttribute('data-nav-title') || 'Section';
@@ -62,7 +46,6 @@ export const init = (node, customConfig = {}) => {
         `;
     }).join('');
 
-    // 3. BUILD META & SHARE HEADER
     let metaHTML = '';
     if (config.showMeta) {
         const currentUrl = config.shareUrl ? buildPath(config.shareUrl) : window.location.href;
@@ -88,7 +71,6 @@ export const init = (node, customConfig = {}) => {
         `;
     }
 
-    // 4. ASSEMBLE THE NEW LAYOUT
     node.innerHTML = `
         <div class="cdlv-template-post">
             <aside class="cdlv-template-post__sidebar" aria-label="Document Navigation">
@@ -101,26 +83,26 @@ export const init = (node, customConfig = {}) => {
         </div>
     `;
 
-    // 5. INJECT CONTENT & RESOLVE PATHS
     const sectionsWrapper = node.querySelector('.cdlv-template-post__sections-wrapper');
-    sectionsWrapper.appendChild(fragment); // Re-attach the living DOM nodes
+    sectionsWrapper.appendChild(fragment);
 
-    // Dynamically resolve all images using data-src-relative
     const dynamicImages = sectionsWrapper.querySelectorAll('img[data-src-relative]');
     dynamicImages.forEach(img => {
         const relativePath = img.getAttribute('data-src-relative');
         if (relativePath) {
             img.src = buildPath(relativePath);
-            img.removeAttribute('data-src-relative'); // Clean up DOM
+            img.removeAttribute('data-src-relative'); 
         }
     });
 
-    // 6. WAKE UP NESTED MODULES
-    // We call the global initialization script specifically on the wrapper 
-    // we just built. This ensures nested components (like accordions) initialize.
-    initializeComponents(sectionsWrapper);
+    // 6. DYNAMIC IMPORT TO FIX CIRCULAR DEPENDENCY
+    try {
+        const { initializeComponents } = await import('../utils/components.js');
+        initializeComponents(sectionsWrapper);
+    } catch (error) {
+        console.error("Failed to load components.js for nested modules:", error);
+    }
 
-    // 7. INITIALIZE SCROLL SPY
     setupScrollSpy(node);
 };
 
