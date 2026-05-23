@@ -41,10 +41,11 @@ and assign it to the `innerHTML` of the target container.
   
   <!-- Content Security Policy (CSP) -->
   <meta http-equiv="Content-Security-Policy" 
-      content="default-src 'self'; 
-               script-src 'self';
-               img-src 'self' data: https:; 
-               connect-src 'self' https://*.supabase.co;">
+    content="default-src 'self'; 
+             script-src 'self';
+             img-src 'self' data: https:; 
+             connect-src 'self' https://*.supabase.co;
+             frame-src 'self' https://calendar.google.com;">
 
   <title>Casa De La Vida | Premium Teas & Wellness Boxes | Tea Delivery | Fresh Honey</title>
 
@@ -125,9 +126,9 @@ and assign it to the `innerHTML` of the target container.
        data-config='{"heading": "What To Expect", "items": [{"title": "30 Mins", "subtitle": "Focused Consultation"}, {"title": "Online", "subtitle": "Via Secure Video"}, {"title": "Tailored Tea", "subtitle": "Custom Wellness Plan"}]}'>
   </div>
 
-  <section class="cdlv-booking-section">
-    <div data-module="booking-calendar"></div>
-  </section>
+  <div data-module="booking-calendar" 
+     data-config='{"title": "Book A Consultation", "subtitle": "Choose a convenient time to meet with our certified nutritional coach. We look forward to speaking with you."}'>
+  </div>
   </main>
 
   <!-- Footer Module Target -->
