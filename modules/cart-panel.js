@@ -8,12 +8,17 @@
 
 import { buildPath } from '../utils/path.js';
 
+/**
+ * Basic text sanitizer to prevent HTML injection from external data strings.
+ * @param {string} str - Raw input string
+ * @returns {string} - Sanitized string safe for DOM insertion
+ */
 const sanitizeText = (str) => {
     if (typeof str !== 'string' && typeof str !== 'number') return '';
     const tempDiv = document.createElement('div');
     tempDiv.textContent = str.toString();
     return tempDiv.innerHTML;
-};
+}; 
 
 // Mock State
 let cartState = {

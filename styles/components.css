@@ -2649,7 +2649,7 @@ display: inline-block;
   .cdlv-booking-calendar__loader {
     animation: none;
     border-style: dotted; /* Provides static visual interest without motion */
-  }
+  } 
 }
 
 /* ==========================================================================
