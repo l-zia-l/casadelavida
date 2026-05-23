@@ -2184,6 +2184,7 @@ display: inline-block;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    font-family: var(--font-family-body);
 }
 
 .cdlv-template-post__author-name {
@@ -2363,6 +2364,7 @@ display: inline-block;
 .cdlv-template-post__content {
     flex: 1;
     width: 100%;
+    min-width: 0;
 }
 
 .cdlv-template-post__section {
@@ -2387,6 +2389,12 @@ display: inline-block;
 .cdlv-template-post__text img {
     margin-block: var(--spacing-sm);
     border-radius: var(--radius-strict);
+}
+
+.cdlv-template-post__content .u-fill-width,
+.cdlv-template-post__content .u-fill-screen {
+    width: 100%;
+    margin-left: 0;
 }
 
 /* ==========================================================================
