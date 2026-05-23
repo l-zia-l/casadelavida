@@ -1,17 +1,13 @@
 /* ==========================================================================
    MODULE: CART PANEL (modules/cart-panel.js)
-   Architecture: Exportable ES Module. Renders a reactive split-view cart.
-   Security: Implements DOMPurify-style text sanitization for injected strings.
-   Dependencies: Relies on `utils/path.js` for asset routing.
+   Architecture: Exportable ES Module. Renders a reactive cart.
+   Security: Implements text sanitization. Enforces strict 100-word limit on notes.
+   Performance: Uses fine-grained DOM updates to prevent layout thrashing and 
+   unnecessary image reloads on state changes.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
 
-/**
- * Basic text sanitizer to prevent HTML injection from external data strings.
- * @param {string} str - Raw input string
- * @returns {string} - Sanitized string safe for DOM insertion
- */
 const sanitizeText = (str) => {
     if (typeof str !== 'string' && typeof str !== 'number') return '';
     const tempDiv = document.createElement('div');
@@ -19,9 +15,7 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
-// --------------------------------------------------------------------------
-// MOCK STATE (To be replaced with utils/cart.js integration in the future)
-// --------------------------------------------------------------------------
+// Mock State
 let cartState = {
     items: [
         {
@@ -45,10 +39,6 @@ let cartState = {
     ],
     shippingRate: 35.00
 };
-
-// --------------------------------------------------------------------------
-// COMPONENT RENDERERS
-// --------------------------------------------------------------------------
 
 const renderEmptyState = () => `
     <div class="cdlv-cart-panel__empty">
@@ -77,14 +67,18 @@ const renderCartItems = () => {
 
             <div class="cdlv-cart-item__actions">
                 <div class="cdlv-cart-item__qty-control">
-                    <button type="button" class="cdlv-cart-item__qty-btn" data-action="decrease" aria-label="Decrease quantity" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
-                    <span class="cdlv-cart-item__qty-value">${sanitizeText(item.quantity)}</span>
-                    <button type="button" class="cdlv-cart-item__qty-btn" data-action="increase" aria-label="Increase quantity" ${item.quantity >= item.maxStock ? 'disabled' : ''}>+</button>
+                    <button type="button" class="cdlv-cart-item__qty-btn" data-action="decrease" aria-label="Decrease quantity" ${item.quantity <= 1 ? 'disabled' : ''}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                    <span class="cdlv-cart-item__qty-value" data-target="qty">${sanitizeText(item.quantity)}</span>
+                    <button type="button" class="cdlv-cart-item__qty-btn" data-action="increase" aria-label="Increase quantity" ${item.quantity >= item.maxStock ? 'disabled' : ''}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                 </div>
-                ${item.quantity >= item.maxStock ? `<span class="cdlv-cart-item__stock-warning">Only ${sanitizeText(item.maxStock)} left in stock.</span>` : ''}
+                <span class="cdlv-cart-item__stock-warning" data-target="warning" ${item.quantity >= item.maxStock ? '' : 'hidden'}>Only ${sanitizeText(item.maxStock)} left in stock.</span>
             </div>
 
-            <div class="cdlv-cart-item__price">
+            <div class="cdlv-cart-item__price" data-target="item-price">
                 ₵${sanitizeText((item.price * item.quantity).toFixed(2))}
             </div>
         </article>
@@ -101,7 +95,7 @@ const renderSummary = () => {
             
             <div class="cdlv-cart-summary__row">
                 <span>Subtotal</span>
-                <span>₵${sanitizeText(subtotal.toFixed(2))}</span>
+                <span data-target="subtotal">₵${sanitizeText(subtotal.toFixed(2))}</span>
             </div>
             <div class="cdlv-cart-summary__row">
                 <span>Estimated Shipping</span>
@@ -112,12 +106,13 @@ const renderSummary = () => {
             
             <div class="cdlv-cart-summary__row cdlv-cart-summary__row--total">
                 <span>Total</span>
-                <span>₵${sanitizeText(total.toFixed(2))}</span>
+                <span data-target="total">₵${sanitizeText(total.toFixed(2))}</span>
             </div>
 
             <div class="cdlv-cart-summary__notes">
-                <label for="cart-notes">Special delivery instructions</label>
-                <textarea id="cart-notes" rows="3" placeholder="e.g., Please leave at the gate..."></textarea>
+                <label for="cart-notes">Special delivery instructions (Max 100 words)</label>
+                <textarea id="cart-notes" data-target="notes" rows="3" placeholder="e.g., Please leave at the gate..."></textarea>
+                <small class="cdlv-cart-summary__word-count" data-target="word-count">0 / 100 words</small>
             </div>
 
             <div class="cdlv-cart-summary__cta-wrapper">
@@ -137,11 +132,22 @@ const renderSummary = () => {
     `;
 };
 
-/**
- * Re-renders the internal HTML based on updated state without destroying the wrapper.
- * @param {HTMLElement} node - The root module node.
- */
-const updateDOM = (node) => {
+// Calculates and updates the bottom-line numbers without re-rendering the HTML
+const updateFinancials = (node) => {
+    const subtotalNode = node.querySelector('[data-target="subtotal"]');
+    const totalNode = node.querySelector('[data-target="total"]');
+    
+    if (!subtotalNode || !totalNode) return;
+
+    const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = subtotal + cartState.shippingRate;
+
+    subtotalNode.textContent = `₵${subtotal.toFixed(2)}`;
+    totalNode.textContent = `₵${total.toFixed(2)}`;
+};
+
+export const init = (node) => {
+    // 1. Initial Full Render
     if (cartState.items.length === 0) {
         node.innerHTML = renderEmptyState();
         return;
@@ -152,26 +158,41 @@ const updateDOM = (node) => {
             <div class="cdlv-cart-panel__list">
                 <div class="cdlv-cart-panel__list-header">
                     <h2>Review Your Items</h2>
-                    <span>${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}</span>
+                    <span data-target="item-count">${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}</span>
                 </div>
-                ${renderCartItems()}
+                <div class="cdlv-cart-panel__items-container">
+                    ${renderCartItems()}
+                </div>
             </div>
             <div class="cdlv-cart-panel__sidebar">
                 ${renderSummary()}
             </div>
         </div>
     `;
-};
 
-/**
- * Core initialization function triggered by the global component loader.
- * @param {HTMLElement} node - The target DOM element.
- */
-export const init = (node) => {
-    // 1. Initial Render
-    updateDOM(node);
+    // 2. Textarea Word Count Limiter
+    const notesArea = node.querySelector('[data-target="notes"]');
+    const wordCountDisplay = node.querySelector('[data-target="word-count"]');
+    
+    if (notesArea) {
+        notesArea.addEventListener('input', (e) => {
+            const text = e.target.value;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            
+            if (words.length > 100) {
+                // Truncate to exactly 100 words
+                const truncatedText = words.slice(0, 100).join(' ');
+                e.target.value = truncatedText;
+                wordCountDisplay.textContent = `100 / 100 words (Max reached)`;
+                wordCountDisplay.style.color = 'var(--color-accent)';
+            } else {
+                wordCountDisplay.textContent = `${words.length} / 100 words`;
+                wordCountDisplay.style.color = 'rgba(0,0,0,0.6)';
+            }
+        });
+    }
 
-    // 2. Performant Event Delegation
+    // 3. Performant Event Delegation for Cart Actions
     node.addEventListener('click', (e) => {
         const actionBtn = e.target.closest('[data-action]');
         if (!actionBtn) return;
@@ -183,21 +204,57 @@ export const init = (node) => {
         const itemIndex = cartState.items.findIndex(i => i.id === itemId);
         if (itemIndex === -1) return;
 
-        if (action === 'increase') {
-            if (cartState.items[itemIndex].quantity < cartState.items[itemIndex].maxStock) {
-                cartState.items[itemIndex].quantity += 1;
-                updateDOM(node);
+        const item = cartState.items[itemIndex];
+
+        if (action === 'increase' || action === 'decrease') {
+            if (action === 'increase' && item.quantity < item.maxStock) {
+                item.quantity += 1;
+            } else if (action === 'decrease' && item.quantity > 1) {
+                item.quantity -= 1;
             }
-        } 
-        else if (action === 'decrease') {
-            if (cartState.items[itemIndex].quantity > 1) {
-                cartState.items[itemIndex].quantity -= 1;
-                updateDOM(node);
+
+            // Target highly specific DOM nodes to prevent layout shifts/image reloads
+            const qtyNode = itemNode.querySelector('[data-target="qty"]');
+            const priceNode = itemNode.querySelector('[data-target="item-price"]');
+            const decreaseBtn = itemNode.querySelector('[data-action="decrease"]');
+            const increaseBtn = itemNode.querySelector('[data-action="increase"]');
+            const warningNode = itemNode.querySelector('[data-target="warning"]');
+
+            qtyNode.textContent = item.quantity;
+            priceNode.textContent = `₵${(item.price * item.quantity).toFixed(2)}`;
+            
+            // Update button states
+            decreaseBtn.disabled = item.quantity <= 1;
+            increaseBtn.disabled = item.quantity >= item.maxStock;
+            
+            // Toggle warning
+            if (item.quantity >= item.maxStock) {
+                warningNode.removeAttribute('hidden');
+            } else {
+                warningNode.setAttribute('hidden', 'true');
             }
+
+            updateFinancials(node);
         } 
         else if (action === 'remove') {
             cartState.items.splice(itemIndex, 1);
-            updateDOM(node);
+            
+            // Fade out animation before removing node
+            itemNode.style.opacity = '0';
+            itemNode.style.transition = 'opacity var(--transition-fast)';
+            
+            setTimeout(() => {
+                itemNode.remove();
+                
+                // Check if cart is now empty
+                if (cartState.items.length === 0) {
+                    node.innerHTML = renderEmptyState();
+                } else {
+                    const countNode = node.querySelector('[data-target="item-count"]');
+                    countNode.textContent = `${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}`;
+                    updateFinancials(node);
+                }
+            }, 150);
         }
     });
 };
