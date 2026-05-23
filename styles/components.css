@@ -2130,177 +2130,171 @@ display: inline-block;
 }
 
 /* ==========================================================================
-CSS APPEND: STYLES/COMPONENTS.CSS
-Architecture: Scoped BEM class structure for the template-post module.
-Implements a CSS Grid layout that shifts from a mobile horizontal top-nav
-to a desktop sticky left-sidebar.
-Typography constraints prioritize the "Clean-Read" 60-70ch character limit.
-========================================================================== */
+   MODULE: TEMPLATE POST (.cdlv-template-post)
+   Architecture: Scoped BEM Grid Layout.
+   Updates: Removed max-width limitations, applied fluid layout gutters, 
+   and implemented dynamic top-positioning synced with the global header.
+   ========================================================================== */
 
 /* Main Wrapper */
 .cdlv-template-post {
-display: flex;
-flex-direction: column;
-gap: var(--spacing-md);
-padding-block: var(--spacing-md) var(--spacing-xl);
-}
-
-/*
-Desktop Layout:
-Sidebar takes a fixed width constraint, Content takes remaining space
-but is strictly capped at an optimal reading width.
-*/
-@media (min-width: 1024px) {
-.cdlv-template-post {
-flex-direction: row;
-align-items: flex-start;
-gap: var(--layout-gutter);
-}
-}
-
-/* Sidebar & Sticky Behavior / */
-.cdlv-template-post__sidebar {
-width: 100%;
-position: sticky;
-top: var(--header-offset);
-z-index: 10;
-background-color: var(--color-primary);
-padding-block: var(--spacing-xs);
-border-bottom: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    /* Prevents text from hugging the screen edges */
+    padding-inline: var(--layout-gutter);
+    padding-block: var(--spacing-md) var(--spacing-xl);
+    width: 100%;
 }
 
 @media (min-width: 1024px) {
-.cdlv-template-post__sidebar {
-flex: 0 0 280px;
-top: calc(var(--header-offset) + var(--spacing-md));
-border-bottom: none;
-padding-block: 0;
-max-height: calc(100vh - var(--header-offset) - var(--spacing-md));
-overflow-y: auto; /* Allow scrolling if sidebar is very long /
-/ Custom scrollbar for sidebar */
-scrollbar-width: thin;
-scrollbar-color: var(--color-secondary) transparent;
+    .cdlv-template-post {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: var(--spacing-lg);
+    }
 }
+
+/* Sidebar & Sticky Behavior */
+.cdlv-template-post__sidebar {
+    width: 100%;
+    position: sticky;
+    top: var(--header-offset);
+    z-index: 10;
+    background-color: var(--color-primary);
+    padding-block: var(--spacing-xs);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    /* Hardware-accelerated transition to match the header easing */
+    transition: top var(--transition-base);
+}
+
+/* Syncs with JS MutationObserver when the main header translates up */
+.cdlv-template-post__sidebar.is-header-hidden {
+    top: 0; 
+}
+
+@media (min-width: 1024px) {
+    .cdlv-template-post__sidebar {
+        flex: 0 0 280px; /* Fixed width for the sidebar */
+        top: calc(var(--header-offset) + var(--spacing-md));
+        border-bottom: none;
+        padding-block: 0;
+        max-height: calc(100vh - var(--header-offset) - var(--spacing-md));
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-secondary) transparent;
+    }
+
+    .cdlv-template-post__sidebar.is-header-hidden {
+        top: var(--spacing-md);
+    }
 }
 
 .cdlv-template-post__meta {
-font-size: var(--font-size-small);
-color: var(--color-accent);
-opacity: 0.7;
-margin-bottom: var(--spacing-xs);
-font-weight: 600;
-text-transform: uppercase;
-letter-spacing: var(--letter-spacing-wide);
-display: none; /* Hide on mobile to save space */
+    font-size: var(--font-size-small);
+    color: var(--color-accent);
+    opacity: 0.7;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    display: none;
 }
 
 @media (min-width: 1024px) {
-.cdlv-template-post__meta {
-display: block;
-}
+    .cdlv-template-post__meta { display: block; }
 }
 
-/* Navigation List / */
+/* Navigation List */
 .cdlv-template-post__nav-list {
-list-style: none;
-display: flex;
-overflow-x: auto;
-gap: var(--spacing-sm);
-padding-bottom: 4px;
-scrollbar-width: none; 
+    list-style: none;
+    display: flex;
+    overflow-x: auto;
+    gap: var(--spacing-sm);
+    padding-bottom: 4px;
+    scrollbar-width: none;
 }
-
-.cdlv-template-post__nav-list::-webkit-scrollbar {
-display: none; 
-}
+.cdlv-template-post__nav-list::-webkit-scrollbar { display: none; }
 
 @media (min-width: 1024px) {
-.cdlv-template-post__nav-list {
-flex-direction: column;
-gap: 0;
-overflow-x: visible;
-}
+    .cdlv-template-post__nav-list {
+        flex-direction: column;
+        gap: 0;
+        overflow-x: visible;
+    }
 }
 
 /* Navigation Links */
 .cdlv-template-post__nav-link {
-display: block;
-font-size: var(--font-size-small);
-color: var(--color-text-dark);
-opacity: 0.6;
-white-space: nowrap;
-padding: calc(var(--spacing-xs) / 2) 0;
-border-bottom: 2px solid transparent;
+    display: block;
+    font-size: var(--font-size-small);
+    color: var(--color-text-dark);
+    opacity: 0.6;
+    white-space: nowrap;
+    padding: calc(var(--spacing-xs) / 2) 0;
+    border-bottom: 2px solid transparent;
 }
 
 @media (min-width: 1024px) {
-.cdlv-template-post__nav-link {
-white-space: normal;
-padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) 0;
-border-bottom: none;
-border-left: 2px solid transparent;
-padding-left: var(--spacing-xs);
-}
+    .cdlv-template-post__nav-link {
+        white-space: normal;
+        padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) 0;
+        border-bottom: none;
+        border-left: 2px solid transparent;
+        padding-left: var(--spacing-xs);
+    }
 }
 
 .cdlv-template-post__nav-link:hover,
 .cdlv-template-post__nav-link:focus-visible {
-opacity: 1;
-color: var(--color-accent);
+    opacity: 1;
+    color: var(--color-accent);
 }
 
-/* Scroll-Spy Active State */
 .cdlv-template-post__nav-link.is-active {
-opacity: 1;
-color: var(--color-accent);
-font-weight: 600;
-border-bottom-color: var(--color-accent);
+    opacity: 1;
+    color: var(--color-accent);
+    font-weight: 600;
+    border-bottom-color: var(--color-accent);
 }
 
 @media (min-width: 1024px) {
-.cdlv-template-post__nav-link.is-active {
-border-bottom-color: transparent;
-border-left-color: var(--color-accent);
-background-color: rgba(71, 59, 117, 0.03); /* Subtle var(--color-accent) tint */
-}
+    .cdlv-template-post__nav-link.is-active {
+        border-bottom-color: transparent;
+        border-left-color: var(--color-accent);
+        background-color: rgba(71, 59, 117, 0.03);
+    }
 }
 
-/* Main Content Area / */
+/* Main Content Area */
 .cdlv-template-post__content {
-flex: 1;
-max-width: 70ch;
-margin-inline: auto;
+    flex: 1;
+    width: 100%;
 }
 
-@media (min-width: 1024px) {
-.cdlv-template-post__content {
-margin-inline: 0; /* Align left alongside sidebar */
-}
-}
-
-/* Sections & Typography / */
 .cdlv-template-post__section {
-scroll-margin-top: calc(var(--header-offset) + var(--spacing-md)); 
-margin-bottom: var(--spacing-lg);
+    scroll-margin-top: calc(var(--header-offset) + var(--spacing-md));
+    margin-bottom: var(--spacing-lg);
 }
 
 .cdlv-template-post__heading {
-font-size: var(--font-size-h4);
-color: var(--color-accent);
-margin-bottom: var(--spacing-sm);
-border-bottom: 1px solid rgba(0,0,0,0.1);
-padding-bottom: calc(var(--spacing-xs) / 2);
+    font-size: var(--font-size-h4);
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-sm);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: calc(var(--spacing-xs) / 2);
 }
 
+/* Changed from <p> to <div> in JS to safely wrap potential inner HTML like images */
 .cdlv-template-post__text {
-font-size: var(--font-size-body);
-color: var(--color-text-dark);
-margin-bottom: var(--spacing-xs);
+    font-size: var(--font-size-body);
+    color: var(--color-text-dark);
+    margin-bottom: var(--spacing-md);
 }
 
-/* Utility to style pseudo-lists (lines starting with bullets in the config) */
-.cdlv-template-post__text:has(+ .cdlv-template-post__text) {
-margin-bottom: calc(var(--spacing-xs) / 2);
+.cdlv-template-post__text img {
+    margin-block: var(--spacing-sm);
+    border-radius: var(--radius-strict);
 }
 
 /* ==========================================================================
