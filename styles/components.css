@@ -2144,7 +2144,7 @@ display: inline-block;
     width: 100%;
 }
 
-/* --- NEW: METADATA HEADER --- */
+/* --- METADATA HEADER --- */
 .cdlv-template-post__header {
     margin-bottom: var(--spacing-lg);
     border-bottom: 1px solid rgba(0,0,0,0.1);
@@ -2152,7 +2152,7 @@ display: inline-block;
 }
 
 .cdlv-template-post__main-title {
-    font-size: var(--font-size-h2); /* Generous scale for article titles */
+    font-size: var(--font-size-h2); 
     color: var(--color-accent);
     margin-bottom: var(--spacing-md);
     line-height: 1.1;
@@ -2172,30 +2172,35 @@ display: inline-block;
     gap: var(--spacing-xs);
 }
 
+/* Fluid Avatar Fix */
 .cdlv-template-post__author-img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%; /* Strict circle */
-    object-fit: cover;
+    width: clamp(2.5rem, 5vw, 4rem);
+    height: clamp(2.5rem, 5vw, 4rem);
+    border-radius: 50%;
+    object-fit: cover; /* Ensures the image fills the circle perfectly */
+    object-position: center; /* Keeps faces/logos perfectly centered to avoid clipping */
     border: 1px solid rgba(0,0,0,0.1);
+    display: block;
 }
 
 .cdlv-template-post__author-text {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    font-family: var(--font-family-body);
 }
 
+/* Inheriting fluid body variables instead of hardcoded sizes */
 .cdlv-template-post__author-name {
-    font-family: var(--font-family-heading);
+    font-family: var(--font-family-body);
     font-weight: 600;
     color: var(--color-text-dark);
-    font-size: var(--font-size-small);
+    font-size: var(--font-size-body);
+    line-height: 1.2;
 }
 
 .cdlv-template-post__date {
-    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
     color: var(--color-text-dark);
     opacity: 0.6;
 }
@@ -2207,17 +2212,18 @@ display: inline-block;
 }
 
 .cdlv-template-post__share-label {
-    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: var(--letter-spacing-wide);
     opacity: 0.6;
-    margin-right: 4px;
+    margin-right: calc(var(--spacing-xs) / 2);
 }
 
 .cdlv-template-post__share-btn {
     background: none;
     border: none;
-    padding: 8px;
+    padding: clamp(6px, 1vw, 10px); /* Fluid padding for the hit target */
     border-radius: 50%;
     background-color: rgba(0,0,0,0.03);
     cursor: pointer;
@@ -2227,13 +2233,13 @@ display: inline-block;
 }
 
 .cdlv-template-post__share-btn:hover {
-    background-color: rgba(71, 59, 117, 0.1); /* Subtle accent hover */
+    background-color: rgba(71, 59, 117, 0.1); 
     transform: translateY(-2px);
 }
 
 .cdlv-template-post__share-btn img {
-    width: 18px;
-    height: 18px;
+    width: var(--icon-size-base); /* Plugged into your global icon sizing */
+    height: var(--icon-size-base);
     opacity: 0.8;
 }
 
