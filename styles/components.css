@@ -2136,19 +2136,116 @@ display: inline-block;
    and implemented dynamic top-positioning synced with the global header.
    ========================================================================== */
 
-/* Main Wrapper */
 .cdlv-template-post {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
-    /* Prevents text from hugging the screen edges */
     padding-inline: var(--layout-gutter);
     padding-block: var(--spacing-md) var(--spacing-xl);
     width: 100%;
 }
 
+/* --- NEW: METADATA HEADER --- */
+.cdlv-template-post__header {
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: var(--spacing-sm);
+}
+
+.cdlv-template-post__main-title {
+    font-size: var(--font-size-h2); /* Generous scale for article titles */
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-md);
+    line-height: 1.1;
+}
+
+.cdlv-template-post__meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.cdlv-template-post__author-lockup {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.cdlv-template-post__author-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%; /* Strict circle */
+    object-fit: cover;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.cdlv-template-post__author-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.cdlv-template-post__author-name {
+    font-family: var(--font-family-heading);
+    font-weight: 600;
+    color: var(--color-text-dark);
+    font-size: var(--font-size-small);
+}
+
+.cdlv-template-post__date {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--color-text-dark);
+    opacity: 0.6;
+}
+
+.cdlv-template-post__share-group {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-xs) / 2);
+}
+
+.cdlv-template-post__share-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    margin-right: 4px;
+}
+
+.cdlv-template-post__share-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: rgba(0,0,0,0.03);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cdlv-template-post__share-btn:hover {
+    background-color: rgba(71, 59, 117, 0.1); /* Subtle accent hover */
+    transform: translateY(-2px);
+}
+
+.cdlv-template-post__share-btn img {
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+}
+
+/* --- BODY (Sidebar + Content) --- */
+.cdlv-template-post__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
 @media (min-width: 1024px) {
-    .cdlv-template-post {
+    .cdlv-template-post__body {
         flex-direction: row;
         align-items: flex-start;
         gap: var(--spacing-lg);
@@ -2164,13 +2261,10 @@ display: inline-block;
     background-color: var(--color-primary);
     padding-block: var(--spacing-xs);
     border-bottom: 1px solid rgba(0,0,0,0.1);
-    
-    /* Hardware-accelerated sync matching the header's global transition curve */
     transition: transform var(--transition-base);
     will-change: transform;
 }
 
-/* Pulls the nav perfectly flush to the top when the header disappears */
 .cdlv-template-post__sidebar.is-header-hidden {
     transform: translateY(calc(-1 * var(--header-offset)));
 }
@@ -2188,7 +2282,6 @@ display: inline-block;
     }
 
     .cdlv-template-post__sidebar.is-header-hidden {
-        /* Maintains the desktop spacing logic while shifting up */
         transform: translateY(calc(-1 * var(--header-offset) + var(--spacing-md)));
     }
 }
@@ -2208,7 +2301,6 @@ display: inline-block;
     .cdlv-template-post__meta { display: block; }
 }
 
-/* Navigation List */
 .cdlv-template-post__nav-list {
     list-style: none;
     display: flex;
@@ -2227,7 +2319,6 @@ display: inline-block;
     }
 }
 
-/* Navigation Links */
 .cdlv-template-post__nav-link {
     display: block;
     font-size: var(--font-size-small);
@@ -2269,7 +2360,6 @@ display: inline-block;
     }
 }
 
-/* Main Content Area */
 .cdlv-template-post__content {
     flex: 1;
     width: 100%;
@@ -2288,7 +2378,6 @@ display: inline-block;
     padding-bottom: calc(var(--spacing-xs) / 2);
 }
 
-/* Changed from <p> to <div> in JS to safely wrap potential inner HTML like images */
 .cdlv-template-post__text {
     font-size: var(--font-size-body);
     color: var(--color-text-dark);
