@@ -2574,12 +2574,12 @@ display: inline-block;
 .cdlv-booking-calendar {
   position: relative;
   width: 100%;
-  /* Fluid height to ensure usability on both mobile and large desktop displays */
   height: clamp(600px, 80vh, 900px);
   background-color: var(--color-primary);
   border: 1px solid var(--color-neutral-bg);
   border-radius: var(--radius-strict);
   overflow: hidden;
+  isolation: isolate;
 }
 
 /* Loader Container - centers the spinner perfectly behind the iframe */
@@ -2616,6 +2616,7 @@ display: inline-block;
 .cdlv-booking-calendar:has(.is-loaded) .cdlv-booking-calendar__loader-wrapper {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden; 
 }
 
 /* Iframe Styling - Starts hidden, fades in securely */
@@ -2638,6 +2639,17 @@ display: inline-block;
 @keyframes cdlv-iframe-spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* 
+ * A11Y FIX: Respect system preferences for reduced motion by stopping 
+ * the infinite spin and converting it to a static visual indicator.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .cdlv-booking-calendar__loader {
+    animation: none;
+    border-style: dotted; /* Provides static visual interest without motion */
+  }
 }
 
 /* ==========================================================================
