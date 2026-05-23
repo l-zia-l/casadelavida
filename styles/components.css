@@ -2433,6 +2433,98 @@ display: inline-block;
 }
 
 /* ==========================================================================
+   MODULE: ICON DETAIL ROW (styles/components.css)
+   Architecture: Minimalist box model using CSS Grid for fluid layout.
+   Purpose: Displays a heading and exactly three text-based data points.
+   Constraints: Strict 0px radius, high contrast, guaranteed 100vh minimum 
+   height to create a focused, immersive viewport block.
+   ========================================================================== */
+
+.cdlv-icon-detail-row {
+    /* Guarantees the component takes up at least one full viewport height */
+    min-height: var(--vh-modern, 100vh);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: var(--spacing-xl);
+}
+
+.cdlv-icon-detail-row__heading {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-accent);
+}
+
+.cdlv-icon-detail-row__grid {
+    display: grid;
+    /* Mobile-first: 1 column stack */
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+.cdlv-icon-detail-row__item {
+    /* Strict box aesthetic */
+    border: 2px solid var(--color-text-dark);
+    border-radius: var(--radius-strict);
+    padding: var(--spacing-md);
+    text-align: center;
+    background-color: var(--color-primary);
+    
+    /* Internal Flex for perfect centering */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: clamp(120px, 20vh, 200px);
+    transition: transform var(--transition-base), background-color var(--transition-base);
+}
+
+/* Subtle interactive hover state */
+.cdlv-icon-detail-row__item:hover {
+    transform: translateY(-4px);
+    background-color: var(--color-text-dark);
+}
+
+.cdlv-icon-detail-row__item:hover .cdlv-icon-detail-row__title,
+.cdlv-icon-detail-row__item:hover .cdlv-icon-detail-row__subtitle {
+    color: var(--color-text-light);
+}
+
+.cdlv-icon-detail-row__title {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-h3);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.1;
+    color: var(--color-text-dark);
+    transition: color var(--transition-base);
+}
+
+.cdlv-icon-detail-row__subtitle {
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    color: var(--color-text-dark);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    font-weight: var(--font-weight-regular);
+    transition: color var(--transition-base);
+}
+
+/* Desktop layout: 3 equal columns */
+@media (min-width: 768px) {
+    .cdlv-icon-detail-row__grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-md);
+    }
+    
+    .cdlv-icon-detail-row__item {
+        padding: var(--spacing-lg) var(--spacing-md);
+        min-height: clamp(200px, 25vw, 300px);
+    }
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
