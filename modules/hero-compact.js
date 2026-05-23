@@ -10,6 +10,7 @@ import { buildPath } from '../utils/path.js';
 const defaultConfig = {
   bgImage: '', 
   imageAlt: '',
+  showOverlay: true, // Default to showing the text box
   headingLevel: 'h2', 
   heading: 'The Shop',
   description: 'Every blend crafted with purpose to support women\'s health. Hand-sourced artisanal ingredients designed to elevate your daily routine.',
@@ -24,7 +25,6 @@ const defaultConfig = {
  * @returns {string} - Sanitized string safe for DOM injection
  */
 function sanitizeHTML(str) {
-  if (!str) return '';
   const temp = document.createElement('div');
   temp.textContent = str;
   return temp.innerHTML;
@@ -40,8 +40,9 @@ export function init(node, customConfig = {}) {
   const validHeading = /^(h[1-6])$/i.test(config.headingLevel) ? config.headingLevel.toLowerCase() : 'h2';
   const safeCtaLink = buildPath(config.ctaLink);
 
+  // 1. Conditionally generate the image HTML
   let imageHTML = '';
-  if (config.bgImage?.trim()) {
+  if (config.bgImage && config.bgImage.trim() !== '') {
     const safeBgImage = buildPath(config.bgImage);
     imageHTML = `
       <img src="${sanitizeHTML(safeBgImage)}" 
@@ -52,17 +53,26 @@ export function init(node, customConfig = {}) {
     `;
   }
 
-  // Added 'u-fill-width' to inherit the global breakout utility
-  const html = `
-    <section class="cdlv-hero cdlv-hero--compact u-fill-width animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}">
-      ${imageHTML}
+  // 2. Conditionally generate the overlay text HTML
+  let overlayHTML = '';
+  if (config.showOverlay) {
+    overlayHTML = `
       <div class="cdlv-hero__compact-overlay">
         <${validHeading} class="cdlv-hero__title">${sanitizeHTML(config.heading)}</${validHeading}>
         <p class="cdlv-hero__description">${sanitizeHTML(config.description)}</p>
+        
         <a href="${sanitizeHTML(safeCtaLink)}" class="cdlv-hero__btn cdlv-hero__btn--secondary">
           ${sanitizeHTML(config.ctaText)}
         </a>
       </div>
+    `;
+  }
+
+  // 3. Inject the dynamic blocks into the main template
+  const html = `
+    <section class="cdlv-hero cdlv-hero--compact animate-enter" role="region" aria-label="${sanitizeHTML(config.heading)}" data-image-sync>
+      ${imageHTML}
+      ${overlayHTML}
     </section>
   `;
 
