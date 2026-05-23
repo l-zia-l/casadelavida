@@ -2132,8 +2132,8 @@ display: inline-block;
 /* ==========================================================================
    MODULE: TEMPLATE POST (.cdlv-template-post)
    Architecture: Scoped BEM Grid Layout.
-   Updates: Removed max-width limitations, applied fluid layout gutters, 
-   and implemented dynamic top-positioning synced with the global header.
+   A11y: Includes :focus-visible states, disabled focus rings on programmatic 
+   section jumps, and respects prefers-reduced-motion media queries.
    ========================================================================== */
 
 .cdlv-template-post {
@@ -2172,13 +2172,12 @@ display: inline-block;
     gap: var(--spacing-xs);
 }
 
-/* Fluid Avatar Fix */
 .cdlv-template-post__author-img {
     width: clamp(2.5rem, 5vw, 4rem);
     height: clamp(2.5rem, 5vw, 4rem);
     border-radius: 50%;
-    object-fit: cover; /* Ensures the image fills the circle perfectly */
-    object-position: center; /* Keeps faces/logos perfectly centered to avoid clipping */
+    object-fit: cover; 
+    object-position: center;
     border: 1px solid rgba(0,0,0,0.1);
     display: block;
 }
@@ -2189,7 +2188,6 @@ display: inline-block;
     justify-content: center;
 }
 
-/* Inheriting fluid body variables instead of hardcoded sizes */
 .cdlv-template-post__author-name {
     font-family: var(--font-family-body);
     font-weight: 600;
@@ -2223,13 +2221,14 @@ display: inline-block;
 .cdlv-template-post__share-btn {
     background: none;
     border: none;
-    padding: clamp(6px, 1vw, 10px); /* Fluid padding for the hit target */
+    padding: clamp(6px, 1vw, 10px); 
     border-radius: 50%;
     background-color: rgba(0,0,0,0.03);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform var(--transition-base), background-color var(--transition-base);
 }
 
 .cdlv-template-post__share-btn:hover {
@@ -2237,8 +2236,14 @@ display: inline-block;
     transform: translateY(-2px);
 }
 
+/* A11y Fix: Visible focus states for keyboard users */
+.cdlv-template-post__share-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+}
+
 .cdlv-template-post__share-btn img {
-    width: var(--icon-size-base); /* Plugged into your global icon sizing */
+    width: var(--icon-size-base); 
     height: var(--icon-size-base);
     opacity: 0.8;
 }
@@ -2316,6 +2321,7 @@ display: inline-block;
     padding-bottom: 4px;
     scrollbar-width: none;
 }
+
 .cdlv-template-post__nav-list::-webkit-scrollbar { display: none; }
 
 @media (min-width: 1024px) {
@@ -2334,6 +2340,7 @@ display: inline-block;
     white-space: nowrap;
     padding: calc(var(--spacing-xs) / 2) 0;
     border-bottom: 2px solid transparent;
+    transition: opacity var(--transition-fast), color var(--transition-fast);
 }
 
 @media (min-width: 1024px) {
@@ -2346,10 +2353,16 @@ display: inline-block;
     }
 }
 
-.cdlv-template-post__nav-link:hover,
-.cdlv-template-post__nav-link:focus-visible {
+.cdlv-template-post__nav-link:hover {
     opacity: 1;
     color: var(--color-accent);
+}
+
+/* A11y Fix: Visible focus states for keyboard users */
+.cdlv-template-post__nav-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    opacity: 1;
 }
 
 .cdlv-template-post__nav-link.is-active {
@@ -2378,6 +2391,12 @@ display: inline-block;
     margin-bottom: var(--spacing-lg);
 }
 
+/* A11y Fix: Prevents an ugly focus ring from appearing around the entire text block 
+   when JS programmatically forces focus on it for screen readers */
+.cdlv-template-post__section:focus {
+    outline: none;
+}
+
 .cdlv-template-post__heading {
     font-size: var(--font-size-h4);
     color: var(--color-accent);
@@ -2401,6 +2420,16 @@ display: inline-block;
 .cdlv-template-post__content .u-fill-screen {
     width: 100%;
     margin-left: 0;
+}
+
+/* A11y Fix: Respect OS-level "Reduce Motion" settings */
+@media (prefers-reduced-motion: reduce) {
+    .cdlv-template-post__sidebar,
+    .cdlv-template-post__share-btn,
+    .cdlv-template-post__nav-link {
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 /* ==========================================================================

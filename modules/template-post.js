@@ -2,11 +2,9 @@
    MODULE: TEMPLATE POST (modules/template-post.js)
    Architecture: Exportable ES Module. Generates a fluid layout with an 
    optional metadata header, synchronized sticky document navigator, and content.
-   Security & Routing: Utilizes DOMParser to safely parse HTML from the JSON 
-   config. Automatically detects internal links/images and routes them.
-   Dependencies: 
-   - utils/components.js (to re-initialize any nested modules in the content)
-   - utils/path.js (for asset routing)
+   Security & Routing: Utilizes DOMParser to safely parse HTML.
+   A11y: Implements programmatic focus management for in-page skip links, 
+   semantic ARIA labeling, and strict button typing.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -35,9 +33,8 @@ const parseAndRouteContent = (rawHTML) => {
     return doc.body.innerHTML;
 };
 
-// Default Configuration expanded with an optional metadata toggle
 const defaultConfig = {
-    showMetadata: false, // Defaults to false for clean legal pages
+    showMetadata: false,
     title: "",
     author: "Casa De La Vida",
     authorAvatar: "assets/images/logo.png", 
@@ -73,7 +70,7 @@ export const init = (node, customConfig = {}) => {
                     <div class="cdlv-template-post__share-group">
                         <span class="cdlv-template-post__share-label">Share:</span>
                         ${config.shareIcons.map(social => `
-                            <button class="cdlv-template-post__share-btn" aria-label="Share on ${social.platform}">
+                            <button type="button" class="cdlv-template-post__share-btn" aria-label="Share on ${social.platform}">
                                 <img src="${buildPath(social.icon)}" alt="" aria-hidden="true">
                             </button>
                         `).join('')}
@@ -102,7 +99,7 @@ export const init = (node, customConfig = {}) => {
 
                 <div class="cdlv-template-post__content">
                     ${config.sections && config.sections.length > 0 ? config.sections.map(section => `
-                        <section id="${parseAndRouteContent(section.id)}" class="cdlv-template-post__section">
+                        <section id="${parseAndRouteContent(section.id)}" class="cdlv-template-post__section" tabindex="-1">
                             <h2 class="cdlv-template-post__heading">${parseAndRouteContent(section.title)}</h2>
                             ${section.content ? section.content.map(paragraph => `
                                 <div class="cdlv-template-post__text">${parseAndRouteContent(paragraph)}</div>
@@ -116,12 +113,22 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = html;
 
-    // 1. Re-initialize any modules injected inside the config strings (e.g. accordion, sliders)
     initializeComponents(node.querySelector('.cdlv-template-post__content'));
 
-    // 2. Performant Scroll Spying (IntersectionObserver)
     const sections = node.querySelectorAll('.cdlv-template-post__section');
     const navLinks = node.querySelectorAll('.cdlv-template-post__nav-link');
+
+    // A11y Fix: Focus Management
+    // Ensures screen reader and keyboard users are dropped into the content when they click a sidebar link
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            const targetId = link.getAttribute('href').substring(1);
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) {
+                targetSection.focus();
+            }
+        });
+    });
 
     const observerOptions = {
         root: null,
@@ -132,12 +139,18 @@ export const init = (node, customConfig = {}) => {
     const scrollObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                navLinks.forEach(link => link.classList.remove('is-active'));
+                navLinks.forEach(link => {
+                    link.classList.remove('is-active');
+                    link.removeAttribute('aria-current'); // A11y Fix: Manage aria-current state
+                });
+                
                 const activeId = entry.target.getAttribute('id');
                 const activeLink = node.querySelector(`.cdlv-template-post__nav-link[href="#${activeId}"]`);
                 
                 if (activeLink) {
                     activeLink.classList.add('is-active');
+                    activeLink.setAttribute('aria-current', 'location');
+                    
                     if (window.innerWidth < 1024) {
                         activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                     }
@@ -148,7 +161,6 @@ export const init = (node, customConfig = {}) => {
 
     sections.forEach(section => scrollObserver.observe(section));
 
-    // 3. Header Sync (MutationObserver)
     const sidebar = node.querySelector('.cdlv-template-post__sidebar');
     const globalHeader = document.getElementById('global-header');
 
