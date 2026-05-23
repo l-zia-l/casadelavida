@@ -137,6 +137,29 @@ const renderSummary = () => {
     `;
 };
 
+const renderTabbedProgress = (activeStep) => {
+    const steps = ['Cart', 'Shipping & Details', 'Payment Info', 'Review'];
+    return `
+        <nav class="cdlv-checkout-nav" aria-label="Checkout Progress">
+            <ul class="cdlv-checkout-nav__list">
+                ${steps.map((step) => {
+                    const isActive = step === activeStep;
+                    return `
+                        <li class="cdlv-checkout-nav__item ${isActive ? 'is-active' : ''}">
+                            <button type="button" 
+                                    class="cdlv-checkout-nav__btn" 
+                                    aria-current="${isActive ? 'step' : 'false'}"
+                                    ${!isActive ? 'disabled' : ''}>
+                                ${sanitizeText(step)}
+                            </button>
+                        </li>
+                    `;
+                }).join('')}
+            </ul>
+        </nav>
+    `;
+};
+
 // Calculates and updates the bottom-line numbers without re-rendering the HTML
 const updateFinancials = (node) => {
     const subtotalNode = node.querySelector('[data-target="subtotal"]');
@@ -151,6 +174,7 @@ const updateFinancials = (node) => {
     totalNode.textContent = `₵${total.toFixed(2)}`;
 };
 
+
 export const init = (node) => {
     // 1. Initial Full Render
     if (cartState.items.length === 0) {
@@ -159,6 +183,7 @@ export const init = (node) => {
     }
 
     node.innerHTML = `
+        ${renderTabbedProgress('Cart')}
         <div class="cdlv-cart-panel__layout">
             <div class="cdlv-cart-panel__list">
                 <div class="cdlv-cart-panel__list-header">
