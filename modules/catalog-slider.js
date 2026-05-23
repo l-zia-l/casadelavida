@@ -1,7 +1,7 @@
 import { buildPath } from '../utils/path.js';
 
 const defaultConfig = {
-    heading: 'Core Offerings',
+    heading: '',
     ctaText: 'Shop All',
     ctaLink: 'shop.html',
     products: [
