@@ -1,18 +1,13 @@
 /* ==========================================================================
    MODULE: CART PANEL (modules/cart-panel.js)
-   Architecture: Exportable ES Module. Renders a reactive cart.
-   Security: Implements text sanitization. Enforces strict 100-word limit on notes.
-   Performance: Uses fine-grained DOM updates to prevent layout thrashing and 
-   unnecessary image reloads on state changes.
+   Architecture: Exportable ES Module. Renders a reactive, multi-step checkout.
+   Security: Implements text sanitization. Enforces strict 100-word limit.
+   Performance: Event delegation handles dynamic DOM updates efficiently.
+   A11y: Programmatic focus management when views change.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
 
-/**
- * Basic text sanitizer to prevent HTML injection from external data strings.
- * @param {string} str - Raw input string
- * @returns {string} - Sanitized string safe for DOM insertion
- */
 const sanitizeText = (str) => {
     if (typeof str !== 'string' && typeof str !== 'number') return '';
     const tempDiv = document.createElement('div');
@@ -20,8 +15,9 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 }; 
 
-// Mock State
+// Application State
 let cartState = {
+    currentStep: 'Cart', // Tracks routing ('Cart', 'Shipping & Details', 'Payment Info', 'Review')
     items: [
         {
             id: 'prod_001',
@@ -38,11 +34,34 @@ let cartState = {
             variant: '250g Glass Jar',
             price: 100.00,
             quantity: 3,
-            maxStock: 3, // Triggers the low stock warning
+            maxStock: 3, 
             image: 'assets/images/products/item_1.webp'
         }
     ],
     shippingRate: 35.00
+};
+
+const renderTabbedProgress = (activeStep) => {
+    const steps = ['Cart', 'Shipping & Details', 'Payment Info', 'Review'];
+    return `
+        <nav class="cdlv-checkout-nav" aria-label="Checkout Progress">
+            <ul class="cdlv-checkout-nav__list">
+                ${steps.map((step) => {
+                    const isActive = step === activeStep;
+                    return `
+                        <li class="cdlv-checkout-nav__item ${isActive ? 'is-active' : ''}">
+                            <button type="button" 
+                                    class="cdlv-checkout-nav__btn" 
+                                    aria-current="${isActive ? 'step' : 'false'}"
+                                    ${!isActive ? 'disabled' : ''}>
+                                ${sanitizeText(step)}
+                            </button>
+                        </li>
+                    `;
+                }).join('')}
+            </ul>
+        </nav>
+    `;
 };
 
 const renderEmptyState = () => `
@@ -114,14 +133,8 @@ const renderSummary = () => {
                 <span data-target="total">₵${sanitizeText(total.toFixed(2))}</span>
             </div>
 
-            <div class="cdlv-cart-summary__notes">
-                <label for="cart-notes">Special delivery instructions (Max 100 words)</label>
-                <textarea id="cart-notes" data-target="notes" rows="3" placeholder="e.g., Please leave at the gate..."></textarea>
-                <small class="cdlv-cart-summary__word-count" data-target="word-count">0 / 100 words</small>
-            </div>
-
             <div class="cdlv-cart-summary__cta-wrapper">
-                <button type="button" class="cdlv-cart-summary__checkout-btn">Secure Checkout</button>
+                <button type="button" class="cdlv-cart-summary__checkout-btn" data-action="checkout">Secure Checkout</button>
                 <div class="cdlv-cart-summary__trust-signals">
                     <span class="cdlv-cart-summary__trust-item">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -137,34 +150,131 @@ const renderSummary = () => {
     `;
 };
 
-const renderTabbedProgress = (activeStep) => {
-    const steps = ['Cart', 'Shipping & Details', 'Payment Info', 'Review'];
-    return `
-        <nav class="cdlv-checkout-nav" aria-label="Checkout Progress">
-            <ul class="cdlv-checkout-nav__list">
-                ${steps.map((step) => {
-                    const isActive = step === activeStep;
-                    return `
-                        <li class="cdlv-checkout-nav__item ${isActive ? 'is-active' : ''}">
-                            <button type="button" 
-                                    class="cdlv-checkout-nav__btn" 
-                                    aria-current="${isActive ? 'step' : 'false'}"
-                                    ${!isActive ? 'disabled' : ''}>
-                                ${sanitizeText(step)}
-                            </button>
-                        </li>
-                    `;
-                }).join('')}
-            </ul>
-        </nav>
+const renderCartView = () => `
+    <div class="cdlv-cart-panel__layout">
+        <div class="cdlv-cart-panel__list">
+            <div class="cdlv-cart-panel__list-header">
+                <h2>Review Your Items</h2>
+                <span data-target="item-count">${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}</span>
+            </div>
+            <div class="cdlv-cart-panel__items-container">
+                ${renderCartItems()}
+            </div>
+        </div>
+        <div class="cdlv-cart-panel__sidebar">
+            ${renderSummary()}
+        </div>
+    </div>
+`;
+
+const renderShippingForm = () => `
+    <div class="cdlv-cart-panel__layout">
+        <section class="cdlv-shipping-form">
+            <h2 class="cdlv-shipping-form__title" tabindex="-1">Shipping & Personal Details</h2>
+            <form id="shipping-details-form" class="cdlv-shipping-form__grid">
+                
+                <div class="cdlv-form-group">
+                    <label for="first-name">First Name *</label>
+                    <input type="text" id="first-name" required aria-required="true">
+                </div>
+                <div class="cdlv-form-group">
+                    <label for="last-name">Last Name *</label>
+                    <input type="text" id="last-name" required aria-required="true">
+                </div>
+                <div class="cdlv-form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" required aria-required="true">
+                </div>
+                <div class="cdlv-form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" placeholder="024 123 4567" required aria-required="true">
+                </div>
+                
+                <hr class="cdlv-shipping-form__divider">
+
+                <div class="cdlv-form-group cdlv-form-group--full">
+                    <label for="address">Delivery Address *</label>
+                    <input type="text" id="address" required aria-required="true">
+                </div>
+                <div class="cdlv-form-group">
+                    <label for="city">City *</label>
+                    <select id="city" required aria-required="true">
+                        <option value="">Select City</option>
+                        <option value="accra">Accra</option>
+                        <option value="tamale">Tamale</option>
+                    </select>
+                </div>
+                <div class="cdlv-form-group">
+                    <label for="region">Region *</label>
+                    <input type="text" id="region" required aria-required="true">
+                </div>
+                <div class="cdlv-form-group cdlv-form-group--full">
+                    <label for="landmark">Landmark (e.g., Near the blue gate) *</label>
+                    <input type="text" id="landmark" required aria-required="true">
+                </div>
+                
+                <div class="cdlv-form-group cdlv-form-group--full">
+                    <div class="cdlv-form-group__header">
+                        <label for="delivery-notes">Special Delivery Instructions</label>
+                        <small class="cdlv-form-word-count" data-target="word-count">0 / 100 words</small>
+                    </div>
+                    <textarea id="delivery-notes" data-target="notes" rows="3" placeholder="e.g., Please leave at the gate..."></textarea>
+                </div>
+
+                <div class="cdlv-shipping-form__actions cdlv-form-group--full">
+                    <button type="button" class="cdlv-shipping-form__back" data-action="back-to-cart">Back to Cart</button>
+                    <button type="submit" class="cdlv-shipping-form__submit">Continue to Payment</button>
+                </div>
+            </form>
+        </section>
+        
+        <div class="cdlv-cart-panel__sidebar">
+            <aside class="cdlv-cart-summary">
+                <h3 class="cdlv-cart-summary__title">Order Summary</h3>
+                <div class="cdlv-cart-summary__row">
+                    <span>${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}</span>
+                    <span>₵${sanitizeText(cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2))}</span>
+                </div>
+                <hr class="cdlv-cart-summary__divider">
+                <div class="cdlv-cart-summary__row cdlv-cart-summary__row--total">
+                    <span>Total</span>
+                    <span>₵${sanitizeText((cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) + cartState.shippingRate).toFixed(2))}</span>
+                </div>
+            </aside>
+        </div>
+    </div>
+`;
+
+const updateView = (node) => {
+    if (cartState.items.length === 0) {
+        node.innerHTML = renderEmptyState();
+        return;
+    }
+
+    let viewContent = '';
+    if (cartState.currentStep === 'Cart') {
+        viewContent = renderCartView();
+    } else if (cartState.currentStep === 'Shipping & Details') {
+        viewContent = renderShippingForm();
+    } else {
+        viewContent = `<p>Placeholder for ${cartState.currentStep}</p>`;
+    }
+
+    node.innerHTML = `
+        ${renderTabbedProgress(cartState.currentStep)}
+        ${viewContent}
     `;
+
+    // A11y: Shift focus logically when views change
+    if (cartState.currentStep === 'Shipping & Details') {
+        const titleNode = node.querySelector('.cdlv-shipping-form__title');
+        if (titleNode) titleNode.focus();
+    }
 };
 
-// Calculates and updates the bottom-line numbers without re-rendering the HTML
 const updateFinancials = (node) => {
     const subtotalNode = node.querySelector('[data-target="subtotal"]');
     const totalNode = node.querySelector('[data-target="total"]');
-    
     if (!subtotalNode || !totalNode) return;
 
     const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -174,63 +284,33 @@ const updateFinancials = (node) => {
     totalNode.textContent = `₵${total.toFixed(2)}`;
 };
 
-
 export const init = (node) => {
-    // 1. Initial Full Render
-    if (cartState.items.length === 0) {
-        node.innerHTML = renderEmptyState();
-        return;
-    }
+    updateView(node);
 
-    node.innerHTML = `
-        ${renderTabbedProgress('Cart')}
-        <div class="cdlv-cart-panel__layout">
-            <div class="cdlv-cart-panel__list">
-                <div class="cdlv-cart-panel__list-header">
-                    <h2>Review Your Items</h2>
-                    <span data-target="item-count">${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}</span>
-                </div>
-                <div class="cdlv-cart-panel__items-container">
-                    ${renderCartItems()}
-                </div>
-            </div>
-            <div class="cdlv-cart-panel__sidebar">
-                ${renderSummary()}
-            </div>
-        </div>
-    `;
-
-    // 2. Textarea Word Count Limiter
-    const notesArea = node.querySelector('[data-target="notes"]');
-    const wordCountDisplay = node.querySelector('[data-target="word-count"]');
-    
-    if (notesArea) {
-        notesArea.addEventListener('input', (e) => {
-            const text = e.target.value;
-            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-            
-            if (words.length > 100) {
-                // Truncate to exactly 100 words
-                const truncatedText = words.slice(0, 100).join(' ');
-                e.target.value = truncatedText;
-                wordCountDisplay.textContent = `100 / 100 words (Max reached)`;
-                wordCountDisplay.style.color = 'var(--color-accent)';
-            } else {
-                wordCountDisplay.textContent = `${words.length} / 100 words`;
-                wordCountDisplay.style.color = 'rgba(0,0,0,0.6)';
-            }
-        });
-    }
-
-    // 3. Performant Event Delegation for Cart Actions
+    // Event Delegation: Clicks
     node.addEventListener('click', (e) => {
         const actionBtn = e.target.closest('[data-action]');
         if (!actionBtn) return;
 
-        const itemNode = actionBtn.closest('.cdlv-cart-item');
-        const itemId = itemNode ? itemNode.getAttribute('data-id') : null;
         const action = actionBtn.getAttribute('data-action');
+
+        // View Routing
+        if (action === 'checkout') {
+            cartState.currentStep = 'Shipping & Details';
+            updateView(node);
+            return;
+        }
+        if (action === 'back-to-cart') {
+            cartState.currentStep = 'Cart';
+            updateView(node);
+            return;
+        }
+
+        // Cart Actions
+        const itemNode = actionBtn.closest('.cdlv-cart-item');
+        if (!itemNode) return;
         
+        const itemId = itemNode.getAttribute('data-id');
         const itemIndex = cartState.items.findIndex(i => i.id === itemId);
         if (itemIndex === -1) return;
 
@@ -243,7 +323,6 @@ export const init = (node) => {
                 item.quantity -= 1;
             }
 
-            // Target highly specific DOM nodes to prevent layout shifts/image reloads
             const qtyNode = itemNode.querySelector('[data-target="qty"]');
             const priceNode = itemNode.querySelector('[data-target="item-price"]');
             const decreaseBtn = itemNode.querySelector('[data-action="decrease"]');
@@ -253,38 +332,62 @@ export const init = (node) => {
             qtyNode.textContent = item.quantity;
             priceNode.textContent = `₵${(item.price * item.quantity).toFixed(2)}`;
             
-            // Update button states
             decreaseBtn.disabled = item.quantity <= 1;
             increaseBtn.disabled = item.quantity >= item.maxStock;
             
-            // Toggle warning
             if (item.quantity >= item.maxStock) {
                 warningNode.removeAttribute('hidden');
             } else {
                 warningNode.setAttribute('hidden', 'true');
             }
-
             updateFinancials(node);
         } 
         else if (action === 'remove') {
             cartState.items.splice(itemIndex, 1);
-            
-            // Fade out animation before removing node
             itemNode.style.opacity = '0';
             itemNode.style.transition = 'opacity var(--transition-fast)';
             
             setTimeout(() => {
                 itemNode.remove();
-                
-                // Check if cart is now empty
                 if (cartState.items.length === 0) {
-                    node.innerHTML = renderEmptyState();
+                    updateView(node);
                 } else {
                     const countNode = node.querySelector('[data-target="item-count"]');
-                    countNode.textContent = `${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}`;
+                    if(countNode) countNode.textContent = `${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}`;
                     updateFinancials(node);
                 }
             }, 150);
+        }
+    });
+
+    // Event Delegation: Textarea Input (Word Count)
+    node.addEventListener('input', (e) => {
+        if (e.target.getAttribute('data-target') === 'notes') {
+            const wordCountDisplay = node.querySelector('[data-target="word-count"]');
+            if(!wordCountDisplay) return;
+
+            const text = e.target.value;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            
+            if (words.length > 100) {
+                const truncatedText = words.slice(0, 100).join(' ');
+                e.target.value = truncatedText;
+                wordCountDisplay.textContent = `100 / 100 words (Max reached)`;
+                wordCountDisplay.style.color = 'var(--color-accent)';
+            } else {
+                wordCountDisplay.textContent = `${words.length} / 100 words`;
+                wordCountDisplay.style.color = 'rgba(0,0,0,0.6)';
+            }
+        }
+    });
+
+    // Event Delegation: Form Submissions
+    node.addEventListener('submit', (e) => {
+        if (e.target.id === 'shipping-details-form') {
+            e.preventDefault(); // Prevent page reload
+            // In a real app, save form data to state/localStorage here
+            cartState.currentStep = 'Payment Info';
+            updateView(node);
         }
     });
 };

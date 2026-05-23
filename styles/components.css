@@ -2718,43 +2718,14 @@ display: inline-block;
         align-items: flex-start;
     }
     
-    .cdlv-cart-panel__list {
+    .cdlv-cart-panel__list,
+    .cdlv-shipping-form {
         flex: 1 1 65%;
     }
     
     .cdlv-cart-panel__sidebar {
         flex: 1 1 35%;
-        /* Removed sticky positioning to allow natural scroll flow */
     }
-}
-
-/* -------------------------
-   LEFT COLUMN: LIST
-   ------------------------- */
-.cdlv-cart-panel__list {
-    background-color: var(--color-primary); /* Changed from green to primary white */
-    padding: var(--spacing-md) 0; /* Adjusted padding since there is no background box */
-}
-
-.cdlv-cart-panel__list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    padding-bottom: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-}
-
-.cdlv-cart-panel__list-header h2 {
-    font-size: var(--font-size-h4);
-    margin: 0;
-    color: var(--color-accent);
-}
-
-.cdlv-cart-panel__list-header span {
-    font-family: var(--font-family-body);
-    font-size: var(--font-size-small);
-    color: rgba(0, 0, 0, 0.6);
 }
 
 /* ==========================================================================
@@ -2786,12 +2757,11 @@ display: inline-block;
     font-family: var(--font-family-heading);
     font-size: var(--font-size-small);
     color: rgba(0, 0, 0, 0.4);
-    cursor: default; /* Disabled for now as we haven't built other steps */
+    cursor: default;
     transition: color var(--transition-base);
     position: relative;
 }
 
-/* Active State */
 .cdlv-checkout-nav__item.is-active .cdlv-checkout-nav__btn {
     color: var(--color-accent);
 }
@@ -2810,6 +2780,35 @@ display: inline-block;
     .cdlv-checkout-nav__btn {
         font-size: 1rem;
     }
+}
+
+/* -------------------------
+   LEFT COLUMN: CART LIST
+   ------------------------- */
+.cdlv-cart-panel__list {
+    background-color: var(--color-primary);
+    padding: 0;
+}
+
+.cdlv-cart-panel__list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.cdlv-cart-panel__list-header h2 {
+    font-size: var(--font-size-h4);
+    margin: 0;
+    color: var(--color-accent);
+}
+
+.cdlv-cart-panel__list-header span {
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    color: rgba(0, 0, 0, 0.6);
 }
 
 /* -------------------------
@@ -2887,7 +2886,6 @@ display: inline-block;
     color: var(--color-accent);
 }
 
-/* Redesigned Quantity Control */
 .cdlv-cart-item__actions {
     display: flex;
     flex-direction: column;
@@ -2898,9 +2896,9 @@ display: inline-block;
 .cdlv-cart-item__qty-control {
     display: inline-flex;
     align-items: center;
-    border: 1px solid rgba(0, 0, 0, 0.15); /* Clean, subtle border */
+    border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: var(--radius-strict);
-    background: var(--color-primary); /* White background */
+    background: var(--color-primary);
 }
 
 .cdlv-cart-item__qty-btn {
@@ -2912,7 +2910,7 @@ display: inline-block;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: var(--color-accent); /* Purple icons */
+    color: var(--color-accent);
     transition: background var(--transition-fast), opacity var(--transition-fast);
 }
 
@@ -2922,7 +2920,7 @@ display: inline-block;
 }
 
 .cdlv-cart-item__qty-btn:hover:not(:disabled) {
-    background: rgba(71, 59, 117, 0.05); /* Subtle accent tint on hover */
+    background: rgba(71, 59, 117, 0.05);
 }
 
 .cdlv-cart-item__qty-value {
@@ -2987,44 +2985,6 @@ display: inline-block;
     margin-bottom: var(--spacing-md);
 }
 
-.cdlv-cart-summary__notes {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: var(--spacing-md);
-}
-
-.cdlv-cart-summary__notes label {
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
-    color: rgba(0, 0, 0, 0.6);
-}
-
-/* Textarea Lockdown */
-.cdlv-cart-summary__notes textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: var(--radius-strict);
-    font-family: var(--font-family-body);
-    font-size: 0.9rem;
-    resize: none; /* Prevents resizing entirely */
-    background: var(--color-primary);
-}
-
-.cdlv-cart-summary__notes textarea:focus {
-    outline: 1px solid var(--color-accent);
-    border-color: var(--color-accent);
-}
-
-.cdlv-cart-summary__word-count {
-    font-size: 0.75rem;
-    margin-top: 0.25rem;
-    text-align: right;
-    color: rgba(0, 0, 0, 0.6);
-    transition: color var(--transition-fast);
-}
-
-/* CTA Wrapper (Standard flow, not fixed) */
 .cdlv-cart-summary__cta-wrapper {
     display: flex;
     flex-direction: column;
@@ -3072,6 +3032,148 @@ display: inline-block;
     width: 14px;
     height: 14px;
     color: var(--color-accent);
+}
+
+/* ==========================================================================
+   MODULE: SHIPPING FORM (.cdlv-shipping-form)
+   ========================================================================== */
+.cdlv-shipping-form {
+    background: var(--color-primary);
+    padding: 0; 
+}
+
+.cdlv-shipping-form__title {
+    font-size: var(--font-size-h4);
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--color-accent);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.cdlv-shipping-form__title:focus {
+    outline: none; /* Avoid aggressive focus ring on programmatically focused heading */
+}
+
+.cdlv-shipping-form__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md) var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+    .cdlv-shipping-form__grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .cdlv-form-group--full {
+        grid-column: 1 / -1;
+    }
+}
+
+.cdlv-shipping-form__divider {
+    grid-column: 1 / -1;
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-block: var(--spacing-sm);
+}
+
+.cdlv-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.cdlv-form-group__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.25rem;
+}
+
+.cdlv-form-group label {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+    color: var(--color-text-dark);
+    font-weight: 500;
+}
+
+.cdlv-form-word-count {
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.6);
+    transition: color var(--transition-fast);
+}
+
+.cdlv-form-group input, 
+.cdlv-form-group select, 
+.cdlv-form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-strict);
+    font-family: var(--font-family-body);
+    font-size: 1rem;
+    color: var(--color-text-dark);
+    background: var(--color-primary);
+    transition: border-color var(--transition-fast), outline var(--transition-fast);
+}
+
+.cdlv-form-group textarea {
+    resize: none;
+}
+
+.cdlv-form-group input:focus, 
+.cdlv-form-group select:focus, 
+.cdlv-form-group textarea:focus {
+    outline: 1px solid var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.cdlv-shipping-form__actions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+    .cdlv-shipping-form__actions {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.cdlv-shipping-form__back {
+    background: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.6);
+    font-family: var(--font-family-body);
+    font-size: 1rem;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    transition: color var(--transition-fast);
+}
+
+.cdlv-shipping-form__back:hover {
+    color: var(--color-text-dark);
+}
+
+.cdlv-shipping-form__submit {
+    background: var(--color-accent);
+    color: var(--color-text-light);
+    padding: clamp(1rem, 2vw, 1.25rem) clamp(2rem, 4vw, 3rem);
+    border: none;
+    border-radius: var(--radius-strict);
+    font-family: var(--font-family-body);
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.cdlv-shipping-form__submit:hover {
+    background-color: var(--color-text-dark);
+    transform: translateY(-2px);
 }
 
 /* ==========================================================================
