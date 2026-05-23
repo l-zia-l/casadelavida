@@ -40,11 +40,11 @@ const defaultConfig = {
     showMetadata: false, // Defaults to false for clean legal pages
     title: "",
     author: "Casa De La Vida",
-    authorAvatar: "assets/images/logo-circle.png", 
+    authorAvatar: "assets/images/logo.png", 
     datePublished: "",
     lastUpdated: "",
     shareIcons: [
-        { platform: "Twitter", icon: "assets/icons/twitter.svg" },
+        { platform: "Twitter", icon: "assets/icons/x.svg" },
         { platform: "Facebook", icon: "assets/icons/facebook.svg" },
         { platform: "LinkedIn", icon: "assets/icons/linkedin.svg" }
     ],
