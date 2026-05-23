@@ -2176,9 +2176,10 @@ display: inline-block;
     width: clamp(2.5rem, 5vw, 4rem);
     height: clamp(2.5rem, 5vw, 4rem);
     border-radius: 50%;
-    object-fit: cover; 
+    object-fit: contain; 
     object-position: center;
     border: 1px solid rgba(0,0,0,0.1);
+    background-color: var(--color-primary); 
     display: block;
 }
 
@@ -2274,7 +2275,6 @@ display: inline-block;
     padding-block: var(--spacing-xs);
     border-bottom: 1px solid rgba(0,0,0,0.1);
     transition: transform var(--transition-base);
-    will-change: transform;
 }
 
 .cdlv-template-post__sidebar.is-header-hidden {

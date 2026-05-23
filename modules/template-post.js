@@ -1,10 +1,9 @@
 /* ==========================================================================
    MODULE: TEMPLATE POST (modules/template-post.js)
-   Architecture: Exportable ES Module. Generates a fluid layout with an 
-   optional metadata header, synchronized sticky document navigator, and content.
-   Security & Routing: Utilizes DOMParser to safely parse HTML.
-   A11y: Implements programmatic focus management for in-page skip links, 
-   semantic ARIA labeling, and strict button typing.
+   Architecture: Exportable ES Module.
+   Performance: Implements RAF-batched DOM updates and lazy-loading.
+   SEO & A11y: Fully semantic HTML5 with Schema.org Microdata integration 
+   (itemscope/itemprop) for Rich Snippet generation.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -28,6 +27,9 @@ const parseAndRouteContent = (rawHTML) => {
         if (src && !src.startsWith('http') && !src.startsWith('data:')) {
             img.setAttribute('src', buildPath(src));
         }
+        
+        if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
+        if (!img.hasAttribute('decoding')) img.setAttribute('decoding', 'async');
     });
 
     return doc.body.innerHTML;
@@ -52,18 +54,18 @@ export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
 
     const html = `
-        <article class="cdlv-template-post">
+        <article class="cdlv-template-post" itemscope itemtype="https://schema.org/Article">
             
             ${config.showMetadata ? `
             <header class="cdlv-template-post__header">
-                ${config.title ? `<h1 class="cdlv-template-post__main-title">${parseAndRouteContent(config.title)}</h1>` : ''}
+                ${config.title ? `<h1 class="cdlv-template-post__main-title" itemprop="headline">${parseAndRouteContent(config.title)}</h1>` : ''}
                 
                 <div class="cdlv-template-post__meta-bar">
                     <div class="cdlv-template-post__author-lockup">
-                        <img src="${buildPath(config.authorAvatar)}" alt="${config.author}" class="cdlv-template-post__author-img" fetchpriority="high">
+                        <img src="${buildPath(config.authorAvatar)}" alt="${config.author}" class="cdlv-template-post__author-img" fetchpriority="high" decoding="sync">
                         <div class="cdlv-template-post__author-text">
-                            <span class="cdlv-template-post__author-name">${parseAndRouteContent(config.author)}</span>
-                            ${config.datePublished ? `<span class="cdlv-template-post__date">${parseAndRouteContent(config.datePublished)}</span>` : ''}
+                            <span class="cdlv-template-post__author-name" itemprop="author">${parseAndRouteContent(config.author)}</span>
+                            ${config.datePublished ? `<time class="cdlv-template-post__date" itemprop="datePublished">${parseAndRouteContent(config.datePublished)}</time>` : ''}
                         </div>
                     </div>
                     
@@ -97,7 +99,7 @@ export const init = (node, customConfig = {}) => {
                     </div>
                 </aside>
 
-                <div class="cdlv-template-post__content">
+                <div class="cdlv-template-post__content" itemprop="articleBody">
                     ${config.sections && config.sections.length > 0 ? config.sections.map(section => `
                         <section id="${parseAndRouteContent(section.id)}" class="cdlv-template-post__section" tabindex="-1">
                             <h2 class="cdlv-template-post__heading">${parseAndRouteContent(section.title)}</h2>
@@ -118,8 +120,6 @@ export const init = (node, customConfig = {}) => {
     const sections = node.querySelectorAll('.cdlv-template-post__section');
     const navLinks = node.querySelectorAll('.cdlv-template-post__nav-link');
 
-    // A11y Fix: Focus Management
-    // Ensures screen reader and keyboard users are dropped into the content when they click a sidebar link
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             const targetId = link.getAttribute('href').substring(1);
@@ -137,25 +137,27 @@ export const init = (node, customConfig = {}) => {
     };
 
     const scrollObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                navLinks.forEach(link => {
-                    link.classList.remove('is-active');
-                    link.removeAttribute('aria-current'); // A11y Fix: Manage aria-current state
-                });
-                
-                const activeId = entry.target.getAttribute('id');
-                const activeLink = node.querySelector(`.cdlv-template-post__nav-link[href="#${activeId}"]`);
-                
-                if (activeLink) {
-                    activeLink.classList.add('is-active');
-                    activeLink.setAttribute('aria-current', 'location');
+        window.requestAnimationFrame(() => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('is-active');
+                        link.removeAttribute('aria-current');
+                    });
                     
-                    if (window.innerWidth < 1024) {
-                        activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    const activeId = entry.target.getAttribute('id');
+                    const activeLink = node.querySelector(`.cdlv-template-post__nav-link[href="#${activeId}"]`);
+                    
+                    if (activeLink) {
+                        activeLink.classList.add('is-active');
+                        activeLink.setAttribute('aria-current', 'location');
+                        
+                        if (window.innerWidth < 1024) {
+                            activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }
                     }
                 }
-            }
+            });
         });
     }, observerOptions);
 
@@ -170,11 +172,13 @@ export const init = (node, customConfig = {}) => {
         }
 
         const headerObserver = new MutationObserver(() => {
-            if (globalHeader.classList.contains('cdlv-header--hidden')) {
-                sidebar.classList.add('is-header-hidden');
-            } else {
-                sidebar.classList.remove('is-header-hidden');
-            }
+            window.requestAnimationFrame(() => {
+                if (globalHeader.classList.contains('cdlv-header--hidden')) {
+                    sidebar.classList.add('is-header-hidden');
+                } else {
+                    sidebar.classList.remove('is-header-hidden');
+                }
+            });
         });
 
         headerObserver.observe(globalHeader, { attributes: true, attributeFilter: ['class'] });
