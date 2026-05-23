@@ -43,29 +43,31 @@ const defaultConfig = {
  */
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
-
-    // Architectural constraint: Force exactly 3 items to maintain the design system
     const itemsToRender = config.items.slice(0, 3);
+    
+    // A11y: Generate a unique ID to prevent screen reader mapping collisions
+    const instanceId = Math.random().toString(36).substring(2, 9);
+    const headingId = `detail-heading-${instanceId}`;
 
-    // 1. Build Semantic HTML
     const templateHTML = `
-        <section class="cdlv-icon-detail-row" aria-labelledby="detail-row-heading">
+        <section class="cdlv-icon-detail-row" aria-labelledby="${headingId}">
             <header>
-                <h2 id="detail-row-heading" class="cdlv-icon-detail-row__heading">
+                <h2 id="${headingId}" class="cdlv-icon-detail-row__heading">
                     ${sanitizeText(config.heading)}
                 </h2>
             </header>
-            <div class="cdlv-icon-detail-row__grid">
+            
+            <!-- SEO/A11y: role="list" fixes Safari voiceover bug when list-style is none -->
+            <ul class="cdlv-icon-detail-row__grid" role="list">
                 ${itemsToRender.map(item => `
-                    <article class="cdlv-icon-detail-row__item">
+                    <li class="cdlv-icon-detail-row__item">
                         <h3 class="cdlv-icon-detail-row__title">${sanitizeText(item.title)}</h3>
                         <p class="cdlv-icon-detail-row__subtitle">${sanitizeText(item.subtitle)}</p>
-                    </article>
+                    </li>
                 `).join('')}
-            </div>
+            </ul>
         </section>
     `;
 
-    // 2. Inject Fragment into DOM target
     node.innerHTML = templateHTML;
 };

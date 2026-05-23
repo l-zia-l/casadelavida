@@ -2457,21 +2457,20 @@ display: inline-block;
 
 .cdlv-icon-detail-row__grid {
     display: grid;
-    /* Mobile-first: 1 column stack */
     grid-template-columns: 1fr;
     gap: var(--spacing-sm);
     width: 100%;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .cdlv-icon-detail-row__item {
-    /* Strict box aesthetic */
-    border: 2px solid var(--color-text-dark);
+    border: 2px solid var(--color-accent);
     border-radius: var(--radius-strict);
     padding: var(--spacing-md);
     text-align: center;
-    background-color: var(--color-primary);
-    
-    /* Internal Flex for perfect centering */
+    background-color: var(--color-accent-light);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -2483,11 +2482,20 @@ display: inline-block;
 /* Subtle interactive hover state */
 .cdlv-icon-detail-row__item:hover {
     transform: translateY(-4px);
+    background-color: var(--color-accent);
+}
+
+.cdlv-icon-detail-row__item:hover,
+.cdlv-icon-detail-row__item:focus-within {
+    transform: translateY(-4px);
     background-color: var(--color-text-dark);
+    outline: 2px solid transparent; 
 }
 
 .cdlv-icon-detail-row__item:hover .cdlv-icon-detail-row__title,
-.cdlv-icon-detail-row__item:hover .cdlv-icon-detail-row__subtitle {
+.cdlv-icon-detail-row__item:focus-within .cdlv-icon-detail-row__title,
+.cdlv-icon-detail-row__item:hover .cdlv-icon-detail-row__subtitle,
+.cdlv-icon-detail-row__item:focus-within .cdlv-icon-detail-row__subtitle {
     color: var(--color-text-light);
 }
 
