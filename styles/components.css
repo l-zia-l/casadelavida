@@ -2130,275 +2130,177 @@ display: inline-block;
 }
 
 /* ==========================================================================
-   MODULE: TEMPLATE LEGAL (.cdlv-template-post)
-   Purpose: Highly readable, structured layout for long-form text documents.
-   Architecture: CSS Grid layout. Sticky navigation adapts from horizontal 
-                 scroll (mobile) to vertical sidebar (desktop).
-   ========================================================================== */
+CSS APPEND: STYLES/COMPONENTS.CSS
+Architecture: Scoped BEM class structure for the template-post module.
+Implements a CSS Grid layout that shifts from a mobile horizontal top-nav
+to a desktop sticky left-sidebar.
+Typography constraints prioritize the "Clean-Read" 60-70ch character limit.
+========================================================================== */
 
+/* Main Wrapper */
 .cdlv-template-post {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr); 
-    gap: var(--spacing-lg);
-    padding-block: var(--spacing-md) var(--spacing-xl);
-    align-items: start;
-    width: 100%;
+display: flex;
+flex-direction: column;
+gap: var(--spacing-md);
+padding-block: var(--spacing-md) var(--spacing-xl);
 }
 
-@media (min-width: 992px) {
-    .cdlv-template-post {
-        grid-template-columns: minmax(220px, 1fr) minmax(0, 3fr);
-    }
+/*
+Desktop Layout:
+Sidebar takes a fixed width constraint, Content takes remaining space
+but is strictly capped at an optimal reading width.
+*/
+@media (min-width: 1024px) {
+.cdlv-template-post {
+flex-direction: row;
+align-items: flex-start;
+gap: var(--layout-gutter);
+}
 }
 
-/* --- Navigation Sidebar --- */
+/* Sidebar & Sticky Behavior / */
 .cdlv-template-post__sidebar {
-    position: sticky;
-    top: var(--header-offset);
-    z-index: 10;
-    background-color: var(--color-primary);
-    width: 100%;
-    min-width: 0; 
-    padding-top: var(--spacing-sm);
-    padding-bottom: var(--spacing-xs);
-    /* FIX: Match the animation timing of the global header */
-    transition: top var(--transition-base);
+width: 100%;
+position: sticky;
+top: var(--header-offset);
+z-index: 10;
+background-color: var(--color-primary);
+padding-block: var(--spacing-xs);
+border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
-@media (min-width: 992px) {
-    .cdlv-template-post__sidebar {
-        top: calc(var(--header-offset) + var(--spacing-md));
-        padding-top: 0;
-        padding-bottom: 0;
-    }
+@media (min-width: 1024px) {
+.cdlv-template-post__sidebar {
+flex: 0 0 280px;
+top: calc(var(--header-offset) + var(--spacing-md));
+border-bottom: none;
+padding-block: 0;
+max-height: calc(100vh - var(--header-offset) - var(--spacing-md));
+overflow-y: auto; /* Allow scrolling if sidebar is very long /
+/ Custom scrollbar for sidebar */
+scrollbar-width: thin;
+scrollbar-color: var(--color-secondary) transparent;
+}
 }
 
-/* FIX: Dynamic Sticky Tracking. 
-   When the global header receives the hidden class, slide the sticky nav up. */
-body:has(#global-header.cdlv-header--hidden) .cdlv-template-post__sidebar {
-    top: 0;
+.cdlv-template-post__meta {
+font-size: var(--font-size-small);
+color: var(--color-accent);
+opacity: 0.7;
+margin-bottom: var(--spacing-xs);
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: var(--letter-spacing-wide);
+display: none; /* Hide on mobile to save space */
 }
 
-@media (min-width: 992px) {
-    body:has(#global-header.cdlv-header--hidden) .cdlv-template-post__sidebar {
-        /* On desktop, keep a little breathing room even when the header is gone */
-        top: var(--spacing-md);
-    }
+@media (min-width: 1024px) {
+.cdlv-template-post__meta {
+display: block;
+}
 }
 
+/* Navigation List / */
 .cdlv-template-post__nav-list {
-    list-style: none;
-    display: flex;
-    flex-direction: row;
-    gap: var(--spacing-sm);
-    overflow-x: auto;
-    white-space: nowrap;
-    padding-bottom: var(--spacing-xs);
-    border-bottom: 1px solid var(--color-neutral-bg);
-    scrollbar-width: none;
+list-style: none;
+display: flex;
+overflow-x: auto;
+gap: var(--spacing-sm);
+padding-bottom: 4px;
+scrollbar-width: none; 
 }
 
 .cdlv-template-post__nav-list::-webkit-scrollbar {
-    display: none;
+display: none; 
 }
 
-@media (min-width: 992px) {
-    .cdlv-template-post__nav-list {
-        flex-direction: column;
-        overflow-x: visible;
-        white-space: normal;
-        border-bottom: none;
-        padding-bottom: 0;
-    }
+@media (min-width: 1024px) {
+.cdlv-template-post__nav-list {
+flex-direction: column;
+gap: 0;
+overflow-x: visible;
+}
 }
 
+/* Navigation Links */
 .cdlv-template-post__nav-link {
-    font-family: var(--font-family-body);
-    font-size: var(--font-size-small);
-    color: var(--color-text-dark);
-    opacity: 0.6;
-    transition: all var(--transition-fast);
-    display: block;
-    border-bottom: 2px solid transparent;
-    padding-bottom: var(--spacing-xs);
+display: block;
+font-size: var(--font-size-small);
+color: var(--color-text-dark);
+opacity: 0.6;
+white-space: nowrap;
+padding: calc(var(--spacing-xs) / 2) 0;
+border-bottom: 2px solid transparent;
 }
 
-@media (min-width: 992px) {
-    .cdlv-template-post__nav-link {
-        border-bottom: none;
-        border-left: 2px solid transparent;
-        padding-bottom: 0;
-        padding-left: var(--spacing-xs);
-    }
+@media (min-width: 1024px) {
+.cdlv-template-post__nav-link {
+white-space: normal;
+padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) 0;
+border-bottom: none;
+border-left: 2px solid transparent;
+padding-left: var(--spacing-xs);
+}
 }
 
 .cdlv-template-post__nav-link:hover,
 .cdlv-template-post__nav-link:focus-visible {
-    opacity: 1;
-    color: var(--color-accent);
+opacity: 1;
+color: var(--color-accent);
 }
 
+/* Scroll-Spy Active State */
 .cdlv-template-post__nav-link.is-active {
-    opacity: 1;
-    color: var(--color-accent);
-    font-weight: 600;
+opacity: 1;
+color: var(--color-accent);
+font-weight: 600;
+border-bottom-color: var(--color-accent);
 }
 
+@media (min-width: 1024px) {
 .cdlv-template-post__nav-link.is-active {
-    border-bottom-color: var(--color-accent);
+border-bottom-color: transparent;
+border-left-color: var(--color-accent);
+background-color: rgba(71, 59, 117, 0.03); /* Subtle var(--color-accent) tint */
+}
 }
 
-@media (min-width: 992px) {
-    .cdlv-template-post__nav-link.is-active {
-        border-bottom-color: transparent;
-        border-left-color: var(--color-accent);
-    }
-}
-
-/* --- Document Content Area --- */
+/* Main Content Area / */
 .cdlv-template-post__content {
-    width: 100%;
-    max-width: 100%; 
-    min-width: 0; 
-    margin-inline: 0; 
-    overflow-wrap: break-word; 
+flex: 1;
+max-width: 70ch;
+margin-inline: auto;
 }
 
-@media (min-width: 992px) {
-    .cdlv-template-post__content {
-        max-width: 75ch; 
-    }
+@media (min-width: 1024px) {
+.cdlv-template-post__content {
+margin-inline: 0; /* Align left alongside sidebar */
+}
 }
 
-.cdlv-template-post__meta {
-    font-size: var(--font-size-small);
-    color: var(--color-text-dark);
-    opacity: 0.7;
-    margin-bottom: var(--spacing-md);
-    font-style: italic;
-}
-
-.cdlv-template-post__intro {
-    margin-bottom: var(--spacing-lg);
-    font-size: var(--font-size-body);
-    line-height: 1.7;
-}
-
+/* Sections & Typography / */
 .cdlv-template-post__section {
-    margin-bottom: var(--spacing-lg);
-    scroll-margin-top: calc(var(--header-offset) + var(--spacing-lg));
+scroll-margin-top: calc(var(--header-offset) + var(--spacing-md)); 
+margin-bottom: var(--spacing-lg);
 }
 
-.cdlv-template-post__section-title {
-    font-family: var(--font-family-heading);
-    font-size: var(--font-size-h3);
-    color: var(--color-accent);
-    margin-bottom: var(--spacing-sm);
+.cdlv-template-post__heading {
+font-size: var(--font-size-h4);
+color: var(--color-accent);
+margin-bottom: var(--spacing-sm);
+border-bottom: 1px solid rgba(0,0,0,0.1);
+padding-bottom: calc(var(--spacing-xs) / 2);
 }
 
-.cdlv-template-post__section p {
-    margin-bottom: var(--spacing-sm);
-    line-height: 1.7;
+.cdlv-template-post__text {
+font-size: var(--font-size-body);
+color: var(--color-text-dark);
+margin-bottom: var(--spacing-xs);
 }
 
-.cdlv-template-post__section ul,
-.cdlv-template-post__section ol {
-    margin-bottom: var(--spacing-sm);
-    padding-left: var(--spacing-md);
-    line-height: 1.7;
-}
-
-.cdlv-template-post__section li {
-    margin-bottom: var(--spacing-xs);
-}
-
-.cdlv-template-post__section strong {
-    font-weight: 600;
-    color: var(--color-text-dark);
-}
-
-/* --- Metadata & Share Header (Blog Posts) --- */
-.cdlv-template-post__meta-block {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    padding-bottom: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-neutral-bg);
-}
-
-@media (min-width: 768px) {
-    .cdlv-template-post__meta-block {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-}
-
-.cdlv-template-post__meta-info {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: var(--font-size-small);
-    color: var(--color-text-dark);
-}
-
-.cdlv-template-post__author strong {
-    font-weight: 600;
-}
-
-.cdlv-template-post__date {
-    opacity: 0.6;
-}
-
-.cdlv-template-post__date::before {
-    content: "•";
-    margin-right: var(--spacing-sm);
-    opacity: 0.5;
-}
-
-.cdlv-template-post__share {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-}
-
-.cdlv-template-post__share-label {
-    font-size: var(--font-size-small);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-right: var(--spacing-xs);
-    opacity: 0.8;
-}
-
-.cdlv-template-post__share-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: var(--color-neutral-bg);
-    color: var(--color-text-dark);
-    transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
-}
-
-.cdlv-template-post__share-link:hover,
-.cdlv-template-post__share-link:focus-visible {
-    background-color: var(--color-accent);
-    color: var(--color-text-light);
-    transform: translateY(-2px);
-}
-
-/* Image formatting inside sections */
-.cdlv-template-post__section img {
-    margin-block: var(--spacing-md);
-    border-radius: var(--radius-strict);
-    width: 100%;
-    height: auto;
-    object-fit: cover;
+/* Utility to style pseudo-lists (lines starting with bullets in the config) */
+.cdlv-template-post__text:has(+ .cdlv-template-post__text) {
+margin-bottom: calc(var(--spacing-xs) / 2);
 }
 
 /* ==========================================================================

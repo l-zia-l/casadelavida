@@ -1,8 +1,24 @@
 /* ==========================================================================
-   MODULE: TEMPLATE LEGAL / BLOG LAYOUT (modules/cdlv-template-post.js)
+   MODULE: TEMPLATE POST (modules/template-post.js)
+   Architecture: Exportable ES Module. Generates a "Clean-Read" layout
+   with a sticky document navigator (sidebar) and an optimal reading width
+   (max 70 characters per line) for long-form legal and blog content.
+   Security: Implements DOMPurify-style text sanitization for all injected
+   strings to mitigate XSS vulnerabilities. Configuration accepts an array
+   of text blocks to naturally segment paragraphs without requiring raw HTML.
+   Dependencies: Relies on utils/components.js for initialization.
+   A11y: Semantic <article>, <nav>, and <section> tags. ARIA landmarks
+   and smooth scrolling anchor links for accessible keyboard navigation.
+   Performance: Utilizes IntersectionObserver for performant scroll-spying
+   to highlight active sections in the sidebar without layout thrashing.
    ========================================================================== */
-import { buildPath } from '../utils/path.js';
 
+/**
+ * Basic text sanitizer to prevent HTML injection from config strings.
+ * Converts characters like < and > into harmless HTML entities.
+ * @param {string} str - Raw input string
+ * @returns {string} - Sanitized string safe for DOM insertion
+ */
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
     const tempDiv = document.createElement('div');
@@ -10,139 +26,90 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
+// Default Configuration: Intentionally blank to enforce data ingestion 
+// from the HTML data-config attribute.
 const defaultConfig = {
-    showMeta: false,
-    author: "",
-    date: "",
-    shareUrl: "",
-    shareTitle: "Casa De La Vida Wellness"
+    lastUpdated: "",
+    sections: []
 };
 
-// Notice the 'async' added here so we can dynamically import the component loader
-export const init = async (node, customConfig = {}) => {
+/**
+ * Core initialization function triggered by the global component loader.
+ * @param {HTMLElement} node - The target DOM element.
+ * @param {Object} customConfig - Optional JSON config from data-config.
+ */
+export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
 
-    const fragment = document.createDocumentFragment();
-    const sections = [];
-    
-    while (node.firstChild) {
-        const child = node.firstChild;
-        if (child.nodeType === 1 && child.classList.contains('cdlv-template-post__section')) {
-            sections.push(child);
-            if (!child.id) child.id = `section-${Math.random().toString(36).substring(2, 9)}`;
-        }
-        fragment.appendChild(child);
-    }
-
-    const navItemsHTML = sections.map((section, index) => {
-        const isActive = index === 0 ? 'is-active' : '';
-        const title = section.getAttribute('data-nav-title') || 'Section';
-        return `
-            <li>
-                <a href="#${section.id}" class="cdlv-template-post__nav-link ${isActive}" data-target="${section.id}">
-                    ${sanitizeText(title)}
-                </a>
-            </li>
-        `;
-    }).join('');
-
-    let metaHTML = '';
-    if (config.showMeta) {
-        const currentUrl = config.shareUrl ? buildPath(config.shareUrl) : window.location.href;
-        const encodedUrl = encodeURIComponent(currentUrl);
-        const encodedTitle = encodeURIComponent(config.shareTitle);
-        
-        metaHTML = `
-            <div class="cdlv-template-post__meta-block">
-                <div class="cdlv-template-post__meta-info">
-                    ${config.author ? `<span class="cdlv-template-post__author">Words by <strong>${sanitizeText(config.author)}</strong></span>` : ''}
-                    ${config.date ? `<span class="cdlv-template-post__date">${sanitizeText(config.date)}</span>` : ''}
+    // 1. Build HTML Structure
+    const html = `
+        <article class="cdlv-template-post">
+            <!-- Sidebar Navigation -->
+            <aside class="cdlv-template-post__sidebar">
+                <div class="cdlv-template-post__sidebar-inner">
+                    ${config.lastUpdated ? `<p class="cdlv-template-post__meta">Last Updated: ${sanitizeText(config.lastUpdated)}</p>` : ''}
+                    <nav class="cdlv-template-post__nav" aria-label="Document Sections">
+                        <ul class="cdlv-template-post__nav-list">
+                            ${config.sections && config.sections.length > 0 ? config.sections.map(section => `
+                                <li>
+                                    <a href="#${sanitizeText(section.id)}" class="cdlv-template-post__nav-link">
+                                        ${sanitizeText(section.title)}
+                                    </a>
+                                </li>
+                            `).join('') : ''}
+                        </ul>
+                    </nav>
                 </div>
-                <div class="cdlv-template-post__share">
-                    <span class="cdlv-template-post__share-label">Share</span>
-                    <a href="https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}" target="_blank" rel="noopener noreferrer" aria-label="Share on X (Twitter)" class="cdlv-template-post__share-link">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    </a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook" class="cdlv-template-post__share-link">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    </a>
-                </div>
-            </div>
-        `;
-    }
-
-    node.innerHTML = `
-        <div class="cdlv-template-post">
-            <aside class="cdlv-template-post__sidebar" aria-label="Document Navigation">
-                <nav><ul class="cdlv-template-post__nav-list">${navItemsHTML}</ul></nav>
             </aside>
-            <article class="cdlv-template-post__content">
-                ${metaHTML}
-                <div class="cdlv-template-post__sections-wrapper"></div>
-            </article>
-        </div>
+
+            <!-- Main Document Content -->
+            <div class="cdlv-template-post__content">
+                ${config.sections && config.sections.length > 0 ? config.sections.map(section => `
+                    <section id="${sanitizeText(section.id)}" class="cdlv-template-post__section">
+                        <h2 class="cdlv-template-post__heading">${sanitizeText(section.title)}</h2>
+                        ${section.content ? section.content.map(paragraph => `
+                            <p class="cdlv-template-post__text">${sanitizeText(paragraph)}</p>
+                        `).join('') : ''}
+                    </section>
+                `).join('') : '<p class="cdlv-template-post__text">No content provided.</p>'}
+            </div>
+        </article>
     `;
 
-    const sectionsWrapper = node.querySelector('.cdlv-template-post__sections-wrapper');
-    sectionsWrapper.appendChild(fragment);
+    node.innerHTML = html;
 
-    const dynamicImages = sectionsWrapper.querySelectorAll('img[data-src-relative]');
-    dynamicImages.forEach(img => {
-        const relativePath = img.getAttribute('data-src-relative');
-        if (relativePath) {
-            img.src = buildPath(relativePath);
-            img.removeAttribute('data-src-relative'); 
-        }
-    });
-
-    // 6. DYNAMIC IMPORT TO FIX CIRCULAR DEPENDENCY
-    try {
-        const { initializeComponents } = await import('../utils/components.js');
-        initializeComponents(sectionsWrapper);
-    } catch (error) {
-        console.error("Failed to load components.js for nested modules:", error);
-    }
-
-    setupScrollSpy(node);
-};
-
-const setupScrollSpy = (node) => {
+    // 2. Performant Scroll Spying (IntersectionObserver)
     const sections = node.querySelectorAll('.cdlv-template-post__section');
     const navLinks = node.querySelectorAll('.cdlv-template-post__nav-link');
 
-    if (!sections.length || !navLinks.length) return;
-
+    // RootMargin offset accounts for the sticky header
     const observerOptions = {
         root: null,
-        rootMargin: '-20% 0px -70% 0px', 
+        rootMargin: '-20% 0px -70% 0px',
         threshold: 0
     };
 
-    const observerCallback = (entries) => {
+    const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
+                // Remove active class from all links
                 navLinks.forEach(link => link.classList.remove('is-active'));
-                
+
+                // Add active class to the currently intersecting section's link
                 const activeId = entry.target.getAttribute('id');
-                const activeLink = node.querySelector(`.cdlv-template-post__nav-link[data-target="${activeId}"]`);
+                const activeLink = node.querySelector(`.cdlv-template-post__nav-link[href="#${activeId}"]`);
                 
                 if (activeLink) {
                     activeLink.classList.add('is-active');
-                    
-                    if (window.innerWidth < 992) {
-                        const navContainer = activeLink.closest('.cdlv-template-post__nav-list');
-                        if (navContainer) {
-                            navContainer.scrollTo({
-                                left: activeLink.parentElement.offsetLeft - 20,
-                                behavior: 'smooth'
-                            });
-                        }
+
+                    // On mobile, ensure the active link scrolls into view within the horizontal nav
+                    if (window.innerWidth < 1024) {
+                        activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                     }
                 }
             }
         });
-    };
+    }, observerOptions);
 
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
     sections.forEach(section => observer.observe(section));
 };
