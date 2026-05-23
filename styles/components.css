@@ -2164,18 +2164,20 @@ display: inline-block;
     background-color: var(--color-primary);
     padding-block: var(--spacing-xs);
     border-bottom: 1px solid rgba(0,0,0,0.1);
-    /* Hardware-accelerated transition to match the header easing */
-    transition: top var(--transition-base);
+    
+    /* Hardware-accelerated sync matching the header's global transition curve */
+    transition: transform var(--transition-base);
+    will-change: transform;
 }
 
-/* Syncs with JS MutationObserver when the main header translates up */
+/* Pulls the nav perfectly flush to the top when the header disappears */
 .cdlv-template-post__sidebar.is-header-hidden {
-    top: 0; 
+    transform: translateY(calc(-1 * var(--header-offset)));
 }
 
 @media (min-width: 1024px) {
     .cdlv-template-post__sidebar {
-        flex: 0 0 280px; /* Fixed width for the sidebar */
+        flex: 0 0 280px; 
         top: calc(var(--header-offset) + var(--spacing-md));
         border-bottom: none;
         padding-block: 0;
@@ -2186,7 +2188,8 @@ display: inline-block;
     }
 
     .cdlv-template-post__sidebar.is-header-hidden {
-        top: var(--spacing-md);
+        /* Maintains the desktop spacing logic while shifting up */
+        transform: translateY(calc(-1 * var(--header-offset) + var(--spacing-md)));
     }
 }
 

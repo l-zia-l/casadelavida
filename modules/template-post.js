@@ -6,34 +6,25 @@
    config. Automatically detects internal links/images and routes them 
    through the global path.js utility.
    Dependencies: Relies on utils/components.js for init, utils/path.js for routing.
-   Performance: IntersectionObserver for scroll-spying, MutationObserver for 
-   header sync. No layout thrashing.
+   Performance: IntersectionObserver for scroll-spying, highly optimized 
+   MutationObserver for header sync. No layout thrashing.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
 
-/**
- * Parses raw HTML strings, safely applying buildPath to internal assets.
- * Allows authors to use <a>, <strong>, <img> etc., inside the JSON config.
- * @param {string} rawHTML - Raw input string
- * @returns {string} - Processed HTML string ready for injection
- */
 const parseAndRouteContent = (rawHTML) => {
     if (typeof rawHTML !== 'string') return '';
     
     const parser = new DOMParser();
     const doc = parser.parseFromString(rawHTML, 'text/html');
     
-    // Auto-route internal links
     doc.querySelectorAll('a').forEach(link => {
         const href = link.getAttribute('href');
-        // Ignore external links, mailto, and anchor hashes
         if (href && !href.startsWith('http') && !href.startsWith('mailto:') && !href.startsWith('#')) {
             link.setAttribute('href', buildPath(href));
         }
     });
     
-    // Auto-route internal images
     doc.querySelectorAll('img').forEach(img => {
         const src = img.getAttribute('src');
         if (src && !src.startsWith('http') && !src.startsWith('data:')) {
@@ -44,7 +35,6 @@ const parseAndRouteContent = (rawHTML) => {
     return doc.body.innerHTML;
 };
 
-// Default Configuration: Intentionally blank to enforce data ingestion
 const defaultConfig = {
     lastUpdated: "",
     sections: []
@@ -53,7 +43,6 @@ const defaultConfig = {
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
 
-    // 1. Build HTML Structure
     const html = `
         <article class="cdlv-template-post">
             <aside class="cdlv-template-post__sidebar">
@@ -88,7 +77,7 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = html;
 
-    // 2. Performant Scroll Spying (IntersectionObserver)
+    // 1. Performant Scroll Spying (IntersectionObserver)
     const sections = node.querySelectorAll('.cdlv-template-post__section');
     const navLinks = node.querySelectorAll('.cdlv-template-post__nav-link');
 
@@ -117,23 +106,30 @@ export const init = (node, customConfig = {}) => {
 
     sections.forEach(section => scrollObserver.observe(section));
 
-    // 3. Header Sync (MutationObserver)
-    // Synchronizes the mobile sticky nav with the global header's visibility
+    // 2. Header Sync (MutationObserver)
+    // Watches the global header for its hidden class. Self-contained inside the module.
     const sidebar = node.querySelector('.cdlv-template-post__sidebar');
     const globalHeader = document.getElementById('global-header');
 
     if (globalHeader && sidebar) {
-        const headerObserver = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.attributeName === 'class') {
-                    if (globalHeader.classList.contains('cdlv-header--hidden')) {
-                        sidebar.classList.add('is-header-hidden');
-                    } else {
-                        sidebar.classList.remove('is-header-hidden');
-                    }
-                }
-            });
+        // Run an initial check in case the header is already hidden when this mounts
+        if (globalHeader.classList.contains('cdlv-header--hidden')) {
+            sidebar.classList.add('is-header-hidden');
+        }
+
+        const headerObserver = new MutationObserver(() => {
+            // We don't need to loop through mutations if we just check the current state
+            if (globalHeader.classList.contains('cdlv-header--hidden')) {
+                sidebar.classList.add('is-header-hidden');
+            } else {
+                sidebar.classList.remove('is-header-hidden');
+            }
         });
-        headerObserver.observe(globalHeader, { attributes: true });
+
+        // attributeFilter ensures this only fires when the 'class' attribute changes, saving memory
+        headerObserver.observe(globalHeader, { 
+            attributes: true, 
+            attributeFilter: ['class'] 
+        });
     }
 };
