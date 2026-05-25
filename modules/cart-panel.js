@@ -18,6 +18,7 @@ const sanitizeText = (str) => {
 // Application State
 let cartState = {
     currentStep: 'Cart', // Tracks routing ('Cart', 'Shipping & Details', 'Payment Info', 'Review')
+    paymentMethod: 'momo',
     items: [
         {
             id: 'prod_001',
@@ -245,6 +246,134 @@ const renderShippingForm = () => `
     </div>
 `;
 
+const renderPaymentForm = () => {
+    // Dynamic fields based on the selected method
+    let paymentFields = '';
+    if (cartState.paymentMethod === 'momo') {
+        paymentFields = `
+            <div class="cdlv-payment-fields">
+                <div class="cdlv-form-group">
+                    <label for="momo-network">Select Network *</label>
+                    <select id="momo-network" required aria-required="true">
+                        <option value="mtn">MTN Mobile Money</option>
+                        <option value="telecel">Telecel Cash</option>
+                        <option value="at">AT Money</option>
+                    </select>
+                </div>
+                <div class="cdlv-form-group">
+                    <label for="momo-phone">Mobile Money Number *</label>
+                    <input type="tel" id="momo-phone" placeholder="e.g. 024 123 4567" required aria-required="true">
+                </div>
+            </div>
+        `;
+    } else if (cartState.paymentMethod === 'card') {
+        paymentFields = `
+            <div class="cdlv-payment-fields">
+                <div class="cdlv-form-group cdlv-form-group--full">
+                    <label for="card-name">Name on Card *</label>
+                    <input type="text" id="card-name" required aria-required="true">
+                </div>
+                <div class="cdlv-form-group cdlv-form-group--full">
+                    <label for="card-number">Card Number *</label>
+                    <input type="text" id="card-number" placeholder="0000 0000 0000 0000" required aria-required="true">
+                </div>
+                <div class="cdlv-form-group">
+                    <label for="card-exp">Expiry Date *</label>
+                    <input type="text" id="card-exp" placeholder="MM/YY" required aria-required="true">
+                </div>
+                <div class="cdlv-form-group">
+                    <label for="card-cvc">CVC *</label>
+                    <input type="text" id="card-cvc" placeholder="123" required aria-required="true">
+                </div>
+            </div>
+        `;
+    } else if (cartState.paymentMethod === 'paypal') {
+        paymentFields = `
+            <div class="cdlv-payment-fields cdlv-payment-fields--redirect">
+                <p>After clicking "Review Order", you will be redirected to PayPal to complete your purchase securely.</p>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="cdlv-cart-panel__layout">
+            <section class="cdlv-shipping-form"> <h2 class="cdlv-shipping-form__title" tabindex="-1">Payment Information</h2>
+                
+                <div class="cdlv-payment-options" role="radiogroup" aria-label="Payment Methods">
+                    <button type="button" class="cdlv-payment-option ${cartState.paymentMethod === 'momo' ? 'is-selected' : ''}" data-action="select-payment" data-method="momo" role="radio" aria-checked="${cartState.paymentMethod === 'momo'}">
+                        <span class="cdlv-payment-option__label">Mobile Money</span>
+                        <div class="cdlv-payment-option__icons">
+                            <img src="${buildPath('assets/icons/mtn.svg')}" alt="MTN" class="cdlv-payment-icon">
+                            <img src="${buildPath('assets/icons/telecel.svg')}" alt="Telecel" class="cdlv-payment-icon">
+                            <img src="${buildPath('assets/icons/at.svg')}" alt="AT" class="cdlv-payment-icon">
+                        </div>
+                    </button>
+                    <button type="button" class="cdlv-payment-option ${cartState.paymentMethod === 'card' ? 'is-selected' : ''}" data-action="select-payment" data-method="card" role="radio" aria-checked="${cartState.paymentMethod === 'card'}">
+                        <span class="cdlv-payment-option__label">Credit/Debit Card</span>
+                        <div class="cdlv-payment-option__icons">
+                            <img src="${buildPath('assets/icons/visa.svg')}" alt="Visa" class="cdlv-payment-icon">
+                            <img src="${buildPath('assets/icons/mastercard.svg')}" alt="Mastercard" class="cdlv-payment-icon">
+                        </div>
+                    </button>
+                    <button type="button" class="cdlv-payment-option ${cartState.paymentMethod === 'paypal' ? 'is-selected' : ''}" data-action="select-payment" data-method="paypal" role="radio" aria-checked="${cartState.paymentMethod === 'paypal'}">
+                        <span class="cdlv-payment-option__label">PayPal</span>
+                        <div class="cdlv-payment-option__icons">
+                            <img src="${buildPath('assets/icons/paypal.svg')}" alt="PayPal" class="cdlv-payment-icon">
+                        </div>
+                    </button>
+                </div>
+
+                <form id="payment-details-form" class="cdlv-shipping-form__grid">
+                    ${paymentFields}
+                    
+                    <div class="cdlv-shipping-form__actions cdlv-form-group--full">
+                    <button type="button" class="cdlv-shipping-form__back" data-action="back-to-cart">Back to Cart</button>
+                    <button type="submit" class="cdlv-shipping-form__submit">Continue to Payment</button>
+                </div>
+            </form>
+        </section>
+        
+        <div class="cdlv-cart-panel__sidebar">
+            ${renderDetailedSummary()} </div>
+    </div>
+    `;
+};
+
+const renderDetailedSummary = () => {
+    const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = subtotal + cartState.shippingRate;
+
+    const itemsList = cartState.items.map(item => `
+        <div class="cdlv-cart-summary__item-row">
+            <span class="cdlv-cart-summary__item-name">${sanitizeText(item.quantity)}x ${sanitizeText(item.name)}</span>
+            <span class="cdlv-cart-summary__item-price">₵${sanitizeText((item.price * item.quantity).toFixed(2))}</span>
+        </div>
+    `).join('');
+
+    return `
+        <aside class="cdlv-cart-summary">
+            <h3 class="cdlv-cart-summary__title">Order Summary</h3>
+            <div class="cdlv-cart-summary__items">
+                ${itemsList}
+            </div>
+            <hr class="cdlv-cart-summary__divider">
+            <div class="cdlv-cart-summary__row">
+                <span>Subtotal</span>
+                <span>₵${sanitizeText(subtotal.toFixed(2))}</span>
+            </div>
+            <div class="cdlv-cart-summary__row">
+                <span>Estimated Shipping</span>
+                <span>₵${sanitizeText(cartState.shippingRate.toFixed(2))}</span>
+            </div>
+            <hr class="cdlv-cart-summary__divider">
+            <div class="cdlv-cart-summary__row cdlv-cart-summary__row--total">
+                <span>Total</span>
+                <span>₵${sanitizeText(total.toFixed(2))}</span>
+            </div>
+        </aside>
+    `;
+};
+
 const updateView = (node) => {
     if (cartState.items.length === 0) {
         node.innerHTML = renderEmptyState();
@@ -255,9 +384,11 @@ const updateView = (node) => {
     if (cartState.currentStep === 'Cart') {
         viewContent = renderCartView();
     } else if (cartState.currentStep === 'Shipping & Details') {
-        viewContent = renderShippingForm();
+        viewContent = renderShippingForm(); // No more regex replace!
+    } else if (cartState.currentStep === 'Payment Info') {
+        viewContent = renderPaymentForm();
     } else {
-        viewContent = `<p>Placeholder for ${cartState.currentStep}</p>`;
+        viewContent = `<div class="cdlv-cart-panel__layout"><h2>Placeholder for Review</h2></div>`;
     }
 
     node.innerHTML = `
@@ -266,9 +397,15 @@ const updateView = (node) => {
     `;
 
     // A11y: Shift focus logically when views change
-    if (cartState.currentStep === 'Shipping & Details') {
-        const titleNode = node.querySelector('.cdlv-shipping-form__title');
-        if (titleNode) titleNode.focus();
+    if (cartState.currentStep !== 'Cart') {
+        const titleNode = node.querySelector('h2');
+        if (titleNode) {
+            // Ensure the element has tabindex="-1" so it can receive programmatic focus
+            if (!titleNode.hasAttribute('tabindex')) {
+                titleNode.setAttribute('tabindex', '-1');
+            }
+            titleNode.focus();
+        }
     }
 };
 
@@ -300,6 +437,22 @@ export const init = (node) => {
             updateView(node);
             return;
         }
+
+        if (action === 'back-to-shipping') {
+            cartState.currentStep = 'Shipping & Details';
+            updateView(node);
+            return;
+        }
+
+        if (action === 'select-payment') {
+            const method = actionBtn.getAttribute('data-method');
+            if (cartState.paymentMethod !== method) {
+                cartState.paymentMethod = method;
+                updateView(node); // Re-render payment view to show new form fields
+            }
+            return;
+        }
+
         if (action === 'back-to-cart') {
             cartState.currentStep = 'Cart';
             updateView(node);
@@ -383,10 +536,15 @@ export const init = (node) => {
 
     // Event Delegation: Form Submissions
     node.addEventListener('submit', (e) => {
+        e.preventDefault(); // Prevent page reload for ALL forms in this module
+
         if (e.target.id === 'shipping-details-form') {
-            e.preventDefault(); // Prevent page reload
             // In a real app, save form data to state/localStorage here
             cartState.currentStep = 'Payment Info';
+            updateView(node);
+        } else if (e.target.id === 'payment-details-form') {
+            // In a real app, securely stash payment intent/method here
+            cartState.currentStep = 'Review';
             updateView(node);
         }
     });

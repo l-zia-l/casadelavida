@@ -3177,6 +3177,96 @@ display: inline-block;
 }
 
 /* ==========================================================================
+   MODULE: PAYMENT OPTIONS
+   ========================================================================== */
+.cdlv-payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+    .cdlv-payment-options {
+        flex-direction: row;
+    }
+}
+
+.cdlv-payment-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: var(--spacing-sm);
+    background: var(--color-primary);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-strict);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.cdlv-payment-option:hover {
+    border-color: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.cdlv-payment-option.is-selected {
+    border-color: var(--color-accent);
+    outline: 1px solid var(--color-accent); /* Double up for high contrast */
+    background: rgba(71, 59, 117, 0.03); /* Faint accent tint */
+}
+
+.cdlv-payment-option__label {
+    font-family: var(--font-family-body);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-dark);
+}
+
+.cdlv-payment-option__icons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    height: 24px;
+}
+
+.cdlv-payment-icon {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+/* -------------------------
+   DETAILED SUMMARY ITEMS
+   ------------------------- */
+.cdlv-cart-summary__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.cdlv-cart-summary__item-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-family-body);
+    font-size: 0.9rem;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.cdlv-cart-summary__item-name {
+    flex: 1;
+    padding-right: 1rem;
+}
+
+.cdlv-cart-summary__item-price {
+    font-weight: 500;
+    color: var(--color-text-dark);
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
