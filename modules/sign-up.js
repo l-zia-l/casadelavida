@@ -1,6 +1,14 @@
 /* ==========================================================================
    MODULE: MULTI-STEP SIGN-UP (modules/sign-up.js)
+   Architecture: Exportable ES Module acting as an internal state machine.
+   Security: DOMPurify-style text sanitization for XSS prevention.
+             Passwords are never stored in memory or localStorage.
+   UX: Validates strictly on `blur` and `submit` with custom error states.
+       Saves draft data to localStorage to prevent accidental data loss.
+   Routing: Utilizes path.js for environment-agnostic absolute URLs.
    ========================================================================== */
+
+import { buildPath } from '../utils/path.js';
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
@@ -43,18 +51,29 @@ const toggleError = (inputEl, errorEl, errorMessage) => {
 
 const defaultConfig = {
     step1: {
-        title: "Begin Your Ritual", subtitle: "Create an account to curate your wellness journeys, track seasonal honey harvests, and manage your subscriptions.",
-        buttonText: "Continue to Verification"
+        title: "Begin Your Wellness Routine", 
+        subtitle: "Create an account to curate your wellness journeys, track seasonal honey harvests, and manage your subscriptions.",
+        buttonText: "Continue to Verification",
+        loginUrl: "auth/login.html" 
     },
     step2: {
-        title: "Verify Your Email", subtitle: "To secure your personal wellness dashboard, we have sent a 4-digit verification token to your inbox. Please enter it below.",
-        buttonText: "Verify & Activate Account", digitCount: 4
+        title: "Verify Your Email", 
+        subtitle: "To secure your personal wellness dashboard, we have sent a 4-digit verification token to your inbox. Please enter it below.",
+        buttonText: "Verify & Activate Account", 
+        digitCount: 4
     },
     step3: {
-        title: "Welcome to the House of Life", subtitle: "Your account is fully verified and secure. Your personal canvas is ready. From your dashboard, you can now manage your subscription frequencies, save your preferred artisanal tea rituals, and access exclusive wellness consultations.",
-        buttonText: "Enter Your Dashboard", redirectUrl: "account/index.html", countdownSeconds: 5
+        title: "Welcome to Casa De La Vida", 
+        subtitle: "Your account is fully verified and secure. Your personal canvas is ready. From your dashboard, you can now manage your subscription frequencies, save your preferred artisanal tea rituals, and access exclusive wellness consultations.",
+        buttonText: "Enter Your Dashboard", 
+        redirectUrl: "account/index.html", 
+        countdownSeconds: 5
     }
 };
+
+// Local Storage Keys
+const DRAFT_NAME_KEY = 'cdlv_signup_draft_name';
+const DRAFT_EMAIL_KEY = 'cdlv_signup_draft_email';
 
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
@@ -84,13 +103,13 @@ export const init = (node, customConfig = {}) => {
                         <div class="cdlv-auth__group">
                             <label for="signup-password" class="visually-hidden">Create Password</label>
                             <input type="password" id="signup-password" class="cdlv-auth__input" placeholder="Minimum 8 characters" required minlength="8" autocomplete="new-password" aria-describedby="error-signup-password">
-                            <small class="cdlv-auth__hint">Intentional security: Passwords must contain letters and numbers to protect your account data.</small>
+                            <small class="cdlv-auth__hint"> Passwords must contain letters and numbers to protect your account data.</small>
                             <span class="cdlv-auth__error" id="error-signup-password" aria-live="polite"></span>
                         </div>
                         <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
                     </form>
                     <footer class="cdlv-auth__footer">
-                        <p>Already have an account? <a href="login.html" class="cdlv-auth__link">Log In</a></p>
+                        <p>Already have an account? <a href="${buildPath(sanitizeText(conf.loginUrl))}" class="cdlv-auth__link">Log In</a></p>
                     </footer>
                 </div>
             </div>
@@ -131,22 +150,16 @@ export const init = (node, customConfig = {}) => {
     const mountStep3 = () => {
         const conf = config.step3;
         let timeLeft = conf.countdownSeconds;
-        const celebrationVector = `
-            <svg class="cdlv-welcome__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
-                <path d="M12 2C7 2 3 6 3 11c0 4 3 8 9 11 6-3 9-7 9-11 0-5-4-9-9-9z"></path>
-                <line x1="12" y1="2" x2="12" y2="22"></line>
-            </svg>
-        `;
+        const resolvedRedirectUrl = buildPath(sanitizeText(conf.redirectUrl));
 
         node.innerHTML = `
             <div class="cdlv-auth-step cdlv-auth-step--centered animate-enter">
                 <header class="cdlv-auth__header">
-                    ${celebrationVector}
                     <h1 class="cdlv-welcome__title">${sanitizeText(conf.title)}</h1>
                     <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
                 </header>
-                <a href="${sanitizeText(conf.redirectUrl)}" class="cdlv-hero__btn cdlv-hero__btn--primary cdlv-welcome__btn">
-                    ${sanitizeText(conf.buttonText)} <span class="cdlv-welcome__countdown">(Redirecting in ${timeLeft}s...)</span>
+                <a href="${resolvedRedirectUrl}" class="cdlv-hero__btn cdlv-hero__btn--primary cdlv-welcome__btn">
+                    ${sanitizeText(conf.buttonText)} <span class="cdlv-welcome__countdown">(Redirecting in ${timeLeft}...)</span>
                 </a>
             </div>
         `;
@@ -157,9 +170,9 @@ export const init = (node, customConfig = {}) => {
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
                 countdownSpan.textContent = "(Redirecting...)";
-                window.location.href = conf.redirectUrl;
+                window.location.href = resolvedRedirectUrl;
             } else {
-                countdownSpan.textContent = `(Redirecting in ${timeLeft}s...)`;
+                countdownSpan.textContent = `(Redirecting in ${timeLeft}...)`;
             }
         }, 1000);
     };
@@ -176,6 +189,16 @@ export const init = (node, customConfig = {}) => {
         const emailError = node.querySelector('#error-signup-email');
         const passwordError = node.querySelector('#error-signup-password');
 
+        // 1. Restore Draft Data
+        const savedName = localStorage.getItem(DRAFT_NAME_KEY);
+        const savedEmail = localStorage.getItem(DRAFT_EMAIL_KEY);
+        if (savedName) nameInput.value = savedName;
+        if (savedEmail) emailInput.value = savedEmail;
+
+        // 2. Save Draft Data on Input
+        nameInput.addEventListener('input', (e) => localStorage.setItem(DRAFT_NAME_KEY, e.target.value));
+        emailInput.addEventListener('input', (e) => localStorage.setItem(DRAFT_EMAIL_KEY, e.target.value));
+
         nameInput.addEventListener('blur', () => toggleError(nameInput, nameError, validateName(nameInput.value)));
         emailInput.addEventListener('blur', () => toggleError(emailInput, emailError, validateEmail(emailInput.value)));
         passwordInput.addEventListener('blur', () => toggleError(passwordInput, passwordError, validatePassword(passwordInput.value)));
@@ -188,6 +211,10 @@ export const init = (node, customConfig = {}) => {
             const isPasswordInvalid = toggleError(passwordInput, passwordError, validatePassword(passwordInput.value));
 
             if (isNameInvalid || isEmailInvalid || isPasswordInvalid) return;
+
+            // 3. Clear Draft Data on Successful Submission
+            localStorage.removeItem(DRAFT_NAME_KEY);
+            localStorage.removeItem(DRAFT_EMAIL_KEY);
 
             userEmailCache = emailInput.value.trim();
             mountStep2();

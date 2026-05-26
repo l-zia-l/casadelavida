@@ -3574,7 +3574,7 @@ display: inline-block;
 /* Welcome Screen Specifics */
 .cdlv-welcome__icon { width: clamp(3rem, 6vw, 4rem); height: auto; margin: 0 auto var(--spacing-sm); color: var(--color-secondary); animation: fade-in-up var(--transition-slow) forwards; }
 .cdlv-welcome__title { font-size: var(--font-size-h1); color: var(--color-text-dark); }
-.cdlv-welcome__btn { display: block; text-decoration: none; width: 100%; max-width: 400px; margin: var(--spacing-md) auto 0; }
+.cdlv-welcome__btn { display: block; text-decoration: none; width: 100%; max-width: 400px; margin: var(--spacing-sm) auto 0; }
 .cdlv-welcome__countdown { font-size: var(--font-size-small); opacity: 0.8; font-family: var(--font-family-body); font-weight: normal; margin-left: 0.5rem; }
 
 /* Validation Error UI */
