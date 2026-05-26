@@ -3587,6 +3587,27 @@ display: inline-block;
 /* Global Button Override for Auth context */
 .cdlv-hero__btn { width: 100%; }
 
+/* ==========================================================================
+   MODULE: MULTI-STEP SIGN-UP - A11Y OVERRIDES (styles/components.css)
+   ========================================================================== */
+
+/* 1. Prevent outline on programmatically focused headings (mouse users) 
+      while preserving it for actual keyboard navigation */
+.cdlv-auth__title:focus:not(:focus-visible),
+.cdlv-welcome__title:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* 2. Respect OS-level motion sensitivity settings */
+@media (prefers-reduced-motion: reduce) {
+    .cdlv-auth-step {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
 
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)

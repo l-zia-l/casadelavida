@@ -2,9 +2,7 @@
    MODULE: MULTI-STEP SIGN-UP (modules/sign-up.js)
    Architecture: Exportable ES Module acting as an internal state machine.
    Security: DOMPurify-style text sanitization for XSS prevention.
-             Passwords are never stored in memory or localStorage.
-   UX: Validates strictly on `blur` and `submit` with custom error states.
-       Saves draft data to localStorage to prevent accidental data loss.
+   A11y: Strict WCAG compliance (Focus routing, aria-live, aria-describedby).
    Routing: Utilizes path.js for environment-agnostic absolute URLs.
    ========================================================================== */
 
@@ -41,10 +39,16 @@ const validatePassword = (val) => {
 
 const toggleError = (inputEl, errorEl, errorMessage) => {
     if (errorMessage) {
-        errorEl.textContent = errorMessage; errorEl.classList.add('is-visible'); inputEl.classList.add('has-error');
+        errorEl.textContent = errorMessage; 
+        errorEl.classList.add('is-visible'); 
+        inputEl.classList.add('has-error');
+        inputEl.setAttribute('aria-invalid', 'true'); // A11y flag
         return true;
     } else {
-        errorEl.textContent = ''; errorEl.classList.remove('is-visible'); inputEl.classList.remove('has-error');
+        errorEl.textContent = ''; 
+        errorEl.classList.remove('is-visible'); 
+        inputEl.classList.remove('has-error');
+        inputEl.removeAttribute('aria-invalid');
         return false;
     }
 };
@@ -71,7 +75,6 @@ const defaultConfig = {
     }
 };
 
-// Local Storage Keys
 const DRAFT_NAME_KEY = 'cdlv_signup_draft_name';
 const DRAFT_EMAIL_KEY = 'cdlv_signup_draft_email';
 
@@ -79,17 +82,27 @@ export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     let userEmailCache = "";
 
+    // Helper to shift focus to the new view for screen readers
+    const shiftFocusToHeading = (selector) => {
+        // requestAnimationFrame ensures the DOM is fully painted before focus is called
+        requestAnimationFrame(() => {
+            const heading = node.querySelector(selector);
+            if (heading) heading.focus();
+        });
+    };
+
     const mountStep1 = () => {
         const conf = config.step1;
         node.innerHTML = `
             <div class="cdlv-auth-step animate-enter">
                 <header class="cdlv-auth__header">
-                    <h2 class="cdlv-auth__title">${sanitizeText(conf.title)}</h2>
+                    <!-- tabindex="-1" allows programmatic focus without messing up natural tab order -->
+                    <h2 class="cdlv-auth__title" id="step1-title" tabindex="-1">${sanitizeText(conf.title)}</h2>
                     <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
                 </header>
                 
                 <div class="cdlv-auth__panel">
-                    <form class="cdlv-auth__form" id="cdlv-signup-form" novalidate>
+                    <form class="cdlv-auth__form" id="cdlv-signup-form" novalidate aria-labelledby="step1-title">
                         <div class="cdlv-auth__group">
                             <label for="signup-name" class="visually-hidden">Full Name</label>
                             <input type="text" id="signup-name" class="cdlv-auth__input" placeholder="Name" required minlength="2" maxlength="50" autocomplete="name" aria-describedby="error-signup-name">
@@ -102,8 +115,9 @@ export const init = (node, customConfig = {}) => {
                         </div>
                         <div class="cdlv-auth__group">
                             <label for="signup-password" class="visually-hidden">Create Password</label>
-                            <input type="password" id="signup-password" class="cdlv-auth__input" placeholder="Minimum 8 characters" required minlength="8" autocomplete="new-password" aria-describedby="error-signup-password">
-                            <small class="cdlv-auth__hint"> Passwords must contain letters and numbers to protect your account data.</small>
+                            <!-- A11y: Multiple aria-describedby IDs linked -->
+                            <input type="password" id="signup-password" class="cdlv-auth__input" placeholder="Minimum 8 characters" required minlength="8" autocomplete="new-password" aria-describedby="hint-signup-password error-signup-password">
+                            <small id="hint-signup-password" class="cdlv-auth__hint">Passwords must contain letters and numbers to protect your account data.</small>
                             <span class="cdlv-auth__error" id="error-signup-password" aria-live="polite"></span>
                         </div>
                         <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
@@ -115,26 +129,30 @@ export const init = (node, customConfig = {}) => {
             </div>
         `;
         bindStep1Events();
+        shiftFocusToHeading('#step1-title');
     };
 
     const mountStep2 = () => {
         const conf = config.step2;
         const inputsHTML = Array.from({ length: conf.digitCount }).map((_, i) => `
             <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" required
-                   class="cdlv-2fa__input-box" aria-label="Digit ${i + 1}" data-index="${i}">
+                   class="cdlv-2fa__input-box" aria-label="Digit ${i + 1} of ${conf.digitCount}" data-index="${i}">
         `).join('');
 
         node.innerHTML = `
             <div class="cdlv-auth-step animate-enter">
                 <header class="cdlv-auth__header">
-                    <h2 class="cdlv-auth__title">${sanitizeText(conf.title)}</h2>
+                    <h2 class="cdlv-auth__title" id="step2-title" tabindex="-1">${sanitizeText(conf.title)}</h2>
                     <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
                 </header>
 
                 <div class="cdlv-auth__panel">
-                    <form class="cdlv-auth__form" id="cdlv-2fa-form" novalidate>
-                        <div class="cdlv-2fa__digits" id="cdlv-2fa-container">${inputsHTML}</div>
-                        <span class="cdlv-auth__error" id="error-2fa-validation" aria-live="polite"></span>
+                    <form class="cdlv-auth__form" id="cdlv-2fa-form" novalidate aria-labelledby="step2-title">
+                        <!-- role="group" groups the split inputs for screen readers -->
+                        <div class="cdlv-2fa__digits" id="cdlv-2fa-container" role="group" aria-label="4-digit verification code">
+                            ${inputsHTML}
+                        </div>
+                        <span class="cdlv-auth__error" id="error-2fa-validation" aria-live="assertive"></span>
                         <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
                     </form>
                     <footer class="cdlv-auth__footer">
@@ -145,6 +163,7 @@ export const init = (node, customConfig = {}) => {
             </div>
         `;
         bindStep2Events();
+        shiftFocusToHeading('#step2-title');
     };
 
     const mountStep3 = () => {
@@ -155,14 +174,17 @@ export const init = (node, customConfig = {}) => {
         node.innerHTML = `
             <div class="cdlv-auth-step cdlv-auth-step--centered animate-enter">
                 <header class="cdlv-auth__header">
-                    <h1 class="cdlv-welcome__title">${sanitizeText(conf.title)}</h1>
+                    <h1 class="cdlv-welcome__title" id="step3-title" tabindex="-1">${sanitizeText(conf.title)}</h1>
                     <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
                 </header>
+                <!-- aria-hidden="true" on the countdown prevents SRs from repeating every tick -->
                 <a href="${resolvedRedirectUrl}" class="cdlv-hero__btn cdlv-hero__btn--primary cdlv-welcome__btn">
-                    ${sanitizeText(conf.buttonText)} <span class="cdlv-welcome__countdown">(Redirecting in ${timeLeft}...)</span>
+                    ${sanitizeText(conf.buttonText)} <span class="cdlv-welcome__countdown" aria-hidden="true">(Redirecting in ${timeLeft}...)</span>
                 </a>
             </div>
         `;
+
+        shiftFocusToHeading('#step3-title');
 
         const countdownSpan = node.querySelector('.cdlv-welcome__countdown');
         const countdownInterval = setInterval(() => {
@@ -189,13 +211,11 @@ export const init = (node, customConfig = {}) => {
         const emailError = node.querySelector('#error-signup-email');
         const passwordError = node.querySelector('#error-signup-password');
 
-        // 1. Restore Draft Data
         const savedName = localStorage.getItem(DRAFT_NAME_KEY);
         const savedEmail = localStorage.getItem(DRAFT_EMAIL_KEY);
         if (savedName) nameInput.value = savedName;
         if (savedEmail) emailInput.value = savedEmail;
 
-        // 2. Save Draft Data on Input
         nameInput.addEventListener('input', (e) => localStorage.setItem(DRAFT_NAME_KEY, e.target.value));
         emailInput.addEventListener('input', (e) => localStorage.setItem(DRAFT_EMAIL_KEY, e.target.value));
 
@@ -210,9 +230,11 @@ export const init = (node, customConfig = {}) => {
             const isEmailInvalid = toggleError(emailInput, emailError, validateEmail(emailInput.value));
             const isPasswordInvalid = toggleError(passwordInput, passwordError, validatePassword(passwordInput.value));
 
-            if (isNameInvalid || isEmailInvalid || isPasswordInvalid) return;
+            // A11y: Auto-focus the first invalid input on submission error
+            if (isNameInvalid) return nameInput.focus();
+            if (isEmailInvalid) return emailInput.focus();
+            if (isPasswordInvalid) return passwordInput.focus();
 
-            // 3. Clear Draft Data on Successful Submission
             localStorage.removeItem(DRAFT_NAME_KEY);
             localStorage.removeItem(DRAFT_EMAIL_KEY);
 
@@ -225,8 +247,6 @@ export const init = (node, customConfig = {}) => {
         const form = node.querySelector('#cdlv-2fa-form');
         const inputBoxes = Array.from(node.querySelectorAll('.cdlv-2fa__input-box'));
         const errorMsg = node.querySelector('#error-2fa-validation');
-
-        setTimeout(() => { if(inputBoxes[0]) inputBoxes[0].focus(); }, 100);
 
         inputBoxes.forEach((input, index) => {
             input.addEventListener('input', (e) => {
@@ -245,7 +265,10 @@ export const init = (node, customConfig = {}) => {
             });
             input.addEventListener('focus', () => {
                 errorMsg.classList.remove('is-visible');
-                inputBoxes.forEach(box => box.classList.remove('has-error'));
+                inputBoxes.forEach(box => {
+                    box.classList.remove('has-error');
+                    box.removeAttribute('aria-invalid');
+                });
             });
         });
 
@@ -257,16 +280,22 @@ export const init = (node, customConfig = {}) => {
             if (token.length < config.step2.digitCount || !/^\d{4}$/.test(token)) {
                 errorMsg.textContent = `Please enter the full ${config.step2.digitCount}-digit token.`;
                 errorMsg.classList.add('is-visible');
-                inputBoxes.forEach(box => box.classList.add('has-error'));
-                return;
+                inputBoxes.forEach(box => {
+                    box.classList.add('has-error');
+                    box.setAttribute('aria-invalid', 'true');
+                });
+                return inputBoxes[0].focus();
             }
 
             if (token === "0000") {
                 errorMsg.textContent = "That token didn't match. Please check your email and try again.";
                 errorMsg.classList.add('is-visible');
-                inputBoxes.forEach(box => { box.classList.add('has-error'); box.value = ''; });
-                inputBoxes[0].focus();
-                return;
+                inputBoxes.forEach(box => { 
+                    box.classList.add('has-error'); 
+                    box.setAttribute('aria-invalid', 'true');
+                    box.value = ''; 
+                });
+                return inputBoxes[0].focus();
             }
 
             mountStep3();
@@ -276,5 +305,8 @@ export const init = (node, customConfig = {}) => {
         node.querySelector('#change-email').addEventListener('click', mountStep1);
     };
 
+    // Initialize module without shifting focus to heading on first natural load
     mountStep1();
+    const heading = node.querySelector('#step1-title');
+    if (heading) heading.removeAttribute('tabindex');
 };
