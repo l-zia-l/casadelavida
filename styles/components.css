@@ -3458,16 +3458,14 @@ display: inline-block;
 }
 
 /* ==========================================================================
-   MODULE: MULTI-STEP SIGN-UP & 2FA (styles/components.css)
+   MODULE: MULTI-STEP SIGN-UP (styles/components.css)
    Architecture: Scoped BEM methodology.
-   Purpose: Defines layouts for the registration form and the 2FA split-passcode.
-   Constraints: Strict 0px radius, fluid typography, no inline styles.
    ========================================================================== */
 
-/* Shared Animation Container */
+/* Shared Animation Container overrides if needed, but relies on global .animate-enter */
 .cdlv-auth-step {
-    animation: fade-in-up var(--transition-base) forwards;
-    will-change: transform, opacity;
+    display: flex;
+    flex-direction: column;
 }
 
 /* --- STEP 1: REGISTRATION LAYOUT --- */
@@ -3476,8 +3474,6 @@ display: inline-block;
     max-width: 450px;
     margin-inline: auto;
     padding: var(--spacing-lg) var(--spacing-xs);
-    display: flex;
-    flex-direction: column;
     gap: var(--spacing-lg);
 }
 
@@ -3512,15 +3508,9 @@ display: inline-block;
     transition: border-color var(--transition-base);
 }
 
-.cdlv-sign-up__input::placeholder {
-    color: rgba(26, 26, 26, 0.4);
-}
-
+.cdlv-sign-up__input::placeholder { color: rgba(26, 26, 26, 0.4); }
 .cdlv-sign-up__input:focus,
-.cdlv-sign-up__input:focus-visible {
-    outline: none;
-    border-bottom: 2px solid var(--color-accent);
-}
+.cdlv-sign-up__input:focus-visible { outline: none; border-bottom: 2px solid var(--color-accent); }
 
 .cdlv-sign-up__hint {
     font-size: var(--font-size-small);
@@ -3531,21 +3521,9 @@ display: inline-block;
     line-height: 1.4;
 }
 
-.cdlv-sign-up__footer {
-    text-align: center;
-    font-size: var(--font-size-small);
-    margin-top: var(--spacing-sm);
-}
-
-.cdlv-sign-up__link {
-    color: var(--color-accent);
-    text-decoration: underline;
-    transition: color var(--transition-fast);
-}
-
-.cdlv-sign-up__link:hover {
-    color: var(--color-text-dark);
-}
+.cdlv-sign-up__footer { text-align: center; font-size: var(--font-size-small); margin-top: var(--spacing-sm); }
+.cdlv-sign-up__link { color: var(--color-accent); text-decoration: underline; transition: color var(--transition-fast); }
+.cdlv-sign-up__link:hover { color: var(--color-text-dark); }
 
 /* --- STEP 2: 2FA VERIFICATION LAYOUT --- */
 .cdlv-2fa {
@@ -3553,8 +3531,6 @@ display: inline-block;
     max-width: 400px;
     margin-inline: auto;
     padding: var(--spacing-lg) var(--spacing-xs);
-    display: flex;
-    flex-direction: column;
     gap: var(--spacing-md);
     text-align: center;
 }
@@ -3581,92 +3557,41 @@ display: inline-block;
 
 .cdlv-2fa__input-box:focus,
 .cdlv-2fa__input-box:focus-visible {
-    outline: none;
-    border-color: var(--color-accent);
-    transform: translateY(-2px);
+    outline: none; border-color: var(--color-accent); transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(71, 59, 117, 0.1);
 }
 
-.cdlv-2fa__footer {
-    font-size: var(--font-size-small);
-    color: var(--color-text-dark);
-    line-height: 1.6;
-    margin-top: var(--spacing-sm);
+.cdlv-2fa__footer { font-size: var(--font-size-small); color: var(--color-text-dark); line-height: 1.6; margin-top: var(--spacing-sm); }
+.cdlv-2fa__btn--resend { background: none; border: none; padding: 0; color: var(--color-accent); text-decoration: underline; cursor: pointer; font-family: inherit; font-size: inherit; transition: color var(--transition-fast); }
+.cdlv-2fa__btn--resend:hover { color: var(--color-text-dark); outline: none; }
+.cdlv-2fa__link--change { color: inherit; opacity: 0.7; text-decoration: underline; background: none; border: none; cursor: pointer; font-family: inherit; font-size: inherit; padding: 0; transition: opacity var(--transition-fast); }
+.cdlv-2fa__link--change:hover { opacity: 1; }
+
+/* --- STEP 3: RITUAL WELCOME --- */
+.cdlv-welcome {
+    width: 100%;
+    max-width: 600px;
+    margin-inline: auto;
+    padding: var(--spacing-lg) var(--spacing-xs);
+    gap: var(--spacing-md);
+    text-align: center;
 }
 
-.cdlv-2fa__btn--resend {
-    background: none;
-    border: none;
-    padding: 0;
-    color: var(--color-accent);
-    text-decoration: underline;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
-    transition: color var(--transition-fast);
+.cdlv-welcome__icon {
+    width: clamp(3rem, 6vw, 4rem);
+    height: auto;
+    margin: 0 auto var(--spacing-sm);
+    color: var(--color-secondary);
+    animation: fade-in-up var(--transition-slow) forwards;
 }
 
-.cdlv-2fa__btn--resend:hover,
-.cdlv-2fa__btn--resend:focus-visible {
-    color: var(--color-text-dark);
-    outline: none;
-}
-
-.cdlv-2fa__link--change {
-    color: inherit;
-    opacity: 0.7;
-    text-decoration: underline;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: inherit;
-    padding: 0;
-    transition: opacity var(--transition-fast);
-}
-
-.cdlv-2fa__link--change:hover {
-    opacity: 1;
-}
+.cdlv-welcome__title { font-size: var(--font-size-h1); color: var(--color-text-dark); }
+.cdlv-welcome__btn { display: block; text-decoration: none; width: 100%; max-width: 400px; margin: var(--spacing-md) auto 0; }
+.cdlv-welcome__countdown { font-size: var(--font-size-small); opacity: 0.8; font-family: var(--font-family-body); font-weight: normal; margin-left: 0.5rem; }
 
 /* Shared Validation Messaging */
-.cdlv-auth__error {
-    font-size: var(--font-size-small);
-    color: var(--color-accent);
-    font-weight: bold;
-    margin-top: calc(var(--spacing-xs) * 0.5);
-    display: none;
-    animation: fade-in-up var(--transition-fast) forwards;
-}
-
-.cdlv-auth__error.is-visible {
-    display: block;
-}
-
-/* Fallback CTA Button (if not in globals) */
-.cdlv-hero__btn {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-family: var(--font-family-heading);
-    font-size: var(--font-size-body);
-    text-align: center;
-    cursor: pointer;
-    border: none;
-    border-radius: var(--radius-strict);
-    transition: background-color var(--transition-base), transform var(--transition-base);
-    margin-top: var(--spacing-sm);
-    width: 100%;
-}
-
-.cdlv-hero__btn--primary {
-    background-color: var(--color-text-dark);
-    color: var(--color-primary);
-}
-
-.cdlv-hero__btn--primary:hover,
-.cdlv-hero__btn--primary:focus {
-    background-color: var(--color-accent);
-    transform: translateY(-2px);
-}
+.cdlv-auth__error { font-size: var(--font-size-small); color: var(--color-accent); font-weight: bold; margin-top: calc(var(--spacing-xs) * 0.5); display: none; animation: fade-in-up var(--transition-fast) forwards; }
+.cdlv-auth__error.is-visible { display: block; }
 
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
