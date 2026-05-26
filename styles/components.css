@@ -3459,22 +3459,31 @@ display: inline-block;
 
 /* ==========================================================================
    MODULE: MULTI-STEP SIGN-UP (styles/components.css)
-   Architecture: Fluid, CSS Grid/Flex hybrid for a 1200px editorial layout.
+   Architecture: 100vh Full-Screen Flex Wrapper with a 1200px inner grid.
    ========================================================================== */
 
-/* Shared 1200px Container */
+/* * The full-screen stage. 
+ * Relies on the global .u-fill-screen class (100vw, 100vh) in the HTML 
+ * to break out of the main container and lock the height.
+ */
+.cdlv-auth-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--layout-gutter);
+    overflow-y: auto; /* Fallback: allows scrolling if mobile keyboard squishes 100vh */
+}
+
+/* Shared 1200px Inner Container */
 .cdlv-auth-step {
     width: 100%;
     max-width: 1200px;
     margin-inline: auto;
-    padding: var(--spacing-lg) var(--spacing-xs);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-xl);
-    animation: fade-in-up var(--transition-base) forwards;
-    will-change: transform, opacity;
 }
 
 /* Modifier for Welcome Step to keep it centered and elegant */
@@ -3482,7 +3491,7 @@ display: inline-block;
     flex-direction: column;
     text-align: center;
     justify-content: center;
-    max-width: 800px; /* Prevents text from spanning absurdly long */
+    max-width: 800px;
 }
 
 .cdlv-auth-step--centered .cdlv-auth__header {
@@ -3499,6 +3508,9 @@ display: inline-block;
 }
 
 .cdlv-auth__title { font-size: var(--font-size-h2); color: var(--color-text-dark); }
+.cdlv-auth__title:focus:not(:focus-visible),
+.cdlv-welcome__title:focus:not(:focus-visible) { outline: none; } /* A11y Outline fix */
+
 .cdlv-auth__subtitle { font-size: var(--font-size-body); color: var(--color-text-dark); opacity: 0.9; }
 
 /* Right Column: Interactive Form & Links */
@@ -3552,9 +3564,9 @@ display: inline-block;
 .cdlv-2fa__digits {
     display: flex;
     gap: var(--spacing-sm);
-    justify-content: flex-start; /* Aligned left to match the column flow */
+    justify-content: flex-start;
     margin: var(--spacing-sm) 0;
-    flex-wrap: wrap; /* Allows digits to wrap safely on extremely tiny screens */
+    flex-wrap: wrap; 
 }
 
 .cdlv-2fa__input-box {
@@ -3572,7 +3584,6 @@ display: inline-block;
 }
 
 /* Welcome Screen Specifics */
-.cdlv-welcome__icon { width: clamp(3rem, 6vw, 4rem); height: auto; margin: 0 auto var(--spacing-sm); color: var(--color-secondary); animation: fade-in-up var(--transition-slow) forwards; }
 .cdlv-welcome__title { font-size: var(--font-size-h1); color: var(--color-text-dark); }
 .cdlv-welcome__btn { display: block; text-decoration: none; width: 100%; max-width: 400px; margin: var(--spacing-sm) auto 0; }
 .cdlv-welcome__countdown { font-size: var(--font-size-small); opacity: 0.8; font-family: var(--font-family-body); font-weight: normal; margin-left: 0.5rem; }
@@ -3587,20 +3598,9 @@ display: inline-block;
 /* Global Button Override for Auth context */
 .cdlv-hero__btn { width: 100%; }
 
-/* ==========================================================================
-   MODULE: MULTI-STEP SIGN-UP - A11Y OVERRIDES (styles/components.css)
-   ========================================================================== */
-
-/* 1. Prevent outline on programmatically focused headings (mouse users) 
-      while preserving it for actual keyboard navigation */
-.cdlv-auth__title:focus:not(:focus-visible),
-.cdlv-welcome__title:focus:not(:focus-visible) {
-    outline: none;
-}
-
-/* 2. Respect OS-level motion sensitivity settings */
+/* A11y: Respect OS-level motion sensitivity settings */
 @media (prefers-reduced-motion: reduce) {
-    .cdlv-auth-step {
+    .animate-enter {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
@@ -3608,7 +3608,6 @@ display: inline-block;
         transform: none !important;
     }
 }
-
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
