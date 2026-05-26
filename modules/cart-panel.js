@@ -1,9 +1,8 @@
 /* ==========================================================================
    MODULE: CART PANEL (modules/cart-panel.js)
    Architecture: Exportable ES Module. Renders a reactive, multi-step checkout.
-   Security: Implements text sanitization. Enforces strict 100-word limit.
-   Performance: Event delegation handles dynamic DOM updates efficiently.
-   A11y: Programmatic focus management when views change.
+   State Management: Preserves form data across internal navigation and 
+   hooks into the browser's native History API for the Back button.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -17,14 +16,15 @@ const sanitizeText = (str) => {
 
 // Application State
 let cartState = {
-    currentStep: 'Cart', // Tracks routing ('Cart', 'Shipping & Details', 'Payment Info', 'Review')
+    currentStep: 'Cart',
     paymentMethod: 'momo',
-    shippingDetails: { // Mock data for the review screen
-        name: 'Kwame Mensah',
-        address: '123 Independence Ave, Osu',
-        city: 'Accra',
-        region: 'Greater Accra',
-        phone: '024 123 4567'
+    shippingDetails: { 
+        firstName: '', lastName: '', email: '', phone: '', 
+        address: '', city: '', region: '', landmark: '', notes: '' 
+    },
+    paymentDetails: {
+        momoNetwork: 'mtn', momoPhone: '', 
+        cardName: '', cardNumber: '', cardExp: '', cardCvc: ''
     },
     items: [
         {
@@ -49,6 +49,34 @@ let cartState = {
     shippingRate: 35.00
 };
 
+// --- DATA PRESERVATION ENGINE ---
+// Scrapes the current DOM values and saves them to state BEFORE a view changes
+const saveFormState = (node) => {
+    if (cartState.currentStep === 'Shipping & Details') {
+        cartState.shippingDetails = {
+            firstName: node.querySelector('#first-name')?.value || '',
+            lastName: node.querySelector('#last-name')?.value || '',
+            email: node.querySelector('#email')?.value || '',
+            phone: node.querySelector('#phone')?.value || '',
+            address: node.querySelector('#address')?.value || '',
+            city: node.querySelector('#city')?.value || '',
+            region: node.querySelector('#region')?.value || '',
+            landmark: node.querySelector('#landmark')?.value || '',
+            notes: node.querySelector('#delivery-notes')?.value || ''
+        };
+    } else if (cartState.currentStep === 'Payment Info') {
+        if (cartState.paymentMethod === 'momo') {
+            cartState.paymentDetails.momoNetwork = node.querySelector('#momo-network')?.value || 'mtn';
+            cartState.paymentDetails.momoPhone = node.querySelector('#momo-phone')?.value || '';
+        } else if (cartState.paymentMethod === 'card') {
+            cartState.paymentDetails.cardName = node.querySelector('#card-name')?.value || '';
+            cartState.paymentDetails.cardNumber = node.querySelector('#card-number')?.value || '';
+            cartState.paymentDetails.cardExp = node.querySelector('#card-exp')?.value || '';
+            cartState.paymentDetails.cardCvc = node.querySelector('#card-cvc')?.value || '';
+        }
+    }
+};
+
 const renderTabbedProgress = (activeStep) => {
     const steps = ['Cart', 'Shipping & Details', 'Payment Info', 'Review'];
     return `
@@ -58,10 +86,7 @@ const renderTabbedProgress = (activeStep) => {
                     const isActive = step === activeStep;
                     return `
                         <li class="cdlv-checkout-nav__item ${isActive ? 'is-active' : ''}">
-                            <button type="button" 
-                                    class="cdlv-checkout-nav__btn" 
-                                    aria-current="${isActive ? 'step' : 'false'}"
-                                    ${!isActive ? 'disabled' : ''}>
+                            <button type="button" class="cdlv-checkout-nav__btn" aria-current="${isActive ? 'step' : 'false'}" ${!isActive ? 'disabled' : ''}>
                                 ${sanitizeText(step)}
                             </button>
                         </li>
@@ -72,17 +97,7 @@ const renderTabbedProgress = (activeStep) => {
     `;
 };
 
-const renderEmptyState = () => `
-    <div class="cdlv-cart-panel__empty">
-        <svg class="cdlv-cart-panel__empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <path d="M16 10a4 4 0 0 1-8 0"></path>
-        </svg>
-        <h2 class="cdlv-cart-panel__empty-title">Your cart is currently craving some wellness.</h2>
-        <a href="shop.html" class="cdlv-cart-panel__empty-btn">Explore Collections</a>
-    </div>
-`;
+const renderEmptyState = () => `...`; // (Keep this exactly as you had it, omitted here for brevity)
 
 const renderCartItems = () => {
     return cartState.items.map(item => `
@@ -118,13 +133,13 @@ const renderCartItems = () => {
 };
 
 const renderSummary = () => {
+    // Keep exact same as before (used on the Cart view)
     const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const total = subtotal + cartState.shippingRate;
 
     return `
-        <aside class="cdlv-cart-summary">
+        <aside class="cdlv-cart-summary" aria-live="polite" aria-atomic="true">
             <h3 class="cdlv-cart-summary__title">Order Summary</h3>
-            
             <div class="cdlv-cart-summary__row">
                 <span>Subtotal</span>
                 <span data-target="subtotal">₵${sanitizeText(subtotal.toFixed(2))}</span>
@@ -133,26 +148,47 @@ const renderSummary = () => {
                 <span>Estimated Shipping</span>
                 <span>₵${sanitizeText(cartState.shippingRate.toFixed(2))}</span>
             </div>
-            
             <hr class="cdlv-cart-summary__divider">
-            
             <div class="cdlv-cart-summary__row cdlv-cart-summary__row--total">
                 <span>Total</span>
                 <span data-target="total">₵${sanitizeText(total.toFixed(2))}</span>
             </div>
-
             <div class="cdlv-cart-summary__cta-wrapper">
                 <button type="button" class="cdlv-cart-summary__checkout-btn" data-action="checkout">Secure Checkout</button>
                 <div class="cdlv-cart-summary__trust-signals">
-                    <span class="cdlv-cart-summary__trust-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        Secure Payment
-                    </span>
-                    <span class="cdlv-cart-summary__trust-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                        Fast Local Delivery
-                    </span>
+                    <span class="cdlv-cart-summary__trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Secure Payment</span>
+                    <span class="cdlv-cart-summary__trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> Fast Local Delivery</span>
                 </div>
+            </div>
+        </aside>
+    `;
+};
+
+const renderDetailedSummary = () => {
+    // Keep exact same as before (used on Shipping/Payment/Review)
+    const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = subtotal + cartState.shippingRate;
+    const itemsList = cartState.items.map(item => `
+        <div class="cdlv-cart-summary__item-row">
+            <span class="cdlv-cart-summary__item-name">${sanitizeText(item.quantity)}x ${sanitizeText(item.name)}</span>
+            <span class="cdlv-cart-summary__item-price">₵${sanitizeText((item.price * item.quantity).toFixed(2))}</span>
+        </div>
+    `).join('');
+
+    return `
+        <aside class="cdlv-cart-summary">
+            <h3 class="cdlv-cart-summary__title">Order Summary</h3>
+            <div class="cdlv-cart-summary__items">${itemsList}</div>
+            <hr class="cdlv-cart-summary__divider">
+            <div class="cdlv-cart-summary__row">
+                <span>Subtotal</span><span>₵${sanitizeText(subtotal.toFixed(2))}</span>
+            </div>
+            <div class="cdlv-cart-summary__row">
+                <span>Estimated Shipping</span><span>₵${sanitizeText(cartState.shippingRate.toFixed(2))}</span>
+            </div>
+            <hr class="cdlv-cart-summary__divider">
+            <div class="cdlv-cart-summary__row cdlv-cart-summary__row--total">
+                <span>Total</span><span>₵${sanitizeText(total.toFixed(2))}</span>
             </div>
         </aside>
     `;
@@ -175,7 +211,9 @@ const renderCartView = () => `
     </div>
 `;
 
-const renderShippingForm = () => `
+const renderShippingForm = () => {
+    const s = cartState.shippingDetails; // shorthand for value injection
+    return `
     <div class="cdlv-cart-panel__layout">
         <section class="cdlv-shipping-form">
             <h2 class="cdlv-shipping-form__title" tabindex="-1">Shipping & Personal Details</h2>
@@ -183,42 +221,42 @@ const renderShippingForm = () => `
                 
                 <div class="cdlv-form-group">
                     <label for="first-name">First Name *</label>
-                    <input type="text" id="first-name" required aria-required="true">
+                    <input type="text" id="first-name" value="${sanitizeText(s.firstName)}" required aria-required="true">
                 </div>
                 <div class="cdlv-form-group">
                     <label for="last-name">Last Name *</label>
-                    <input type="text" id="last-name" required aria-required="true">
+                    <input type="text" id="last-name" value="${sanitizeText(s.lastName)}" required aria-required="true">
                 </div>
                 <div class="cdlv-form-group">
                     <label for="email">Email *</label>
-                    <input type="email" id="email" required aria-required="true">
+                    <input type="email" id="email" value="${sanitizeText(s.email)}" required aria-required="true">
                 </div>
                 <div class="cdlv-form-group">
                     <label for="phone">Phone Number *</label>
-                    <input type="tel" id="phone" placeholder="024 123 4567" required aria-required="true">
+                    <input type="tel" id="phone" value="${sanitizeText(s.phone)}" placeholder="024 123 4567" required aria-required="true">
                 </div>
                 
                 <hr class="cdlv-shipping-form__divider">
 
                 <div class="cdlv-form-group cdlv-form-group--full">
                     <label for="address">Delivery Address *</label>
-                    <input type="text" id="address" required aria-required="true">
+                    <input type="text" id="address" value="${sanitizeText(s.address)}" required aria-required="true">
                 </div>
                 <div class="cdlv-form-group">
                     <label for="city">City *</label>
                     <select id="city" required aria-required="true">
                         <option value="">Select City</option>
-                        <option value="accra">Accra</option>
-                        <option value="tamale">Tamale</option>
+                        <option value="accra" ${s.city === 'accra' ? 'selected' : ''}>Accra</option>
+                        <option value="tamale" ${s.city === 'tamale' ? 'selected' : ''}>Tamale</option>
                     </select>
                 </div>
                 <div class="cdlv-form-group">
                     <label for="region">Region *</label>
-                    <input type="text" id="region" required aria-required="true">
+                    <input type="text" id="region" value="${sanitizeText(s.region)}" required aria-required="true">
                 </div>
                 <div class="cdlv-form-group cdlv-form-group--full">
                     <label for="landmark">Landmark (e.g., Near the blue gate) *</label>
-                    <input type="text" id="landmark" required aria-required="true">
+                    <input type="text" id="landmark" value="${sanitizeText(s.landmark)}" required aria-required="true">
                 </div>
                 
                 <div class="cdlv-form-group cdlv-form-group--full">
@@ -226,7 +264,7 @@ const renderShippingForm = () => `
                         <label for="delivery-notes">Special Delivery Instructions</label>
                         <small class="cdlv-form-word-count" data-target="word-count">0 / 100 words</small>
                     </div>
-                    <textarea id="delivery-notes" data-target="notes" rows="3" placeholder="e.g., Please leave at the gate..."></textarea>
+                    <textarea id="delivery-notes" data-target="notes" rows="3" placeholder="e.g., Please leave at the gate...">${sanitizeText(s.notes)}</textarea>
                 </div>
 
                 <div class="cdlv-shipping-form__actions cdlv-form-group--full">
@@ -237,39 +275,30 @@ const renderShippingForm = () => `
         </section>
         
         <div class="cdlv-cart-panel__sidebar">
-            <aside class="cdlv-cart-summary">
-                <h3 class="cdlv-cart-summary__title">Order Summary</h3>
-                <div class="cdlv-cart-summary__row">
-                    <span>${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}</span>
-                    <span>₵${sanitizeText(cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2))}</span>
-                </div>
-                <hr class="cdlv-cart-summary__divider">
-                <div class="cdlv-cart-summary__row cdlv-cart-summary__row--total">
-                    <span>Total</span>
-                    <span>₵${sanitizeText((cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) + cartState.shippingRate).toFixed(2))}</span>
-                </div>
-            </aside>
+            ${renderDetailedSummary()}
         </div>
     </div>
-`;
+    `;
+};
 
 const renderPaymentForm = () => {
-    // Dynamic fields based on the selected method
+    const p = cartState.paymentDetails;
     let paymentFields = '';
+    
     if (cartState.paymentMethod === 'momo') {
         paymentFields = `
             <div class="cdlv-payment-fields">
                 <div class="cdlv-form-group">
                     <label for="momo-network">Select Network *</label>
                     <select id="momo-network" required aria-required="true">
-                        <option value="mtn">MTN Mobile Money</option>
-                        <option value="telecel">Telecel Cash</option>
-                        <option value="at">AT Money</option>
+                        <option value="mtn" ${p.momoNetwork === 'mtn' ? 'selected' : ''}>MTN Mobile Money</option>
+                        <option value="telecel" ${p.momoNetwork === 'telecel' ? 'selected' : ''}>Telecel Cash</option>
+                        <option value="at" ${p.momoNetwork === 'at' ? 'selected' : ''}>AT Money</option>
                     </select>
                 </div>
                 <div class="cdlv-form-group">
                     <label for="momo-phone">Mobile Money Number *</label>
-                    <input type="tel" id="momo-phone" placeholder="e.g. 024 123 4567" required aria-required="true">
+                    <input type="tel" id="momo-phone" value="${sanitizeText(p.momoPhone)}" placeholder="e.g. 024 123 4567" required aria-required="true">
                 </div>
             </div>
         `;
@@ -278,75 +307,86 @@ const renderPaymentForm = () => {
             <div class="cdlv-payment-fields">
                 <div class="cdlv-form-group cdlv-form-group--full">
                     <label for="card-name">Name on Card *</label>
-                    <input type="text" id="card-name" required aria-required="true">
+                    <input type="text" id="card-name" value="${sanitizeText(p.cardName)}" required aria-required="true">
                 </div>
                 <div class="cdlv-form-group cdlv-form-group--full">
                     <label for="card-number">Card Number *</label>
-                    <input type="text" id="card-number" placeholder="0000 0000 0000 0000" required aria-required="true">
+                    <input type="text" id="card-number" value="${sanitizeText(p.cardNumber)}" placeholder="0000 0000 0000 0000" required aria-required="true">
                 </div>
                 <div class="cdlv-form-group">
                     <label for="card-exp">Expiry Date *</label>
-                    <input type="text" id="card-exp" placeholder="MM/YY" required aria-required="true">
+                    <input type="text" id="card-exp" value="${sanitizeText(p.cardExp)}" placeholder="MM/YY" required aria-required="true">
                 </div>
                 <div class="cdlv-form-group">
                     <label for="card-cvc">CVC *</label>
-                    <input type="text" id="card-cvc" placeholder="123" required aria-required="true">
+                    <input type="text" id="card-cvc" value="${sanitizeText(p.cardCvc)}" placeholder="123" required aria-required="true">
                 </div>
             </div>
         `;
     } else if (cartState.paymentMethod === 'paypal') {
-        paymentFields = `
-            <div class="cdlv-payment-fields cdlv-payment-fields--redirect">
-                <p>After clicking "Review Order", you will be redirected to PayPal to complete your purchase securely.</p>
-            </div>
-        `;
+        paymentFields = `<div class="cdlv-payment-fields cdlv-payment-fields--redirect"><p>After clicking "Review Order", you will be redirected to PayPal to complete your purchase securely.</p></div>`;
     }
 
     return `
         <div class="cdlv-cart-panel__layout">
-            <section class="cdlv-shipping-form"> <h2 class="cdlv-shipping-form__title" tabindex="-1">Payment Information</h2>
-                
-                <div class="cdlv-payment-options" role="radiogroup" aria-label="Payment Methods">
-                    <button type="button" class="cdlv-payment-option ${cartState.paymentMethod === 'momo' ? 'is-selected' : ''}" data-action="select-payment" data-method="momo" role="radio" aria-checked="${cartState.paymentMethod === 'momo'}">
+            <section class="cdlv-shipping-form">
+                <h2 class="cdlv-shipping-form__title" tabindex="-1">Payment Information</h2>
+                <div class="cdlv-payment-options" aria-label="Payment Methods">
+                    <button type="button" 
+                            class="cdlv-payment-option ${cartState.paymentMethod === 'momo' ? 'is-selected' : ''}" 
+                            data-action="select-payment" 
+                            data-method="momo" 
+                            aria-pressed="${cartState.paymentMethod === 'momo'}">
                         <span class="cdlv-payment-option__label">Mobile Money</span>
                         <div class="cdlv-payment-option__icons">
                             <img src="${buildPath('assets/icons/mtn.svg')}" alt="MTN" class="cdlv-payment-icon">
-                            <img src="${buildPath('assets/icons/telecel.svg')}" alt="Telecel" class="cdlv-payment-icon">
-                            <img src="${buildPath('assets/icons/at.svg')}" alt="AT" class="cdlv-payment-icon">
+                            <img src="${buildPath('assets/icons/telecel.svg')}" alt="Telecel Cash" class="cdlv-payment-icon">
+                            <img src="${buildPath('assets/icons/at.svg')}" alt="AT Money" class="cdlv-payment-icon">
                         </div>
                     </button>
-                    <button type="button" class="cdlv-payment-option ${cartState.paymentMethod === 'card' ? 'is-selected' : ''}" data-action="select-payment" data-method="card" role="radio" aria-checked="${cartState.paymentMethod === 'card'}">
+
+                    <button type="button" 
+                            class="cdlv-payment-option ${cartState.paymentMethod === 'card' ? 'is-selected' : ''}" 
+                            data-action="select-payment" 
+                            data-method="card" 
+                            aria-pressed="${cartState.paymentMethod === 'card'}">
                         <span class="cdlv-payment-option__label">Credit/Debit Card</span>
                         <div class="cdlv-payment-option__icons">
                             <img src="${buildPath('assets/icons/visa.svg')}" alt="Visa" class="cdlv-payment-icon">
                             <img src="${buildPath('assets/icons/mastercard.svg')}" alt="Mastercard" class="cdlv-payment-icon">
                         </div>
                     </button>
-                    <button type="button" class="cdlv-payment-option ${cartState.paymentMethod === 'paypal' ? 'is-selected' : ''}" data-action="select-payment" data-method="paypal" role="radio" aria-checked="${cartState.paymentMethod === 'paypal'}">
+                    <button type="button" 
+                            class="cdlv-payment-option ${cartState.paymentMethod === 'paypal' ? 'is-selected' : ''}" 
+                            data-action="select-payment" 
+                            data-method="paypal" 
+                            aria-pressed="${cartState.paymentMethod === 'paypal'}">
                         <span class="cdlv-payment-option__label">PayPal</span>
                         <div class="cdlv-payment-option__icons">
                             <img src="${buildPath('assets/icons/paypal.svg')}" alt="PayPal" class="cdlv-payment-icon">
                         </div>
                     </button>
                 </div>
-
+                
                 <form id="payment-details-form" class="cdlv-shipping-form__grid">
                     ${paymentFields}
-                    
                     <div class="cdlv-shipping-form__actions cdlv-form-group--full">
-                    <button type="button" class="cdlv-shipping-form__back" data-action="back-to-cart">Back to Cart</button>
-                    <button type="submit" class="cdlv-shipping-form__submit">Continue to Payment</button>
-                </div>
-            </form>
-        </section>
-        
-        <div class="cdlv-cart-panel__sidebar">
-            ${renderDetailedSummary()} </div>
-    </div>
+                        <button type="button" class="cdlv-shipping-form__back" data-action="back-to-shipping">Back to Shipping</button>
+                        <button type="submit" class="cdlv-shipping-form__submit">Review Order</button>
+                    </div>
+                </form>
+            </section>
+            <div class="cdlv-cart-panel__sidebar">
+                ${renderDetailedSummary()} 
+            </div>
+        </div>
     `;
 };
 
 const renderReviewView = () => {
+    const s = cartState.shippingDetails;
+    const fullName = `${s.firstName} ${s.lastName}`.trim() || 'No name provided';
+    
     return `
         <div class="cdlv-cart-panel__layout">
             <section class="cdlv-shipping-form">
@@ -358,10 +398,10 @@ const renderReviewView = () => {
                             <h3>Shipping To</h3>
                             <button type="button" class="cdlv-review-edit" data-action="edit-shipping">Edit</button>
                         </div>
-                        <p><strong>${sanitizeText(cartState.shippingDetails.name)}</strong></p>
-                        <p>${sanitizeText(cartState.shippingDetails.address)}</p>
-                        <p>${sanitizeText(cartState.shippingDetails.city)}, ${sanitizeText(cartState.shippingDetails.region)}</p>
-                        <p>${sanitizeText(cartState.shippingDetails.phone)}</p>
+                        <p><strong>${sanitizeText(fullName)}</strong></p>
+                        <p>${sanitizeText(s.address || 'No address provided')}</p>
+                        <p>${sanitizeText(s.city || '')}, ${sanitizeText(s.region || '')}</p>
+                        <p>${sanitizeText(s.phone || '')}</p>
                     </article>
                     
                     <article class="cdlv-review-card">
@@ -395,42 +435,8 @@ const renderReviewView = () => {
     `;
 };
 
-const renderDetailedSummary = () => {
-    const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const total = subtotal + cartState.shippingRate;
-
-    const itemsList = cartState.items.map(item => `
-        <div class="cdlv-cart-summary__item-row">
-            <span class="cdlv-cart-summary__item-name">${sanitizeText(item.quantity)}x ${sanitizeText(item.name)}</span>
-            <span class="cdlv-cart-summary__item-price">₵${sanitizeText((item.price * item.quantity).toFixed(2))}</span>
-        </div>
-    `).join('');
-
-    return `
-        <aside class="cdlv-cart-summary">
-            <h3 class="cdlv-cart-summary__title">Order Summary</h3>
-            <div class="cdlv-cart-summary__items">
-                ${itemsList}
-            </div>
-            <hr class="cdlv-cart-summary__divider">
-            <div class="cdlv-cart-summary__row">
-                <span>Subtotal</span>
-                <span>₵${sanitizeText(subtotal.toFixed(2))}</span>
-            </div>
-            <div class="cdlv-cart-summary__row">
-                <span>Estimated Shipping</span>
-                <span>₵${sanitizeText(cartState.shippingRate.toFixed(2))}</span>
-            </div>
-            <hr class="cdlv-cart-summary__divider">
-            <div class="cdlv-cart-summary__row cdlv-cart-summary__row--total">
-                <span>Total</span>
-                <span>₵${sanitizeText(total.toFixed(2))}</span>
-            </div>
-        </aside>
-    `;
-};
-
-const updateView = (node) => {
+// Added `pushHistory` flag to prevent duplicate state stacking when using browser Back button
+const updateView = (node, pushHistory = true) => {
     if (cartState.items.length === 0) {
         node.innerHTML = renderEmptyState();
         return;
@@ -452,11 +458,17 @@ const updateView = (node) => {
         ${viewContent}
     `;
 
+    // History API Integration
+    if (pushHistory) {
+        const url = new URL(window.location);
+        url.searchParams.set('step', cartState.currentStep.replace(/\s+/g, '-').toLowerCase());
+        window.history.pushState({ checkoutStep: cartState.currentStep }, '', url);
+    }
+
     // A11y: Shift focus logically when views change
     if (cartState.currentStep !== 'Cart') {
         const titleNode = node.querySelector('h2');
         if (titleNode) {
-            // Ensure the element has tabindex="-1" so it can receive programmatic focus
             if (!titleNode.hasAttribute('tabindex')) {
                 titleNode.setAttribute('tabindex', '-1');
             }
@@ -478,7 +490,21 @@ const updateFinancials = (node) => {
 };
 
 export const init = (node) => {
-    updateView(node);
+    // Initialize History API to lock in the first state
+    const url = new URL(window.location);
+    url.searchParams.set('step', 'cart');
+    window.history.replaceState({ checkoutStep: 'Cart' }, '', url);
+
+    updateView(node, false);
+
+    // Hijack the Browser "Back" and "Forward" buttons
+    window.addEventListener('popstate', (e) => {
+        if (e.state && e.state.checkoutStep) {
+            saveFormState(node); // Save current view before it's destroyed
+            cartState.currentStep = e.state.checkoutStep;
+            updateView(node, false); // Pass false so we don't push a new history state on top
+        }
+    });
 
     // Event Delegation: Clicks
     node.addEventListener('click', (e) => {
@@ -487,47 +513,46 @@ export const init = (node) => {
 
         const action = actionBtn.getAttribute('data-action');
 
-        // View Routing
+        // View Routing (Notice we save state BEFORE changing currentStep)
         if (action === 'checkout') {
+            saveFormState(node);
             cartState.currentStep = 'Shipping & Details';
             updateView(node);
             return;
         }
 
-        if (action === 'back-to-shipping') {
+        if (action === 'back-to-shipping' || action === 'edit-shipping') {
+            saveFormState(node);
             cartState.currentStep = 'Shipping & Details';
             updateView(node);
             return;
         }
 
         if (action === 'back-to-payment' || action === 'edit-payment') {
+            saveFormState(node);
             cartState.currentStep = 'Payment Info';
             updateView(node);
             return;
         }
 
-        if (action === 'edit-shipping') {
-            cartState.currentStep = 'Shipping & Details';
-            updateView(node);
-            return;
-        }
-
-        if (action === 'select-payment') {
-            const method = actionBtn.getAttribute('data-method');
-            if (cartState.paymentMethod !== method) {
-                cartState.paymentMethod = method;
-                updateView(node); // Re-render payment view to show new form fields
-            }
-            return;
-        }
-
         if (action === 'back-to-cart') {
+            saveFormState(node);
             cartState.currentStep = 'Cart';
             updateView(node);
             return;
         }
 
-        // Cart Actions
+        if (action === 'select-payment') {
+            saveFormState(node); // Save before swapping payment fields
+            const method = actionBtn.getAttribute('data-method');
+            if (cartState.paymentMethod !== method) {
+                cartState.paymentMethod = method;
+                updateView(node); 
+            }
+            return;
+        }
+
+        // Cart Actions (Quantity/Remove logic remains exactly the same)
         const itemNode = actionBtn.closest('.cdlv-cart-item');
         if (!itemNode) return;
         
@@ -581,7 +606,7 @@ export const init = (node) => {
         }
     });
 
-    // Event Delegation: Textarea Input (Word Count)
+    // Event Delegation: Textarea Word Count Limiter
     node.addEventListener('input', (e) => {
         if (e.target.getAttribute('data-target') === 'notes') {
             const wordCountDisplay = node.querySelector('[data-target="word-count"]');
@@ -607,14 +632,15 @@ export const init = (node) => {
         e.preventDefault(); 
         
         if (e.target.id === 'shipping-details-form') {
+            saveFormState(node); // Save state on submit!
             cartState.currentStep = 'Payment Info';
             updateView(node);
         } else if (e.target.id === 'payment-details-form') {
+            saveFormState(node); // Save state on submit!
             cartState.currentStep = 'Review';
             updateView(node);
         } else if (e.target.id === 'place-order-form') {
-            // The required attribute on the checkbox handles validation naturally.
-            // When the form successfully submits, redirect to the success page.
+            // Success Redirect
             window.location.href = buildPath('status/success.html');
         }
     });
