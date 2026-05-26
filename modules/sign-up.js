@@ -1,9 +1,5 @@
 /* ==========================================================================
    MODULE: MULTI-STEP SIGN-UP (modules/sign-up.js)
-   Architecture: Exportable ES Module acting as an internal state machine.
-   Security: DOMPurify-style text sanitization for XSS prevention.
-   Dependencies: Relies on `utils/components.js` for initialization and 
-   your global .animate-enter class for smooth vertical transitions.
    ========================================================================== */
 
 const sanitizeText = (str) => {
@@ -13,30 +9,50 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const isValidPassword = (password) => /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
+// --- VALIDATION ENGINE ---
+const validateName = (val) => {
+    const trimmed = val.trim();
+    if (!trimmed) return "Please enter your name.";
+    if (!/^[\p{L}\s'.-]+$/u.test(trimmed)) return "Please use only letters, spaces, or hyphens.";
+    if (trimmed.split(/\s+/).length < 2) return "Please enter your full name (first and last).";
+    return null;
+};
+
+const validateEmail = (val) => {
+    const trimmed = val.trim();
+    if (!trimmed) return "An email address is required for your account.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return "Please enter a valid email address (e.g., you@example.com).";
+    return null;
+};
+
+const validatePassword = (val) => {
+    if (val.length < 8) return "Your password must be at least 8 characters long.";
+    if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d\S]{8,}$/.test(val)) return "Please include at least one letter and one number for security.";
+    return null;
+};
+
+const toggleError = (inputEl, errorEl, errorMessage) => {
+    if (errorMessage) {
+        errorEl.textContent = errorMessage; errorEl.classList.add('is-visible'); inputEl.classList.add('has-error');
+        return true;
+    } else {
+        errorEl.textContent = ''; errorEl.classList.remove('is-visible'); inputEl.classList.remove('has-error');
+        return false;
+    }
+};
 
 const defaultConfig = {
     step1: {
-        title: "Begin Your Ritual",
-        subtitle: "Create an account to curate your wellness journeys, track seasonal honey harvests, and manage your subscriptions.",
-        namePlaceholder: "Name",
-        emailPlaceholder: "you@example.com",
-        passwordPlaceholder: "Minimum 8 characters",
+        title: "Begin Your Ritual", subtitle: "Create an account to curate your wellness journeys, track seasonal honey harvests, and manage your subscriptions.",
         buttonText: "Continue to Verification"
     },
     step2: {
-        title: "Verify Your Email",
-        subtitle: "To secure your personal wellness dashboard, we have sent a 4-digit verification token to your inbox. Please enter it below.",
-        buttonText: "Verify & Activate Account",
-        digitCount: 4
+        title: "Verify Your Email", subtitle: "To secure your personal wellness dashboard, we have sent a 4-digit verification token to your inbox. Please enter it below.",
+        buttonText: "Verify & Activate Account", digitCount: 4
     },
     step3: {
-        title: "Welcome to Casa De La Vida",
-        subtitle: "Your account is fully verified and secure. Your personal canvas is ready. From your dashboard, you can now manage your subscription frequencies, save your preferred artisanal tea rituals, and access exclusive wellness consultations.",
-        buttonText: "Enter Your Dashboard",
-        redirectUrl: "account/index.html",
-        countdownSeconds: 5
+        title: "Welcome to the House of Life", subtitle: "Your account is fully verified and secure. Your personal canvas is ready. From your dashboard, you can now manage your subscription frequencies, save your preferred artisanal tea rituals, and access exclusive wellness consultations.",
+        buttonText: "Enter Your Dashboard", redirectUrl: "account/index.html", countdownSeconds: 5
     }
 };
 
@@ -44,41 +60,39 @@ export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     let userEmailCache = "";
 
-    // --- STATE MACHINE ROUTERS ---
-
     const mountStep1 = () => {
         const conf = config.step1;
-        // Using global .animate-enter class ensures the "floating up" animation triggers on injection
         node.innerHTML = `
-            <div class="cdlv-sign-up cdlv-auth-step animate-enter">
-                <header class="cdlv-sign-up__header">
-                    <h2 class="cdlv-sign-up__title">${sanitizeText(conf.title)}</h2>
-                    <p class="cdlv-sign-up__subtitle">${sanitizeText(conf.subtitle)}</p>
+            <div class="cdlv-auth-step animate-enter">
+                <header class="cdlv-auth__header">
+                    <h2 class="cdlv-auth__title">${sanitizeText(conf.title)}</h2>
+                    <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
                 </header>
                 
-                <form class="cdlv-sign-up__form" id="cdlv-signup-form" novalidate>
-                    <div class="cdlv-sign-up__group">
-                        <label for="signup-name" class="visually-hidden">Full Name</label>
-                        <input type="text" id="signup-name" class="cdlv-sign-up__input" placeholder="${sanitizeText(conf.namePlaceholder)}" required aria-describedby="error-signup-name">
-                        <span class="cdlv-auth__error" id="error-signup-name" aria-live="polite"></span>
-                    </div>
-                    <div class="cdlv-sign-up__group">
-                        <label for="signup-email" class="visually-hidden">Email Address</label>
-                        <input type="email" id="signup-email" class="cdlv-sign-up__input" placeholder="${sanitizeText(conf.emailPlaceholder)}" required aria-describedby="error-signup-email">
-                        <span class="cdlv-auth__error" id="error-signup-email" aria-live="polite"></span>
-                    </div>
-                    <div class="cdlv-sign-up__group">
-                        <label for="signup-password" class="visually-hidden">Create Password</label>
-                        <input type="password" id="signup-password" class="cdlv-sign-up__input" placeholder="${sanitizeText(conf.passwordPlaceholder)}" required aria-describedby="error-signup-password">
-                        <small class="cdlv-sign-up__hint">Intentional security: Passwords must contain letters and numbers to protect your account data.</small>
-                        <span class="cdlv-auth__error" id="error-signup-password" aria-live="polite"></span>
-                    </div>
-                    <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
-                </form>
-
-                <footer class="cdlv-sign-up__footer">
-                    <p>Already have an account? <a href="login.html" class="cdlv-sign-up__link">Log In</a></p>
-                </footer>
+                <div class="cdlv-auth__panel">
+                    <form class="cdlv-auth__form" id="cdlv-signup-form" novalidate>
+                        <div class="cdlv-auth__group">
+                            <label for="signup-name" class="visually-hidden">Full Name</label>
+                            <input type="text" id="signup-name" class="cdlv-auth__input" placeholder="Name" required minlength="2" maxlength="50" autocomplete="name" aria-describedby="error-signup-name">
+                            <span class="cdlv-auth__error" id="error-signup-name" aria-live="polite"></span>
+                        </div>
+                        <div class="cdlv-auth__group">
+                            <label for="signup-email" class="visually-hidden">Email Address</label>
+                            <input type="email" id="signup-email" class="cdlv-auth__input" placeholder="you@example.com" required autocomplete="email" aria-describedby="error-signup-email">
+                            <span class="cdlv-auth__error" id="error-signup-email" aria-live="polite"></span>
+                        </div>
+                        <div class="cdlv-auth__group">
+                            <label for="signup-password" class="visually-hidden">Create Password</label>
+                            <input type="password" id="signup-password" class="cdlv-auth__input" placeholder="Minimum 8 characters" required minlength="8" autocomplete="new-password" aria-describedby="error-signup-password">
+                            <small class="cdlv-auth__hint">Intentional security: Passwords must contain letters and numbers to protect your account data.</small>
+                            <span class="cdlv-auth__error" id="error-signup-password" aria-live="polite"></span>
+                        </div>
+                        <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
+                    </form>
+                    <footer class="cdlv-auth__footer">
+                        <p>Already have an account? <a href="login.html" class="cdlv-auth__link">Log In</a></p>
+                    </footer>
+                </div>
             </div>
         `;
         bindStep1Events();
@@ -87,25 +101,28 @@ export const init = (node, customConfig = {}) => {
     const mountStep2 = () => {
         const conf = config.step2;
         const inputsHTML = Array.from({ length: conf.digitCount }).map((_, i) => `
-            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" 
+            <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" required
                    class="cdlv-2fa__input-box" aria-label="Digit ${i + 1}" data-index="${i}">
         `).join('');
 
         node.innerHTML = `
-            <div class="cdlv-2fa cdlv-auth-step animate-enter">
-                <header class="cdlv-2fa__header">
-                    <h2 class="cdlv-2fa__title">${sanitizeText(conf.title)}</h2>
-                    <p class="cdlv-2fa__subtitle">${sanitizeText(conf.subtitle)}</p>
+            <div class="cdlv-auth-step animate-enter">
+                <header class="cdlv-auth__header">
+                    <h2 class="cdlv-auth__title">${sanitizeText(conf.title)}</h2>
+                    <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
                 </header>
-                <form class="cdlv-sign-up__form" id="cdlv-2fa-form" novalidate>
-                    <div class="cdlv-2fa__digits" id="cdlv-2fa-container">${inputsHTML}</div>
-                    <span class="cdlv-auth__error" id="error-2fa-validation" aria-live="polite"></span>
-                    <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
-                </form>
-                <footer class="cdlv-2fa__footer">
-                    <p>Didn't receive the code? <button type="button" id="resend-code" class="cdlv-2fa__btn--resend">Resend Token</button></p>
-                    <p>or <button type="button" id="change-email" class="cdlv-2fa__link--change">Change Email Address</button></p>
-                </footer>
+
+                <div class="cdlv-auth__panel">
+                    <form class="cdlv-auth__form" id="cdlv-2fa-form" novalidate>
+                        <div class="cdlv-2fa__digits" id="cdlv-2fa-container">${inputsHTML}</div>
+                        <span class="cdlv-auth__error" id="error-2fa-validation" aria-live="polite"></span>
+                        <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
+                    </form>
+                    <footer class="cdlv-auth__footer">
+                        <p>Didn't receive the code? <button type="button" id="resend-code" class="cdlv-auth__link">Resend Token</button></p>
+                        <p>or <button type="button" id="change-email" class="cdlv-auth__link" style="opacity: 0.7;">Change Email Address</button></p>
+                    </footer>
+                </div>
             </div>
         `;
         bindStep2Events();
@@ -114,8 +131,6 @@ export const init = (node, customConfig = {}) => {
     const mountStep3 = () => {
         const conf = config.step3;
         let timeLeft = conf.countdownSeconds;
-
-        // Custom Leaf/Flower Minimalist SVG Vector
         const celebrationVector = `
             <svg class="cdlv-welcome__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
                 <path d="M12 2C7 2 3 6 3 11c0 4 3 8 9 11 6-3 9-7 9-11 0-5-4-9-9-9z"></path>
@@ -124,29 +139,25 @@ export const init = (node, customConfig = {}) => {
         `;
 
         node.innerHTML = `
-            <div class="cdlv-welcome cdlv-auth-step animate-enter">
-                <header class="cdlv-sign-up__header">
+            <div class="cdlv-auth-step cdlv-auth-step--centered animate-enter">
+                <header class="cdlv-auth__header">
                     ${celebrationVector}
                     <h1 class="cdlv-welcome__title">${sanitizeText(conf.title)}</h1>
-                    <p class="cdlv-sign-up__subtitle">${sanitizeText(conf.subtitle)}</p>
+                    <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
                 </header>
-                
-                <a href="${sanitizeText(conf.redirectUrl)}" id="cdlv-dashboard-redirect" class="cdlv-hero__btn cdlv-hero__btn--primary cdlv-welcome__btn">
-                    ${sanitizeText(conf.buttonText)} 
-                    <span class="cdlv-welcome__countdown">(Redirecting in ${timeLeft}s...)</span>
+                <a href="${sanitizeText(conf.redirectUrl)}" class="cdlv-hero__btn cdlv-hero__btn--primary cdlv-welcome__btn">
+                    ${sanitizeText(conf.buttonText)} <span class="cdlv-welcome__countdown">(Redirecting in ${timeLeft}s...)</span>
                 </a>
             </div>
         `;
 
-        // Countdown Timer Logic
         const countdownSpan = node.querySelector('.cdlv-welcome__countdown');
-        
         const countdownInterval = setInterval(() => {
             timeLeft -= 1;
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
                 countdownSpan.textContent = "(Redirecting...)";
-                window.location.href = conf.redirectUrl; // Fires the absolute redirect
+                window.location.href = conf.redirectUrl;
             } else {
                 countdownSpan.textContent = `(Redirecting in ${timeLeft}s...)`;
             }
@@ -157,23 +168,29 @@ export const init = (node, customConfig = {}) => {
 
     const bindStep1Events = () => {
         const form = node.querySelector('#cdlv-signup-form');
-        const [nameInput, emailInput, passwordInput] = ['name', 'email', 'password'].map(id => node.querySelector(`#signup-${id}`));
-        const [nameError, emailError, passwordError] = ['name', 'email', 'password'].map(id => node.querySelector(`#error-signup-${id}`));
+        const nameInput = node.querySelector('#signup-name');
+        const emailInput = node.querySelector('#signup-email');
+        const passwordInput = node.querySelector('#signup-password');
+        
+        const nameError = node.querySelector('#error-signup-name');
+        const emailError = node.querySelector('#error-signup-email');
+        const passwordError = node.querySelector('#error-signup-password');
+
+        nameInput.addEventListener('blur', () => toggleError(nameInput, nameError, validateName(nameInput.value)));
+        emailInput.addEventListener('blur', () => toggleError(emailInput, emailError, validateEmail(emailInput.value)));
+        passwordInput.addEventListener('blur', () => toggleError(passwordInput, passwordError, validatePassword(passwordInput.value)));
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            let hasError = false;
+            
+            const isNameInvalid = toggleError(nameInput, nameError, validateName(nameInput.value));
+            const isEmailInvalid = toggleError(emailInput, emailError, validateEmail(emailInput.value));
+            const isPasswordInvalid = toggleError(passwordInput, passwordError, validatePassword(passwordInput.value));
 
-            [nameError, emailError, passwordError].forEach(el => { el.textContent = ''; el.classList.remove('is-visible'); });
-
-            if (!nameInput.value.trim()) { nameError.textContent = 'Please enter your full name.'; nameError.classList.add('is-visible'); hasError = true; }
-            if (!isValidEmail(emailInput.value.trim())) { emailError.textContent = 'Please enter a valid email address.'; emailError.classList.add('is-visible'); hasError = true; }
-            if (!isValidPassword(passwordInput.value)) { passwordError.textContent = 'Minimum 8 characters with letters and numbers required.'; passwordError.classList.add('is-visible'); hasError = true; }
-
-            if (hasError) return;
+            if (isNameInvalid || isEmailInvalid || isPasswordInvalid) return;
 
             userEmailCache = emailInput.value.trim();
-            mountStep2(); // Transition up
+            mountStep2();
         });
     };
 
@@ -199,20 +216,32 @@ export const init = (node, customConfig = {}) => {
                 numericData.split('').forEach((char, i) => { if (inputBoxes[i]) inputBoxes[i].value = char; });
                 inputBoxes[Math.min(numericData.length, config.step2.digitCount - 1)].focus();
             });
+            input.addEventListener('focus', () => {
+                errorMsg.classList.remove('is-visible');
+                inputBoxes.forEach(box => box.classList.remove('has-error'));
+            });
         });
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            errorMsg.classList.remove('is-visible');
+            
             const token = inputBoxes.map(input => input.value).join('');
 
-            if (token.length < config.step2.digitCount) {
-                errorMsg.textContent = `Please enter all ${config.step2.digitCount} digits.`;
+            if (token.length < config.step2.digitCount || !/^\d{4}$/.test(token)) {
+                errorMsg.textContent = `Please enter the full ${config.step2.digitCount}-digit token.`;
                 errorMsg.classList.add('is-visible');
+                inputBoxes.forEach(box => box.classList.add('has-error'));
                 return;
             }
 
-            // Simulate Token verification success, then move to Step 3
+            if (token === "0000") {
+                errorMsg.textContent = "That token didn't match. Please check your email and try again.";
+                errorMsg.classList.add('is-visible');
+                inputBoxes.forEach(box => { box.classList.add('has-error'); box.value = ''; });
+                inputBoxes[0].focus();
+                return;
+            }
+
             mountStep3();
         });
 
@@ -220,6 +249,5 @@ export const init = (node, customConfig = {}) => {
         node.querySelector('#change-email').addEventListener('click', mountStep1);
     };
 
-    // Initialize module by mounting the first step
     mountStep1();
 };
