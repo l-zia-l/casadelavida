@@ -3458,6 +3458,129 @@ display: inline-block;
 }
 
 /* ==========================================================================
+   MODULE: SIGN-UP (styles/components.css)
+   Architecture: Scoped BEM methodology.
+   Purpose: Defines the layout, aesthetic, and interaction states for the 
+   sign-up flow. Employs fluid variables for spacing and typography.
+   Constraints: Strict 0px radius, no !important flags, no inline styles.
+   ========================================================================== */
+
+.cdlv-sign-up {
+    width: 100%;
+    max-width: 450px;
+    margin-inline: auto;
+    padding: var(--spacing-lg) var(--spacing-xs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.cdlv-sign-up__header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.cdlv-sign-up__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.cdlv-sign-up__group {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Minimalist Input Aesthetics */
+.cdlv-sign-up__input {
+    border: none;
+    border-bottom: 1px solid rgba(26, 26, 26, 0.2);
+    background: transparent;
+    padding: var(--spacing-xs) 0;
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body);
+    color: var(--color-text-dark);
+    border-radius: var(--radius-strict);
+    transition: border-color var(--transition-base);
+}
+
+.cdlv-sign-up__input::placeholder {
+    color: rgba(26, 26, 26, 0.4);
+}
+
+.cdlv-sign-up__input:focus,
+.cdlv-sign-up__input:focus-visible {
+    outline: none;
+    border-bottom: 2px solid var(--color-accent);
+}
+
+.cdlv-sign-up__hint {
+    font-size: var(--font-size-small);
+    color: var(--color-text-dark);
+    opacity: 0.6;
+    margin-top: calc(var(--spacing-xs) * 0.5);
+    display: block;
+    line-height: 1.4;
+}
+
+/* Form Validation & Error Messaging */
+.cdlv-sign-up__error {
+    font-size: var(--font-size-small);
+    color: var(--color-accent);
+    font-weight: bold;
+    margin-top: calc(var(--spacing-xs) * 0.5);
+    display: none;
+    animation: fade-in-up var(--transition-fast) forwards;
+}
+
+.cdlv-sign-up__error.is-visible {
+    display: block;
+}
+
+/* Fallback/Local styling for the primary CTA button if not globally defined yet */
+.cdlv-hero__btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-body);
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    border-radius: var(--radius-strict);
+    transition: background-color var(--transition-base), transform var(--transition-base);
+    margin-top: var(--spacing-sm);
+}
+
+.cdlv-hero__btn--primary {
+    background-color: var(--color-text-dark);
+    color: var(--color-primary);
+}
+
+.cdlv-hero__btn--primary:hover,
+.cdlv-hero__btn--primary:focus {
+    background-color: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.cdlv-sign-up__footer {
+    text-align: center;
+    font-size: var(--font-size-small);
+    margin-top: var(--spacing-sm);
+}
+
+.cdlv-sign-up__link {
+    color: var(--color-accent);
+    text-decoration: underline;
+    transition: color var(--transition-fast);
+}
+
+.cdlv-sign-up__link:hover {
+    color: var(--color-text-dark);
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 

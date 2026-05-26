@@ -22,8 +22,8 @@ const sanitizeText = (str) => {
 const defaultConfig = {
     heading: "404",
     message: "Oops, seems like you typed the wrong URL.",
-    btnText: "Back to the Shop",
-    btnLink: "shop.html"
+    btnText: "Back to the Homepage",
+    btnLink: "index.html"
 };
 
 /**
