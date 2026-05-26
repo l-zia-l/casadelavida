@@ -19,6 +19,13 @@ const sanitizeText = (str) => {
 let cartState = {
     currentStep: 'Cart', // Tracks routing ('Cart', 'Shipping & Details', 'Payment Info', 'Review')
     paymentMethod: 'momo',
+    shippingDetails: { // Mock data for the review screen
+        name: 'Kwame Mensah',
+        address: '123 Independence Ave, Osu',
+        city: 'Accra',
+        region: 'Greater Accra',
+        phone: '024 123 4567'
+    },
     items: [
         {
             id: 'prod_001',
@@ -339,6 +346,55 @@ const renderPaymentForm = () => {
     `;
 };
 
+const renderReviewView = () => {
+    return `
+        <div class="cdlv-cart-panel__layout">
+            <section class="cdlv-shipping-form">
+                <h2 class="cdlv-shipping-form__title" tabindex="-1">Review & Confirm</h2>
+                
+                <div class="cdlv-review-grid">
+                    <article class="cdlv-review-card">
+                        <div class="cdlv-review-card__header">
+                            <h3>Shipping To</h3>
+                            <button type="button" class="cdlv-review-edit" data-action="edit-shipping">Edit</button>
+                        </div>
+                        <p><strong>${sanitizeText(cartState.shippingDetails.name)}</strong></p>
+                        <p>${sanitizeText(cartState.shippingDetails.address)}</p>
+                        <p>${sanitizeText(cartState.shippingDetails.city)}, ${sanitizeText(cartState.shippingDetails.region)}</p>
+                        <p>${sanitizeText(cartState.shippingDetails.phone)}</p>
+                    </article>
+                    
+                    <article class="cdlv-review-card">
+                        <div class="cdlv-review-card__header">
+                            <h3>Payment Method</h3>
+                            <button type="button" class="cdlv-review-edit" data-action="edit-payment">Edit</button>
+                        </div>
+                        <p><strong>${cartState.paymentMethod === 'momo' ? 'Mobile Money' : cartState.paymentMethod === 'card' ? 'Credit/Debit Card' : 'PayPal'}</strong></p>
+                        <p class="cdlv-review-card__note">You will not be charged until you click 'Place Order'.</p>
+                    </article>
+                </div>
+
+                <form id="place-order-form" class="cdlv-review-actions">
+                    <div class="cdlv-review-terms">
+                        <input type="checkbox" id="terms-agree" required aria-required="true">
+                        <label for="terms-agree">I agree to the <a href="${buildPath('legal/terms-of-service.html')}" target="_blank">Terms of Service</a> and <a href="${buildPath('legal/privacy-policy.html')}" target="_blank">Privacy Policy</a>.</label>
+                    </div>
+                    
+                    <button type="submit" class="cdlv-review-submit">Place Order</button>
+                    
+                    <div class="cdlv-review-back-wrapper">
+                        <button type="button" class="cdlv-shipping-form__back" data-action="back-to-payment">Back to Payment</button>
+                    </div>
+                </form>
+            </section>
+            
+            <div class="cdlv-cart-panel__sidebar">
+                ${renderDetailedSummary()}
+            </div>
+        </div>
+    `;
+};
+
 const renderDetailedSummary = () => {
     const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const total = subtotal + cartState.shippingRate;
@@ -384,11 +440,11 @@ const updateView = (node) => {
     if (cartState.currentStep === 'Cart') {
         viewContent = renderCartView();
     } else if (cartState.currentStep === 'Shipping & Details') {
-        viewContent = renderShippingForm(); // No more regex replace!
+        viewContent = renderShippingForm(); 
     } else if (cartState.currentStep === 'Payment Info') {
         viewContent = renderPaymentForm();
-    } else {
-        viewContent = `<div class="cdlv-cart-panel__layout"><h2>Placeholder for Review</h2></div>`;
+    } else if (cartState.currentStep === 'Review') {
+        viewContent = renderReviewView();
     }
 
     node.innerHTML = `
@@ -439,6 +495,18 @@ export const init = (node) => {
         }
 
         if (action === 'back-to-shipping') {
+            cartState.currentStep = 'Shipping & Details';
+            updateView(node);
+            return;
+        }
+
+        if (action === 'back-to-payment' || action === 'edit-payment') {
+            cartState.currentStep = 'Payment Info';
+            updateView(node);
+            return;
+        }
+
+        if (action === 'edit-shipping') {
             cartState.currentStep = 'Shipping & Details';
             updateView(node);
             return;
@@ -536,16 +604,18 @@ export const init = (node) => {
 
     // Event Delegation: Form Submissions
     node.addEventListener('submit', (e) => {
-        e.preventDefault(); // Prevent page reload for ALL forms in this module
-
+        e.preventDefault(); 
+        
         if (e.target.id === 'shipping-details-form') {
-            // In a real app, save form data to state/localStorage here
             cartState.currentStep = 'Payment Info';
             updateView(node);
         } else if (e.target.id === 'payment-details-form') {
-            // In a real app, securely stash payment intent/method here
             cartState.currentStep = 'Review';
             updateView(node);
+        } else if (e.target.id === 'place-order-form') {
+            // The required attribute on the checkbox handles validation naturally.
+            // When the form successfully submits, redirect to the success page.
+            window.location.href = buildPath('status/success.html');
         }
     });
 };
