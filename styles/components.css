@@ -3459,34 +3459,25 @@ display: inline-block;
 
 /* ==========================================================================
    MODULE: MULTI-STEP SIGN-UP (styles/components.css)
-   Architecture: 100vh Full-Screen Flex Wrapper with a 1200px inner grid.
+   Architecture: Fluid layout scaling via vh/vw to prevent vertical scrolling.
    ========================================================================== */
 
-/* * The full-screen stage. 
- * Relies on the global .u-fill-screen class (100vw, 100vh) in the HTML 
- * to break out of the main container and lock the height.
- */
-.cdlv-auth-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--layout-gutter);
-    overflow-y: auto; /* Fallback: allows scrolling if mobile keyboard squishes 100vh */
-}
-
-/* Shared 1200px Inner Container */
 .cdlv-auth-step {
     width: 100%;
     max-width: 1200px;
     margin-inline: auto;
+    /* Vertical padding scales with screen height */
+    padding: clamp(1rem, 3vh, var(--spacing-lg)) 0;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--spacing-xl);
+    /* Gaps scale dynamically with screen height */
+    gap: clamp(1.5rem, 5vh, var(--spacing-xl));
+    animation: fade-in-up var(--transition-base) forwards;
+    will-change: transform, opacity;
 }
 
-/* Modifier for Welcome Step to keep it centered and elegant */
 .cdlv-auth-step--centered {
     flex-direction: column;
     text-align: center;
@@ -3504,27 +3495,36 @@ display: inline-block;
     flex: 1 1 min(100%, 450px);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: clamp(0.5rem, 2vh, var(--spacing-sm));
 }
 
-.cdlv-auth__title { font-size: var(--font-size-h2); color: var(--color-text-dark); }
-.cdlv-auth__title:focus:not(:focus-visible),
-.cdlv-welcome__title:focus:not(:focus-visible) { outline: none; } /* A11y Outline fix */
+/* Typography scales with screen height to prevent vertical overflow */
+.cdlv-auth__title { 
+    font-size: clamp(1.75rem, 4vh + 1vw, var(--font-size-h2)); 
+    color: var(--color-text-dark); 
+}
 
-.cdlv-auth__subtitle { font-size: var(--font-size-body); color: var(--color-text-dark); opacity: 0.9; }
+.cdlv-auth__title:focus:not(:focus-visible),
+.cdlv-welcome__title:focus:not(:focus-visible) { outline: none; }
+
+.cdlv-auth__subtitle { 
+    font-size: clamp(0.875rem, 2vh + 0.5vw, var(--font-size-body)); 
+    color: var(--color-text-dark); 
+    opacity: 0.9; 
+}
 
 /* Right Column: Interactive Form & Links */
 .cdlv-auth__panel {
     flex: 1 1 min(100%, 500px);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: clamp(1.5rem, 4vh, var(--spacing-md));
 }
 
 .cdlv-auth__form {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: clamp(1rem, 3vh, var(--spacing-md));
 }
 
 .cdlv-auth__group {
@@ -3538,9 +3538,10 @@ display: inline-block;
     border: none;
     border-bottom: 1px solid rgba(26, 26, 26, 0.2);
     background: transparent;
-    padding: var(--spacing-xs) 0;
+    /* Input padding shrinks on short screens */
+    padding: clamp(0.25rem, 1vh, var(--spacing-xs)) 0;
     font-family: var(--font-family-body);
-    font-size: var(--font-size-body);
+    font-size: clamp(0.875rem, 2vh + 0.5vw, var(--font-size-body));
     color: var(--color-text-dark);
     border-radius: var(--radius-strict);
     transition: border-color var(--transition-base);
@@ -3552,11 +3553,15 @@ display: inline-block;
 .cdlv-auth__input.has-error, .cdlv-2fa__input-box.has-error { border-color: #D9534F !important; }
 
 .cdlv-auth__hint {
-    font-size: var(--font-size-small); color: var(--color-text-dark); opacity: 0.6;
-    margin-top: calc(var(--spacing-xs) * 0.5); display: block; line-height: 1.4;
+    font-size: clamp(0.75rem, 1.5vh, var(--font-size-small)); 
+    color: var(--color-text-dark); 
+    opacity: 0.6;
+    margin-top: calc(var(--spacing-xs) * 0.5); 
+    display: block; 
+    line-height: 1.4;
 }
 
-.cdlv-auth__footer { font-size: var(--font-size-small); margin-top: var(--spacing-sm); }
+.cdlv-auth__footer { font-size: var(--font-size-small); margin-top: clamp(0.5rem, 2vh, var(--spacing-sm)); }
 .cdlv-auth__link { color: var(--color-accent); text-decoration: underline; transition: color var(--transition-fast); background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; font-size: inherit; }
 .cdlv-auth__link:hover { color: var(--color-text-dark); }
 
@@ -3564,15 +3569,17 @@ display: inline-block;
 .cdlv-2fa__digits {
     display: flex;
     gap: var(--spacing-sm);
-    justify-content: flex-start;
-    margin: var(--spacing-sm) 0;
+    justify-content: flex-start; 
+    margin: clamp(0.5rem, 2vh, var(--spacing-sm)) 0;
     flex-wrap: wrap; 
 }
 
 .cdlv-2fa__input-box {
-    width: clamp(3rem, 10vw, 4.5rem);
+    width: clamp(3rem, 8vh + 2vw, 4.5rem);
     aspect-ratio: 1; text-align: center;
-    font-family: var(--font-family-heading); font-size: var(--font-size-h3); color: var(--color-text-dark);
+    font-family: var(--font-family-heading); 
+    font-size: clamp(1.25rem, 3vh + 1vw, var(--font-size-h3)); 
+    color: var(--color-text-dark);
     background: transparent; border: 1px solid rgba(26, 26, 26, 0.2); border-radius: var(--radius-strict);
     transition: border-color var(--transition-base), transform var(--transition-fast);
 }
@@ -3584,21 +3591,26 @@ display: inline-block;
 }
 
 /* Welcome Screen Specifics */
-.cdlv-welcome__title { font-size: var(--font-size-h1); color: var(--color-text-dark); }
-.cdlv-welcome__btn { display: block; text-decoration: none; width: 100%; max-width: 400px; margin: var(--spacing-sm) auto 0; }
+.cdlv-welcome__icon { width: clamp(3rem, 6vh + 2vw, 4rem); height: auto; margin: 0 auto clamp(0.5rem, 2vh, var(--spacing-sm)); color: var(--color-secondary); animation: fade-in-up var(--transition-slow) forwards; }
+.cdlv-welcome__title { font-size: clamp(2rem, 5vh + 1vw, var(--font-size-h1)); color: var(--color-text-dark); }
+.cdlv-welcome__btn { display: block; text-decoration: none; width: 100%; max-width: 400px; margin: clamp(1rem, 3vh, var(--spacing-sm)) auto 0; }
 .cdlv-welcome__countdown { font-size: var(--font-size-small); opacity: 0.8; font-family: var(--font-family-body); font-weight: normal; margin-left: 0.5rem; }
 
 /* Validation Error UI */
 .cdlv-auth__error {
-    font-size: var(--font-size-small); color: #D9534F; font-weight: bold;
+    font-size: clamp(0.75rem, 1.5vh, var(--font-size-small)); 
+    color: #D9534F; font-weight: bold;
     margin-top: calc(var(--spacing-xs) * 0.5); display: none; animation: fade-in-up var(--transition-fast) forwards;
 }
 .cdlv-auth__error.is-visible { display: block; }
 
 /* Global Button Override for Auth context */
-.cdlv-hero__btn { width: 100%; }
+.cdlv-hero__btn { 
+    width: 100%; 
+    padding: clamp(0.5rem, 2vh, var(--spacing-sm)) var(--spacing-md); 
+}
 
-/* A11y: Respect OS-level motion sensitivity settings */
+/* A11y */
 @media (prefers-reduced-motion: reduce) {
     .animate-enter {
         animation-duration: 0.01ms !important;
@@ -3608,6 +3620,7 @@ display: inline-block;
         transform: none !important;
     }
 }
+
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */

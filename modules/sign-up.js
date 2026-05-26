@@ -1,13 +1,13 @@
 /* ==========================================================================
    MODULE: MULTI-STEP SIGN-UP (modules/sign-up.js)
    Architecture: Exportable ES Module acting as an internal state machine.
-   Security: DOMPurify-style text sanitization for XSS prevention.
-   A11y: Strict WCAG compliance (Focus routing, aria-live, aria-describedby).
-   Routing: Utilizes path.js for environment-agnostic absolute URLs.
-   Layout: Fully fluid 100vh wrapper utilizing global .u-fill-screen.
+   Performance: Uses requestAnimationFrame for DOM batching, prevents memory leaks.
+   Layout: Fluidly stacks beneath previous DOM elements without rigid 100vh wrappers.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
+
+let countdownInterval = null; 
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
@@ -39,19 +39,20 @@ const validatePassword = (val) => {
 };
 
 const toggleError = (inputEl, errorEl, errorMessage) => {
-    if (errorMessage) {
-        errorEl.textContent = errorMessage; 
-        errorEl.classList.add('is-visible'); 
-        inputEl.classList.add('has-error');
-        inputEl.setAttribute('aria-invalid', 'true');
-        return true;
-    } else {
-        errorEl.textContent = ''; 
-        errorEl.classList.remove('is-visible'); 
-        inputEl.classList.remove('has-error');
-        inputEl.removeAttribute('aria-invalid');
-        return false;
-    }
+    requestAnimationFrame(() => {
+        if (errorMessage) {
+            errorEl.textContent = errorMessage; 
+            errorEl.classList.add('is-visible'); 
+            inputEl.classList.add('has-error');
+            inputEl.setAttribute('aria-invalid', 'true');
+        } else {
+            errorEl.textContent = ''; 
+            errorEl.classList.remove('is-visible'); 
+            inputEl.classList.remove('has-error');
+            inputEl.removeAttribute('aria-invalid');
+        }
+    });
+    return !!errorMessage; 
 };
 
 const defaultConfig = {
@@ -83,6 +84,8 @@ export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     let userEmailCache = "";
 
+    if (countdownInterval) clearInterval(countdownInterval);
+
     const shiftFocusToHeading = (selector) => {
         requestAnimationFrame(() => {
             const heading = node.querySelector(selector);
@@ -93,37 +96,34 @@ export const init = (node, customConfig = {}) => {
     const mountStep1 = () => {
         const conf = config.step1;
         node.innerHTML = `
-            <div class="cdlv-auth-wrapper u-fill-screen animate-enter">
-                <div class="cdlv-auth-step">
-                    <header class="cdlv-auth__header">
-                        <h2 class="cdlv-auth__title" id="step1-title" tabindex="-1">${sanitizeText(conf.title)}</h2>
-                        <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
-                    </header>
-                    
-                    <div class="cdlv-auth__panel">
-                        <form class="cdlv-auth__form" id="cdlv-signup-form" novalidate aria-labelledby="step1-title">
-                            <div class="cdlv-auth__group">
-                                <label for="signup-name" class="visually-hidden">Full Name</label>
-                                <input type="text" id="signup-name" class="cdlv-auth__input" placeholder="Name" required minlength="2" maxlength="50" autocomplete="name" aria-describedby="error-signup-name">
-                                <span class="cdlv-auth__error" id="error-signup-name" aria-live="polite"></span>
-                            </div>
-                            <div class="cdlv-auth__group">
-                                <label for="signup-email" class="visually-hidden">Email Address</label>
-                                <input type="email" id="signup-email" class="cdlv-auth__input" placeholder="you@example.com" required autocomplete="email" aria-describedby="error-signup-email">
-                                <span class="cdlv-auth__error" id="error-signup-email" aria-live="polite"></span>
-                            </div>
-                            <div class="cdlv-auth__group">
-                                <label for="signup-password" class="visually-hidden">Create Password</label>
-                                <input type="password" id="signup-password" class="cdlv-auth__input" placeholder="Minimum 8 characters" required minlength="8" autocomplete="new-password" aria-describedby="hint-signup-password error-signup-password">
-                                <small id="hint-signup-password" class="cdlv-auth__hint">Passwords must contain letters and numbers to protect your account data.</small>
-                                <span class="cdlv-auth__error" id="error-signup-password" aria-live="polite"></span>
-                            </div>
-                            <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
-                        </form>
-                        <footer class="cdlv-auth__footer">
-                            <p>Already have an account? <a href="${buildPath(sanitizeText(conf.loginUrl))}" class="cdlv-auth__link">Log In</a></p>
-                        </footer>
-                    </div>
+            <div class="cdlv-auth-step animate-enter">
+                <header class="cdlv-auth__header">
+                    <h2 class="cdlv-auth__title" id="step1-title" tabindex="-1">${sanitizeText(conf.title)}</h2>
+                    <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
+                </header>
+                <div class="cdlv-auth__panel">
+                    <form class="cdlv-auth__form" id="cdlv-signup-form" novalidate aria-labelledby="step1-title">
+                        <div class="cdlv-auth__group">
+                            <label for="signup-name" class="visually-hidden">Full Name</label>
+                            <input type="text" id="signup-name" class="cdlv-auth__input" placeholder="Name" required minlength="2" maxlength="50" autocomplete="name" aria-describedby="error-signup-name">
+                            <span class="cdlv-auth__error" id="error-signup-name" aria-live="polite"></span>
+                        </div>
+                        <div class="cdlv-auth__group">
+                            <label for="signup-email" class="visually-hidden">Email Address</label>
+                            <input type="email" id="signup-email" class="cdlv-auth__input" placeholder="you@example.com" required autocomplete="email" aria-describedby="error-signup-email">
+                            <span class="cdlv-auth__error" id="error-signup-email" aria-live="polite"></span>
+                        </div>
+                        <div class="cdlv-auth__group">
+                            <label for="signup-password" class="visually-hidden">Create Password</label>
+                            <input type="password" id="signup-password" class="cdlv-auth__input" placeholder="Minimum 8 characters" required minlength="8" autocomplete="new-password" aria-describedby="hint-signup-password error-signup-password">
+                            <small id="hint-signup-password" class="cdlv-auth__hint">Passwords must contain letters and numbers to protect your account data.</small>
+                            <span class="cdlv-auth__error" id="error-signup-password" aria-live="polite"></span>
+                        </div>
+                        <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
+                    </form>
+                    <footer class="cdlv-auth__footer">
+                        <p>Already have an account? <a href="${buildPath(sanitizeText(conf.loginUrl))}" class="cdlv-auth__link">Log In</a></p>
+                    </footer>
                 </div>
             </div>
         `;
@@ -139,26 +139,23 @@ export const init = (node, customConfig = {}) => {
         `).join('');
 
         node.innerHTML = `
-            <div class="cdlv-auth-wrapper u-fill-screen animate-enter">
-                <div class="cdlv-auth-step">
-                    <header class="cdlv-auth__header">
-                        <h2 class="cdlv-auth__title" id="step2-title" tabindex="-1">${sanitizeText(conf.title)}</h2>
-                        <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
-                    </header>
-
-                    <div class="cdlv-auth__panel">
-                        <form class="cdlv-auth__form" id="cdlv-2fa-form" novalidate aria-labelledby="step2-title">
-                            <div class="cdlv-2fa__digits" id="cdlv-2fa-container" role="group" aria-label="4-digit verification code">
-                                ${inputsHTML}
-                            </div>
-                            <span class="cdlv-auth__error" id="error-2fa-validation" aria-live="assertive"></span>
-                            <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
-                        </form>
-                        <footer class="cdlv-auth__footer">
-                            <p>Didn't receive the code? <button type="button" id="resend-code" class="cdlv-auth__link">Resend Token</button></p>
-                            <p>or <button type="button" id="change-email" class="cdlv-auth__link" style="opacity: 0.7;">Change Email Address</button></p>
-                        </footer>
-                    </div>
+            <div class="cdlv-auth-step animate-enter">
+                <header class="cdlv-auth__header">
+                    <h2 class="cdlv-auth__title" id="step2-title" tabindex="-1">${sanitizeText(conf.title)}</h2>
+                    <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
+                </header>
+                <div class="cdlv-auth__panel">
+                    <form class="cdlv-auth__form" id="cdlv-2fa-form" novalidate aria-labelledby="step2-title">
+                        <div class="cdlv-2fa__digits" id="cdlv-2fa-container" role="group" aria-label="4-digit verification code">
+                            ${inputsHTML}
+                        </div>
+                        <span class="cdlv-auth__error" id="error-2fa-validation" aria-live="assertive"></span>
+                        <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(conf.buttonText)}</button>
+                    </form>
+                    <footer class="cdlv-auth__footer">
+                        <p>Didn't receive the code? <button type="button" id="resend-code" class="cdlv-auth__link">Resend Token</button></p>
+                        <p>or <button type="button" id="change-email" class="cdlv-auth__link" style="opacity: 0.7;">Change Email Address</button></p>
+                    </footer>
                 </div>
             </div>
         `;
@@ -172,30 +169,33 @@ export const init = (node, customConfig = {}) => {
         const resolvedRedirectUrl = buildPath(sanitizeText(conf.redirectUrl));
 
         node.innerHTML = `
-            <div class="cdlv-auth-wrapper u-fill-screen animate-enter">
-                <div class="cdlv-auth-step cdlv-auth-step--centered">
-                    <header class="cdlv-auth__header">
-                        <h1 class="cdlv-welcome__title" id="step3-title" tabindex="-1">${sanitizeText(conf.title)}</h1>
-                        <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
-                    </header>
-                    <a href="${resolvedRedirectUrl}" class="cdlv-hero__btn cdlv-hero__btn--primary cdlv-welcome__btn">
-                        ${sanitizeText(conf.buttonText)} <span class="cdlv-welcome__countdown" aria-hidden="true">(Redirecting in ${timeLeft}...)</span>
-                    </a>
-                </div>
+            <div class="cdlv-auth-step cdlv-auth-step--centered animate-enter">
+                <header class="cdlv-auth__header">
+                    <h1 class="cdlv-welcome__title" id="step3-title" tabindex="-1">${sanitizeText(conf.title)}</h1>
+                    <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
+                </header>
+                <a href="${resolvedRedirectUrl}" class="cdlv-hero__btn cdlv-hero__btn--primary cdlv-welcome__btn">
+                    ${sanitizeText(conf.buttonText)} <span class="cdlv-welcome__countdown" aria-hidden="true">(Redirecting in ${timeLeft}...)</span>
+                </a>
             </div>
         `;
 
         shiftFocusToHeading('#step3-title');
 
         const countdownSpan = node.querySelector('.cdlv-welcome__countdown');
-        const countdownInterval = setInterval(() => {
+        
+        countdownInterval = setInterval(() => {
             timeLeft -= 1;
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
-                countdownSpan.textContent = "(Redirecting...)";
+                requestAnimationFrame(() => {
+                    countdownSpan.textContent = "(Redirecting...)";
+                });
                 window.location.href = resolvedRedirectUrl;
             } else {
-                countdownSpan.textContent = `(Redirecting in ${timeLeft}...)`;
+                requestAnimationFrame(() => {
+                    countdownSpan.textContent = `(Redirecting in ${timeLeft}...)`;
+                });
             }
         }, 1000);
     };
@@ -231,9 +231,9 @@ export const init = (node, customConfig = {}) => {
             const isEmailInvalid = toggleError(emailInput, emailError, validateEmail(emailInput.value));
             const isPasswordInvalid = toggleError(passwordInput, passwordError, validatePassword(passwordInput.value));
 
-            if (isNameInvalid) return nameInput.focus();
-            if (isEmailInvalid) return emailInput.focus();
-            if (isPasswordInvalid) return passwordInput.focus();
+            if (isNameInvalid) return shiftFocusToHeading('#signup-name');
+            if (isEmailInvalid) return shiftFocusToHeading('#signup-email');
+            if (isPasswordInvalid) return shiftFocusToHeading('#signup-password');
 
             localStorage.removeItem(DRAFT_NAME_KEY);
             localStorage.removeItem(DRAFT_EMAIL_KEY);
@@ -264,10 +264,12 @@ export const init = (node, customConfig = {}) => {
                 inputBoxes[Math.min(numericData.length, config.step2.digitCount - 1)].focus();
             });
             input.addEventListener('focus', () => {
-                errorMsg.classList.remove('is-visible');
-                inputBoxes.forEach(box => {
-                    box.classList.remove('has-error');
-                    box.removeAttribute('aria-invalid');
+                requestAnimationFrame(() => {
+                    errorMsg.classList.remove('is-visible');
+                    inputBoxes.forEach(box => {
+                        box.classList.remove('has-error');
+                        box.removeAttribute('aria-invalid');
+                    });
                 });
             });
         });
@@ -278,27 +280,31 @@ export const init = (node, customConfig = {}) => {
             const token = inputBoxes.map(input => input.value).join('');
 
             if (token.length < config.step2.digitCount || !/^\d{4}$/.test(token)) {
-                errorMsg.textContent = `Please enter the full ${config.step2.digitCount}-digit token.`;
-                errorMsg.classList.add('is-visible');
-                inputBoxes.forEach(box => {
-                    box.classList.add('has-error');
-                    box.setAttribute('aria-invalid', 'true');
+                requestAnimationFrame(() => {
+                    errorMsg.textContent = `Please enter the full ${config.step2.digitCount}-digit token.`;
+                    errorMsg.classList.add('is-visible');
+                    inputBoxes.forEach(box => {
+                        box.classList.add('has-error');
+                        box.setAttribute('aria-invalid', 'true');
+                    });
                 });
                 return inputBoxes[0].focus();
             }
 
             if (token === "0000") {
-                errorMsg.textContent = "That token didn't match. Please check your email and try again.";
-                errorMsg.classList.add('is-visible');
-                inputBoxes.forEach(box => { 
-                    box.classList.add('has-error'); 
-                    box.setAttribute('aria-invalid', 'true');
-                    box.value = ''; 
+                requestAnimationFrame(() => {
+                    errorMsg.textContent = "That token didn't match. Please check your email and try again.";
+                    errorMsg.classList.add('is-visible');
+                    inputBoxes.forEach(box => { 
+                        box.classList.add('has-error'); 
+                        box.setAttribute('aria-invalid', 'true');
+                        box.value = ''; 
+                    });
                 });
                 return inputBoxes[0].focus();
             }
 
-            mountStep3();
+            mountStep3(); 
         });
 
         node.querySelector('#resend-code').addEventListener('click', () => console.log('Resending...'));
