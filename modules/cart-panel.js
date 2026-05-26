@@ -103,7 +103,11 @@ const renderCartItems = () => {
     return cartState.items.map(item => `
         <article class="cdlv-cart-item" data-id="${sanitizeText(item.id)}">
             <div class="cdlv-cart-item__image-wrap u-img-loader">
-                <img src="${buildPath(item.image)}" alt="${sanitizeText(item.name)}" class="cdlv-cart-item__image">
+                <img src="${buildPath(item.image)}" 
+                    alt="${sanitizeText(item.name)}" 
+                    class="cdlv-cart-item__image"
+                    loading="lazy" 
+                    decoding="async">
             </div>
             
             <div class="cdlv-cart-item__details">
@@ -156,9 +160,15 @@ const renderSummary = () => {
             <div class="cdlv-cart-summary__cta-wrapper">
                 <button type="button" class="cdlv-cart-summary__checkout-btn" data-action="checkout">Secure Checkout</button>
                 <div class="cdlv-cart-summary__trust-signals">
-                    <span class="cdlv-cart-summary__trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Secure Payment</span>
-                    <span class="cdlv-cart-summary__trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> Fast Local Delivery</span>
-                </div>
+                <span class="cdlv-cart-summary__trust-item">
+                    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Secure Payment
+                </span>
+                <span class="cdlv-cart-summary__trust-item">
+                    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Fast Local Delivery
+                </span>
+            </div>
             </div>
         </aside>
     `;
@@ -367,7 +377,7 @@ const renderPaymentForm = () => {
                         </div>
                     </button>
                 </div>
-                
+
                 <form id="payment-details-form" class="cdlv-shipping-form__grid">
                     ${paymentFields}
                     <div class="cdlv-shipping-form__actions cdlv-form-group--full">
