@@ -9,11 +9,11 @@ import { buildPath } from '../utils/path.js';
 
 let countdownInterval = null; 
 
+const sanitizerNode = document.createElement('div');
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
-    const tempDiv = document.createElement('div');
-    tempDiv.textContent = str;
-    return tempDiv.innerHTML;
+    sanitizerNode.textContent = str;
+    return sanitizerNode.innerHTML;
 };
 
 // --- VALIDATION ENGINE ---
@@ -171,7 +171,7 @@ export const init = (node, customConfig = {}) => {
         node.innerHTML = `
             <div class="cdlv-auth-step cdlv-auth-step--centered animate-enter">
                 <header class="cdlv-auth__header">
-                    <h1 class="cdlv-welcome__title" id="step3-title" tabindex="-1">${sanitizeText(conf.title)}</h1>
+                    <h2 class="cdlv-welcome__title" id="step3-title" tabindex="-1">${sanitizeText(conf.title)}</h2>
                     <p class="cdlv-auth__subtitle">${sanitizeText(conf.subtitle)}</p>
                 </header>
                 <a href="${resolvedRedirectUrl}" class="cdlv-hero__btn cdlv-hero__btn--primary cdlv-welcome__btn">
@@ -185,16 +185,22 @@ export const init = (node, customConfig = {}) => {
         const countdownSpan = node.querySelector('.cdlv-welcome__countdown');
         
         countdownInterval = setInterval(() => {
+            // PERF/MEM: Stop the interval if the user navigated away and the node was destroyed
+            if (!document.body.contains(node)) {
+                clearInterval(countdownInterval);
+                return;
+            }
+
             timeLeft -= 1;
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
                 requestAnimationFrame(() => {
-                    countdownSpan.textContent = "(Redirecting...)";
+                    if (countdownSpan) countdownSpan.textContent = "(Redirecting...)";
                 });
                 window.location.href = resolvedRedirectUrl;
             } else {
                 requestAnimationFrame(() => {
-                    countdownSpan.textContent = `(Redirecting in ${timeLeft}...)`;
+                    if (countdownSpan) countdownSpan.textContent = `(Redirecting in ${timeLeft}...)`;
                 });
             }
         }, 1000);
