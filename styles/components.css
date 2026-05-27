@@ -3463,7 +3463,7 @@ display: inline-block;
    ========================================================================== */
 
 .cdlv-auth-step {
-    max-width: 500px;
+    max-width: 1000px;
     width: 100%;
     margin: var(--spacing-xl) auto;
     /* Vertical padding scales with screen height */
