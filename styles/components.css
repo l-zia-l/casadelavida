@@ -3463,11 +3463,11 @@ display: inline-block;
    ========================================================================== */
 
 .cdlv-auth-step {
+    max-width: 500px;
     width: 100%;
-    max-width: 1200px;
-    margin-inline: auto;
+    margin: var(--spacing-xl) auto;
     /* Vertical padding scales with screen height */
-    padding: clamp(1rem, 3vh, var(--spacing-lg)) 0;
+    padding-inline: var(--spacing-sm);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -3475,7 +3475,6 @@ display: inline-block;
     /* Gaps scale dynamically with screen height */
     gap: clamp(1.5rem, 5vh, var(--spacing-xl));
     animation: fade-in-up var(--transition-base) forwards;
-    will-change: transform, opacity;
 }
 
 .cdlv-auth-step--centered {
@@ -3496,6 +3495,8 @@ display: inline-block;
     display: flex;
     flex-direction: column;
     gap: clamp(0.5rem, 2vh, var(--spacing-sm));
+    text-align: center;
+    margin-bottom: var(--spacing-md);
 }
 
 /* Typography scales with screen height to prevent vertical overflow */
@@ -3527,14 +3528,22 @@ display: inline-block;
     gap: clamp(1rem, 3vh, var(--spacing-md));
 }
 
+.cdlv-auth__form .cdlv-hero__btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+}
+
 .cdlv-auth__group {
     display: flex;
     flex-direction: column;
     position: relative;
+    margin-bottom: var(--spacing-sm);
+    width: 100%;
 }
 
 /* Shared Input Aesthetics */
 .cdlv-auth__input {
+    width: 100%;
     border: none;
     border-bottom: 1px solid rgba(26, 26, 26, 0.2);
     background: transparent;
@@ -3561,7 +3570,8 @@ display: inline-block;
     line-height: 1.4;
 }
 
-.cdlv-auth__footer { font-size: var(--font-size-small); margin-top: clamp(0.5rem, 2vh, var(--spacing-sm)); }
+.cdlv-auth__footer { font-size: var(--font-size-small); text-align: center;
+    margin-top: var(--spacing-md); }
 .cdlv-auth__link { color: var(--color-accent); text-decoration: underline; transition: color var(--transition-fast); background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; font-size: inherit; }
 .cdlv-auth__link:hover { color: var(--color-text-dark); }
 
