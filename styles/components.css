@@ -3464,7 +3464,7 @@ display: inline-block;
 
 .cdlv-auth-step {
     /* Tighten the max-width to lock the inputs to a comfortable size */
-    max-width: 550px; 
+    max-width: 1200px; 
     width: 100%;
     margin: var(--spacing-xl) auto;
     padding-inline: var(--spacing-sm);
