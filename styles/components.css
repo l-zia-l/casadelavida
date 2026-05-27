@@ -3463,17 +3463,16 @@ display: inline-block;
    ========================================================================== */
 
 .cdlv-auth-step {
-    /* Tighten the max-width to lock the inputs to a comfortable size */
     max-width: 1200px; 
     width: 100%;
     margin: var(--spacing-xl) auto;
     padding-inline: var(--spacing-sm);
     
-    /* Stack the text and form vertically */
+    /* Mobile-First: Stacked layout */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
     
     animation: fade-in-up var(--transition-base) forwards;
 }
@@ -3508,6 +3507,26 @@ display: inline-block;
     font-size: clamp(0.875rem, 2vh + 0.5vw, var(--font-size-body)); 
     color: var(--color-text-dark); 
     opacity: 0.9; 
+}
+
+/* --- DESKTOP & TABLET: TWO-COLUMN LAYOUT --- */
+@media (min-width: 768px) {
+    /* Apply row layout only if it's not the centered welcome screen */
+    .cdlv-auth-step:not(.cdlv-auth-step--centered) {
+        flex-direction: row;
+        align-items: center; /* Vertically centers the text and the form */
+        justify-content: space-between;
+    }
+
+    .cdlv-auth__header {
+        flex: 1 1 45%; /* Takes up roughly half the container */
+        padding-right: var(--spacing-md); /* Breathing room between columns */
+    }
+
+    .cdlv-auth__panel {
+        flex: 1 1 50%; /* Takes up the other half */
+        max-width: 500px; /* Ensures inputs still stay at a comfortable reading width */
+    }
 }
 
 /* Right Column: Interactive Form & Links */
