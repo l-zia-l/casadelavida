@@ -154,7 +154,7 @@ export const init = (node, customConfig = {}) => {
                     </form>
                     <footer class="cdlv-auth__footer">
                         <p>Didn't receive the code? <button type="button" id="resend-code" class="cdlv-auth__link">Resend Token</button></p>
-                        <p>or <button type="button" id="change-email" class="cdlv-auth__link" style="opacity: 0.7;">Change Email Address</button></p>
+                        <p>or <button type="button" id="change-email" class="cdlv-auth__link cdlv-auth__link--muted">Change Email Address</button></p>
                     </footer>
                 </div>
             </div>
@@ -254,7 +254,20 @@ export const init = (node, customConfig = {}) => {
                 if (e.target.value !== '' && index < inputBoxes.length - 1) inputBoxes[index + 1].focus();
             });
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && e.target.value === '' && index > 0) inputBoxes[index - 1].focus();
+                // Handle Backspace logic
+                if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                    inputBoxes[index - 1].focus();
+                }
+                // A11y: Support Left Arrow navigation
+                else if (e.key === 'ArrowLeft' && index > 0) {
+                    e.preventDefault();
+                    inputBoxes[index - 1].focus();
+                }
+                // A11y: Support Right Arrow navigation
+                else if (e.key === 'ArrowRight' && index < inputBoxes.length - 1) {
+                    e.preventDefault();
+                    inputBoxes[index + 1].focus();
+                }
             });
             input.addEventListener('paste', (e) => {
                 e.preventDefault();

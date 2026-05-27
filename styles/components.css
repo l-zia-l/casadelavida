@@ -3558,24 +3558,37 @@ display: inline-block;
 }
 
 /* Shared Input Aesthetics */
+/* Shared Input Aesthetics & A11y Focus States */
 .cdlv-auth__input {
     width: 100%;
     border: none;
     border-bottom: 1px solid rgba(26, 26, 26, 0.2);
     background: transparent;
-    /* Input padding shrinks on short screens */
-    padding: clamp(0.25rem, 1vh, var(--spacing-xs)) 0;
+    padding: clamp(0.25rem, 1vh, var(--spacing-xs)) var(--spacing-xs); /* Added horizontal padding for background focus */
     font-family: var(--font-family-body);
     font-size: clamp(0.875rem, 2vh + 0.5vw, var(--font-size-body));
     color: var(--color-text-dark);
     border-radius: var(--radius-strict);
-    transition: border-color var(--transition-base);
+    transition: border-color var(--transition-base), background-color var(--transition-base);
 }
 
 .cdlv-auth__input::placeholder { color: rgba(26, 26, 26, 0.4); }
+
+/* A11y: Robust focus state replacing the default outline */
 .cdlv-auth__input:focus,
-.cdlv-auth__input:focus-visible { outline: none; border-bottom: 2px solid var(--color-accent); }
-.cdlv-auth__input.has-error, .cdlv-2fa__input-box.has-error { border-color: #D9534F !important; }
+.cdlv-auth__input:focus-visible { 
+    outline: none; 
+    border-bottom: 2px solid var(--color-accent); 
+    /* Subtle background shift to ensure focus is unmistakable */
+    background-color: rgba(71, 59, 117, 0.03); 
+}
+
+.cdlv-auth__input.has-error, 
+.cdlv-2fa__input-box.has-error { 
+    border-color: #D9534F !important; 
+    /* A11y: Ensure error states also have a background indicator for colorblind users */
+    background-color: rgba(217, 83, 79, 0.03); 
+}
 
 .cdlv-auth__hint {
     font-size: clamp(0.75rem, 1.5vh, var(--font-size-small)); 
@@ -3586,10 +3599,45 @@ display: inline-block;
     line-height: 1.4;
 }
 
-.cdlv-auth__footer { font-size: var(--font-size-small); text-align: center;
-    margin-top: var(--spacing-md); }
-.cdlv-auth__link { color: var(--color-accent); text-decoration: underline; transition: color var(--transition-fast); background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; font-size: inherit; }
-.cdlv-auth__link:hover { color: var(--color-text-dark); }
+.cdlv-auth__footer { 
+    font-size: var(--font-size-small); 
+    text-align: center;
+    margin-top: var(--spacing-md); 
+}
+
+.cdlv-auth__link { 
+    color: var(--color-accent); 
+    text-decoration: underline; 
+    text-underline-offset: 4px; /* A11y: Improves readability of underlined text */
+    transition: color var(--transition-fast), text-decoration-thickness var(--transition-fast); 
+    background: none; 
+    border: none; 
+    cursor: pointer; 
+    padding: 0.25rem; /* A11y: Increases hit area for touch/mouse users */
+    margin: -0.25rem;
+    font-family: inherit; 
+    font-size: inherit; 
+}
+
+.cdlv-auth__link:hover,
+.cdlv-auth__link:focus-visible { 
+    color: var(--color-text-dark); 
+    text-decoration-thickness: 2px;
+    outline: 2px solid var(--color-accent); /* Standardize focus on custom buttons */
+    outline-offset: 4px;
+}
+
+/* A11y: Handle secondary muted links without violating contrast ratios */
+.cdlv-auth__link--muted {
+    color: var(--color-text-dark);
+    text-decoration: none;
+}
+
+.cdlv-auth__link--muted:hover,
+.cdlv-auth__link--muted:focus-visible {
+    text-decoration: underline;
+    color: var(--color-accent);
+}
 
 /* 2FA Specific Elements */
 .cdlv-2fa__digits {
