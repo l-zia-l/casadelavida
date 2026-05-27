@@ -54,7 +54,8 @@ const defaultConfig = {
     dividerText: "or log in with email",
     buttonText: "Log In",
     forgotUrl: "auth/reset-password.html",
-    signupUrl: "auth/sign-up.html"
+    signupUrl: "auth/sign-up.html",
+    redirectUrl: "account/index.html" // Added redirect URL
 };
 
 // SVG Definitions for pristine scaling
@@ -90,17 +91,16 @@ export const init = (node, customConfig = {}) => {
                     <div class="cdlv-auth__group">
                         <label for="login-email" class="visually-hidden">Email Address</label>
                         <input type="email" id="login-email" class="cdlv-auth__input" placeholder="you@example.com" required autocomplete="email" aria-describedby="error-login-email">
-                        <div class="cdlv-auth__input-footer">
-                            <span class="cdlv-auth__error" id="error-login-email" aria-live="polite"></span>
-                        </div>
+                        <span class="cdlv-auth__error" id="error-login-email" aria-live="polite"></span>
                     </div>
                     
                     <div class="cdlv-auth__group">
                         <label for="login-password" class="visually-hidden">Password</label>
                         <input type="password" id="login-password" class="cdlv-auth__input" placeholder="Enter your password" required autocomplete="current-password" aria-describedby="error-login-password">
-                        <div class="cdlv-auth__input-footer">
-                            <span class="cdlv-auth__error" id="error-login-password" aria-live="polite"></span>
-                            <a href="${buildPath(sanitizeText(config.forgotUrl))}" class="cdlv-auth__link cdlv-auth__link--muted cdlv-auth__forgot-link">Forgot?</a>
+                        <span class="cdlv-auth__error" id="error-login-password" aria-live="polite"></span>
+                        
+                        <div class="cdlv-auth__forgot-wrapper">
+                            <a href="${buildPath(sanitizeText(config.forgotUrl))}" class="cdlv-auth__link cdlv-auth__link--muted">Forgot?</a>
                         </div>
                     </div>
                     
@@ -139,8 +139,8 @@ export const init = (node, customConfig = {}) => {
         if (isEmailInvalid) return emailInput.focus();
         if (isPasswordInvalid) return passwordInput.focus();
 
-        // Pass to Supabase auth logic here
-        console.log('Logging in with:', emailInput.value);
+        // Redirect to the account dashboard upon passing validation
+        window.location.href = buildPath(sanitizeText(config.redirectUrl));
     });
 
     node.querySelector('#oauth-google').addEventListener('click', () => console.log('Google OAuth trigger'));

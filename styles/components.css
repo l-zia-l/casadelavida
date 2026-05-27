@@ -3773,13 +3773,16 @@ display: inline-block;
     z-index: 1;
 }
 
-/* --- FORM SPECIFICS (Add these for the Forgot link) --- */
-.cdlv-auth__input-footer {
+.cdlv-auth__forgot-wrapper {
     display: flex;
-    align-items: flex-start;
+    justify-content: flex-end;
     width: 100%;
-    margin-top: calc(var(--spacing-xs) * 0.5);
-    gap: var(--spacing-sm);
+    margin-top: calc(var(--spacing-xs) * 0.75);
+}
+
+/* Ensure the error message doesn't push the wrapper too far down when visible */
+.cdlv-auth__group .cdlv-auth__error {
+    margin-bottom: calc(var(--spacing-xs) * -0.5);
 }
 
 .cdlv-auth__input-footer .cdlv-auth__error {
@@ -3787,10 +3790,6 @@ display: inline-block;
     margin-top: 0; 
 }
 
-.cdlv-auth__forgot-link {
-    margin-left: auto; /* Forces the link to the right edge */
-    font-size: clamp(0.75rem, 1.5vh, var(--font-size-small));
-}
 
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
