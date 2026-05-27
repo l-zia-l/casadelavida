@@ -3529,7 +3529,7 @@ display: inline-block;
 }
 
 .cdlv-auth__form .cdlv-hero__btn {
-    width: 100%;
+    width: var(--spacing-md);
     margin-top: var(--spacing-sm);
 }
 
