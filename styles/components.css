@@ -3790,6 +3790,26 @@ display: inline-block;
     margin-top: 0; 
 }
 
+/* ==========================================================================
+   MODULE: RESET PASSWORD (styles/components.css)
+   Architecture: Extends the fluid .cdlv-auth-step layout. 
+   ========================================================================== */
+
+/* --- SUCCESS STATE ICON --- */
+.cdlv-reset__icon {
+    width: clamp(3rem, 6vh + 2vw, 4rem);
+    height: auto;
+    margin: 0 auto clamp(0.5rem, 2vh, var(--spacing-sm));
+    color: var(--color-accent);
+    animation: fade-in-up var(--transition-slow) forwards;
+}
+
+/* Ensure the success text remains properly constrained */
+.cdlv-reset__success-text {
+    max-width: 60ch;
+    margin-inline: auto;
+}
+
 
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)

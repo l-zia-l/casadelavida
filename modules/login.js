@@ -83,7 +83,7 @@ export const init = (node, customConfig = {}) => {
                     </button>
                 </div>
 
-                <div class="cdlv-auth__divider">
+                <div class="cdlv-auth__divider" role="separator" aria-orientation="horizontal">
                     <span>${sanitizeText(config.dividerText)}</span>
                 </div>
 
@@ -100,7 +100,9 @@ export const init = (node, customConfig = {}) => {
                         <span class="cdlv-auth__error" id="error-login-password" aria-live="polite"></span>
                         
                         <div class="cdlv-auth__forgot-wrapper">
-                            <a href="${buildPath(sanitizeText(config.forgotUrl))}" class="cdlv-auth__link cdlv-auth__link--muted">Forgot?</a>
+                            <a href="${buildPath(sanitizeText(config.forgotUrl))}" class="cdlv-auth__link cdlv-auth__link--muted">
+                                Forgot<span class="visually-hidden"> password</span>?
+                            </a>
                         </div>
                     </div>
                     
