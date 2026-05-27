@@ -3511,21 +3511,20 @@ display: inline-block;
 
 /* --- DESKTOP & TABLET: TWO-COLUMN LAYOUT --- */
 @media (min-width: 768px) {
-    /* Apply row layout only if it's not the centered welcome screen */
     .cdlv-auth-step:not(.cdlv-auth-step--centered) {
         flex-direction: row;
-        align-items: center; /* Vertically centers the text and the form */
+        align-items: flex-start; /* Changed from center to top-align the columns */
         justify-content: space-between;
     }
 
     .cdlv-auth__header {
-        flex: 1 1 45%; /* Takes up roughly half the container */
-        padding-right: var(--spacing-md); /* Breathing room between columns */
+        flex: 1 1 45%; 
+        padding-right: var(--spacing-md); 
     }
 
     .cdlv-auth__panel {
-        flex: 1 1 50%; /* Takes up the other half */
-        max-width: 500px; /* Ensures inputs still stay at a comfortable reading width */
+        flex: 1 1 50%; 
+        max-width: 500px; 
     }
 }
 
@@ -3772,6 +3771,25 @@ display: inline-block;
     justify-content: flex-end;
     margin-bottom: calc(var(--spacing-xs) * -0.5); /* Pulls link slightly closer to input */
     z-index: 1;
+}
+
+/* --- FORM SPECIFICS (Add these for the Forgot link) --- */
+.cdlv-auth__input-footer {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    margin-top: calc(var(--spacing-xs) * 0.5);
+    gap: var(--spacing-sm);
+}
+
+.cdlv-auth__input-footer .cdlv-auth__error {
+    /* Remove default top margin since the footer wrapper handles the spacing */
+    margin-top: 0; 
+}
+
+.cdlv-auth__forgot-link {
+    margin-left: auto; /* Forces the link to the right edge */
+    font-size: clamp(0.75rem, 1.5vh, var(--font-size-small));
 }
 
 /* ==========================================================================

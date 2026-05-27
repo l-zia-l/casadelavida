@@ -90,16 +90,18 @@ export const init = (node, customConfig = {}) => {
                     <div class="cdlv-auth__group">
                         <label for="login-email" class="visually-hidden">Email Address</label>
                         <input type="email" id="login-email" class="cdlv-auth__input" placeholder="you@example.com" required autocomplete="email" aria-describedby="error-login-email">
-                        <span class="cdlv-auth__error" id="error-login-email" aria-live="polite"></span>
+                        <div class="cdlv-auth__input-footer">
+                            <span class="cdlv-auth__error" id="error-login-email" aria-live="polite"></span>
+                        </div>
                     </div>
                     
                     <div class="cdlv-auth__group">
-                        <div class="cdlv-auth__label-row">
-                            <label for="login-password" class="visually-hidden">Password</label>
-                            <a href="${buildPath(sanitizeText(config.forgotUrl))}" class="cdlv-auth__link cdlv-auth__link--muted">Forgot?</a>
-                        </div>
+                        <label for="login-password" class="visually-hidden">Password</label>
                         <input type="password" id="login-password" class="cdlv-auth__input" placeholder="Enter your password" required autocomplete="current-password" aria-describedby="error-login-password">
-                        <span class="cdlv-auth__error" id="error-login-password" aria-live="polite"></span>
+                        <div class="cdlv-auth__input-footer">
+                            <span class="cdlv-auth__error" id="error-login-password" aria-live="polite"></span>
+                            <a href="${buildPath(sanitizeText(config.forgotUrl))}" class="cdlv-auth__link cdlv-auth__link--muted cdlv-auth__forgot-link">Forgot?</a>
+                        </div>
                     </div>
                     
                     <button type="submit" class="cdlv-hero__btn cdlv-hero__btn--primary">${sanitizeText(config.buttonText)}</button>
