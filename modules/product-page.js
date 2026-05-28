@@ -2,10 +2,9 @@
    MODULE: PRODUCT PAGE (modules/product-page.js)
    Architecture: Exportable ES Module generating a fluid, 2-column e-commerce 
                  interface. Uses event delegation for performance.
-   SEO: Perfect heading hierarchy (H1-H3), semantic <article> wrappers, 
-        and descriptive variant image alt-text for Google Images indexing.
+   SEO: Semantic heading structures (h1, h2, h3).
    A11y: WCAG Compliant. Uses semantic <button> and native <input type="radio">.
-   Performance: Hardware-accelerated states, LCP prioritization, lazy-loading.
+   Security: Strict CSP Compliance (No inline style tags), DOMPurify-style fallback.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -45,7 +44,6 @@ const generateOptionsForQuantity = (quantity, config) => {
         html += `<div class="cdlv-product-page__item-config" data-item-index="${i}">`;
         
         if (quantity > 1) {
-            /* SEO FIX: Upgraded from H4 to H3 to prevent skipping heading levels */
             html += `<h3 class="cdlv-product-page__item-title">Item ${i} Configuration</h3>`;
         }
 
@@ -72,7 +70,6 @@ const generateOptionsForQuantity = (quantity, config) => {
                 const isSelected = color.default ? 'is-selected' : '';
                 const isChecked = color.default ? 'checked' : '';
                 const resolvedImgPath = buildPath(sanitizeText(color.img));
-                /* SEO FIX: Removed aria-hidden and added descriptive alt text for Google Images indexing */
                 html += `
                     <label class="cdlv-product-page__option-box cdlv-product-page__option-box--color ${isSelected}" data-type="color">
                         <input type="radio" name="item_${i}_color" value="${sanitizeText(color.id)}" class="cdlv-product-page__sr-only" ${isChecked}>
@@ -94,7 +91,6 @@ export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     const mainImgPath = config.images.length > 0 ? buildPath(sanitizeText(config.images[0])) : '';
     
-    /* SEO FIX: Changed generic <div> to semantic <article> */
     const moduleHTML = `
         <article class="cdlv-product-page" data-image-sync>
             <h1 class="cdlv-product-page__title-mobile">${sanitizeText(config.title)}</h1>
@@ -158,9 +154,9 @@ export const init = (node, customConfig = {}) => {
                     ${generateOptionsForQuantity(1, config)}
                 </div>
 
-                <fieldset class="cdlv-product-page__purchase-options" style="border: none; padding: 0; margin: 0;">
-                    <legend class="cdlv-product-page__label" style="margin-bottom: var(--spacing-xs);">Purchasing Options</legend>
-                    <div style="border: 1px solid rgba(26, 26, 26, 0.2); padding: var(--spacing-xs); display: flex; flex-direction: column; gap: var(--spacing-xs);">
+                <fieldset class="cdlv-product-page__purchase-fieldset">
+                    <legend class="cdlv-product-page__label cdlv-product-page__purchase-legend">Purchasing Options</legend>
+                    <div class="cdlv-product-page__purchase-options">
                         <label class="cdlv-product-page__radio-row">
                             <input type="radio" name="purchase_type" value="subscription" class="cdlv-product-page__radio-input">
                             <div class="cdlv-product-page__radio-content">
@@ -187,7 +183,6 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = moduleHTML;
 
-    // DOM Elements
     const mainImg = node.querySelector('#main-product-image');
     const thumbnails = node.querySelectorAll('.cdlv-product-page__thumb-btn');
     const readMoreBtn = node.querySelector('#read-more-btn');
@@ -195,7 +190,6 @@ export const init = (node, customConfig = {}) => {
     const qtyInput = node.querySelector('#qty');
     const dynamicContainer = node.querySelector('#dynamic-options-container');
 
-    // Read More Logic with Debounced ResizeObserver
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
             const isExpanded = descList.classList.contains('is-expanded');
@@ -246,7 +240,6 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Thumbnail logic
     thumbnails.forEach(thumb => {
         thumb.addEventListener('click', (e) => {
             const targetSrc = e.currentTarget.getAttribute('data-target-src');
@@ -279,7 +272,6 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Grid Event Delegation for radios
     if (dynamicContainer) {
         dynamicContainer.addEventListener('change', (e) => {
             if (e.target.type === 'radio') {

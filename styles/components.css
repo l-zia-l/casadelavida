@@ -4217,7 +4217,17 @@ h3.cdlv-product-page__item-title {
     word-break: break-word;
 }
 
-/* Purchasing Options */
+/* Purchasing Options (CSP Compliant) */
+.cdlv-product-page__purchase-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cdlv-product-page__purchase-legend {
+    margin-bottom: var(--spacing-xs);
+}
+
 .cdlv-product-page__purchase-options {
     display: flex;
     flex-direction: column;
