@@ -8,16 +8,12 @@
    Dependencies: Expects CSS variables from `globals.css` and scoped styles 
                  from `components.css`. Integrates with global image-render.js 
                  via `data-image-sync`. Uses `utils/path.js` for dynamic routing.
-   Performance: Dynamic DOM rendering based on quantity input prevents bloated 
-                HTML. Hardware-accelerated CSS max-height transitions.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
 
 /**
  * Text Sanitizer to prevent XSS injection.
- * @param {string} str - Raw input string
- * @returns {string} - Sanitized string
  */
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
@@ -50,9 +46,6 @@ const defaultConfig = {
 
 /**
  * Generates the HTML for the dynamic size and color selections based on quantity.
- * @param {number} quantity 
- * @param {Object} config 
- * @returns {string} HTML string
  */
 const generateOptionsForQuantity = (quantity, config) => {
     let html = '';
@@ -82,8 +75,7 @@ const generateOptionsForQuantity = (quantity, config) => {
 
         // Generate Colors/Accessories
         if (config.colors && config.colors.length > 0) {
-            // Apply the new --colors modifier for the 2-column layout
-            html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors">`;
+            html += `<div class="cdlv-product-page__options-grid">`;
             config.colors.forEach(color => {
                 const isSelected = color.default ? 'is-selected' : '';
                 const resolvedImgPath = buildPath(sanitizeText(color.img));
@@ -105,16 +97,11 @@ const generateOptionsForQuantity = (quantity, config) => {
 
 /**
  * Core initialization function.
- * @param {HTMLElement} node - Target DOM element
- * @param {Object} customConfig - Configuration overriding defaults
  */
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
-    
-    // Safely set a main image path fallback if array is empty
     const mainImgPath = config.images.length > 0 ? buildPath(sanitizeText(config.images[0])) : '';
     
-    // 1. Build Base HTML structure
     const moduleHTML = `
         <div class="cdlv-product-page" data-image-sync>
             <h1 class="cdlv-product-page__title-mobile">${sanitizeText(config.title)}</h1>
@@ -157,14 +144,16 @@ export const init = (node, customConfig = {}) => {
             <section class="cdlv-product-page__details">
                 <h1 class="cdlv-product-page__title-desktop">${sanitizeText(config.title)}</h1>
 
-                <div class="cdlv-product-page__form-group">
-                    <label class="cdlv-product-page__label" for="del-date">Delivery Date*</label>
-                    <input type="date" id="del-date" class="cdlv-product-page__input">
-                </div>
+                <div class="cdlv-product-page__form-row">
+                    <div class="cdlv-product-page__form-group">
+                        <label class="cdlv-product-page__label" for="del-date">Delivery Date*</label>
+                        <input type="date" id="del-date" class="cdlv-product-page__input">
+                    </div>
 
-                <div class="cdlv-product-page__form-group">
-                    <label class="cdlv-product-page__label" for="qty">Quantity</label>
-                    <input type="number" id="qty" class="cdlv-product-page__input" value="1" min="1" max="10">
+                    <div class="cdlv-product-page__form-group">
+                        <label class="cdlv-product-page__label" for="qty">Quantity</label>
+                        <input type="number" id="qty" class="cdlv-product-page__input" value="1" min="1" max="10">
+                    </div>
                 </div>
 
                 <div id="dynamic-options-container">
@@ -206,25 +195,24 @@ export const init = (node, customConfig = {}) => {
     const qtyInput = node.querySelector('#qty');
     const dynamicContainer = node.querySelector('#dynamic-options-container');
 
-    // Smart Read More Logic (Strips max-height to measure true length of text)
+    // Bulletproof Read More Logic utilizing ResizeObserver for web font loads
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
-            // Uncap height temporarily to measure true scroll height safely
             const currentMax = descList.style.maxHeight;
             descList.style.maxHeight = 'none';
             const trueHeight = descList.scrollHeight;
             descList.style.maxHeight = currentMax;
 
-            if (trueHeight <= 250) {
-                readMoreBtn.style.display = 'none';
-            } else {
+            if (trueHeight > 250) {
                 readMoreBtn.style.display = 'inline-block';
+            } else {
+                readMoreBtn.style.display = 'none';
             }
         };
 
-        // Fire once DOM is painted and listen for screen resizing
-        requestAnimationFrame(evaluateReadMore);
-        window.addEventListener('resize', evaluateReadMore);
+        // ResizeObserver guarantees measurement *after* layout shifts and font loads
+        const resizeObserver = new ResizeObserver(() => requestAnimationFrame(evaluateReadMore));
+        resizeObserver.observe(descList);
 
         readMoreBtn.addEventListener('click', () => {
             const isExpanded = descList.classList.toggle('is-expanded');
