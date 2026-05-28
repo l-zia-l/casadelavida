@@ -3852,8 +3852,7 @@ display: inline-block;
     margin-bottom: 0;
 }
 
-/* Desktop Title (Div acting visually as H1 to prevent SEO penalty) */
-div.cdlv-product-page__title-desktop {
+.cdlv-product-page__title-desktop {
     display: none;
     font-size: var(--font-size-h2);
     margin-bottom: var(--spacing-md);
