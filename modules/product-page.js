@@ -30,8 +30,7 @@ const sanitizeText = (str) => {
 const defaultConfig = {
     title: "The Serenity Wellness Box",
     subtitle: "Organic Matcha, Raw Honey, and Artisan Accessories.",
-    images: [
-    ],
+    images: [],
     ingredients: "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
     bestFor: "Morning rituals, mindfulness practices, or deep focus work sessions.",
     funFact: "Matcha contains L-theanine, an amino acid that promotes relaxed alertness without the caffeine crash.",
@@ -42,8 +41,7 @@ const defaultConfig = {
         { id: "s2", name: "Deluxe", desc: "40 Servings", price: 94 },
         { id: "s3", name: "Original", desc: "20 Servings", price: 69 }
     ],
-    colors: [
-    ],
+    colors: [],
     subscription: {
         priceText: "GH₵ 66 + free shipping",
         desc: "Best Value: Up to 30% off. Skip or cancel anytime."
@@ -82,7 +80,7 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `</div>`;
         }
 
-        // Generate Colors/Accessories (No price difference)
+        // Generate Colors/Accessories
         if (config.colors && config.colors.length > 0) {
             html += `<div class="cdlv-product-page__options-grid">`;
             config.colors.forEach(color => {
@@ -91,7 +89,9 @@ const generateOptionsForQuantity = (quantity, config) => {
                 html += `
                     <div class="cdlv-product-page__option-box cdlv-product-page__option-box--color ${isSelected}" data-type="color" data-id="${sanitizeText(color.id)}">
                         <img src="${resolvedImgPath}" alt="${sanitizeText(color.name)}" class="cdlv-product-page__option-img u-img-loader u-img-reveal" loading="lazy">
-                        <div class="cdlv-product-page__option-name">${sanitizeText(color.name)}</div>
+                        <div class="cdlv-product-page__color-text">
+                            <span class="cdlv-product-page__option-name">${sanitizeText(color.name)}</span>
+                        </div>
                     </div>
                 `;
             });
@@ -109,7 +109,9 @@ const generateOptionsForQuantity = (quantity, config) => {
  */
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
-    const mainImgPath = buildPath(sanitizeText(config.images[0]));
+    
+    // Safely set a main image path fallback if array is empty
+    const mainImgPath = config.images.length > 0 ? buildPath(sanitizeText(config.images[0])) : '';
     
     // 1. Build Base HTML structure
     const moduleHTML = `
@@ -208,27 +210,38 @@ export const init = (node, customConfig = {}) => {
     const qtyInput = node.querySelector('#qty');
     const dynamicContainer = node.querySelector('#dynamic-options-container');
 
-    // Thumbnail click logic
-    thumbnails.forEach(thumb => {
-        thumb.addEventListener('click', (e) => {
-            thumbnails.forEach(t => t.classList.remove('is-active'));
-            e.currentTarget.classList.add('is-active');
-            
-            mainImg.style.opacity = '0.5';
-            setTimeout(() => {
-                mainImg.src = e.currentTarget.getAttribute('data-target-src');
-                mainImg.style.opacity = '1';
-            }, 150);
-        });
-    });
-
-    // Read More Logic
+    // Smart Read More Logic (Hides if text is short)
     if (readMoreBtn && descList) {
+        // We use requestAnimationFrame to let the browser paint the DOM first,
+        // otherwise scrollHeight might calculate as 0 initially.
+        requestAnimationFrame(() => {
+            if (descList.scrollHeight <= 250) {
+                readMoreBtn.style.display = 'none';
+            }
+        });
+
         readMoreBtn.addEventListener('click', () => {
             const isExpanded = descList.classList.toggle('is-expanded');
             readMoreBtn.textContent = isExpanded ? 'Read Less' : 'Read More';
         });
     }
+
+    // Thumbnail click logic - strictly assigning the target SRC
+    thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', (e) => {
+            const targetSrc = e.currentTarget.getAttribute('data-target-src');
+            if (!targetSrc || !mainImg) return;
+
+            thumbnails.forEach(t => t.classList.remove('is-active'));
+            e.currentTarget.classList.add('is-active');
+            
+            mainImg.style.opacity = '0.5';
+            setTimeout(() => {
+                mainImg.src = targetSrc;
+                mainImg.style.opacity = '1';
+            }, 150);
+        });
+    });
 
     // Dynamic Quantity Re-rendering
     if (qtyInput && dynamicContainer) {

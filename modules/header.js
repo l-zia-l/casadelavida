@@ -140,7 +140,8 @@ export function init(element) {
                 evaluateHeaderTheme(); 
 
                 const heroSection = document.querySelector('[data-module^="hero"]');
-                const hideThreshold = heroSection ? heroSection.offsetHeight : 500;
+                // FIXED: Now falls back to a tiny 80px threshold if no hero is present
+                const hideThreshold = heroSection ? heroSection.offsetHeight : 80;
 
                 if (currentScrollY > hideThreshold && !isMenuOpen) {
                     if (currentScrollY > lastScrollY) {
