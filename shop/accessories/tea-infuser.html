@@ -119,21 +119,32 @@ and assign it to the `innerHTML` of the target container.
   <main id="main-content" class="container">
     <div data-module="product-page" 
      data-config='{
-        "title": "Tea Infuser",
-        "subtitle": "Heat-resistant Glass Tea Infuser",
+        "title": "The Fertility Wellness Box",
+        "subtitle": "Curated holistic self-care routines for intentional feminine wellness.",
         "images": [
-            "assets/images/products/item_7.webp"
+            "assets/images/products/box_1.webp",
+            "assets/images/products/box_2.webp",
+            "assets/images/products/box_3.webp",
+            "assets/images/products/box_4.webp"
         ],
-        "composition": "Crafted from high-borosilicate heat-resistant glass, durable stainless steel framing, and an ergonomic, cool-touch composite handle and base.",
-        "bestFor": "Creating a clean, debris-free brewing experience for loose-leaf herbal teas, floral infusions, and multi-serving daily wellness rituals.",
-        "funFact": "The fine-mesh plunger system used in this infuser doesn’t just strain your tea; it fully isolates the leaves at the bottom, stopping the brewing process instantly so your last cup never tastes bitter.",
-        "proTip": "To get the absolute most out of your botanical blends, leave the plunger up while steeping to let the loose leaves expand freely, then slowly press down to lock in the vibrant flavors and essential oils.",
+        "composition": "Each premium box is crafted from durable, high-quality materials and includes an artisanal selection of: our signature loose-leaf herbal infusions, raw honey, pure black seed oil, a heat-resistant glass tea infuser, and a hand-poured ritual candle.",
+        "bestFor": "Creating a dedicated space for "soft life" rituals, fertility support, gentle body detoxification, and nurturing your mind during busy days.",
+        "funFact": "Every box arrives with exclusive, beautifully designed instruction cards that guide you step-by-step through the intention and preparation of each ritual item, ensuring a deeply mindful experience.",
+        "proTip": "Set the tone for your ritual by lighting your candle first, then use your instruction card to reflect on your intention before you begin brewing your tea.",
         "deliveryCountryMsg": "Available for same-day local delivery in Accra and Tamale.",
         "sizes": [
-            { "id": "s1", "name": "Original", "desc": "", "price": 90, "default": true }
+            { "id": "s1", "name": "Grand", "desc": "60 Servings", "price": 800, "default": false },
+            { "id": "s2", "name": "Deluxe", "desc": "40 Servings", "price": 700, "popular": true, "default": true },
+            { "id": "s3", "name": "Original", "desc": "20 Servings", "price": 600, "default": false }
+        ],
+        "colors": [
+            { "id": "c1", "name": "Baby Pink", "img": "assets/images/products/box_1.webp", "default": true },
+            { "id": "c2", "name": "Crimson red", "img": "assets/images/products/box_2.webp" },
+            { "id": "c3", "name": "Navy Blue", "img": "assets/images/products/box_3.webp" },
+            { "id": "c4", "name": "Cream", "img": "assets/images/products/box_4.webp" }
         ],
         "subscription": {
-            "priceText": "GH₵ 200 yearly + free shipping",
+            "priceText": "GH₵ 1300 + free shipping",
             "desc": "Best Value: Up to 30% off. Skip or cancel anytime."
         }
      }'>
@@ -143,10 +154,10 @@ and assign it to the `innerHTML` of the target container.
      data-config='{
        "mediaType": "video",
        "videoSrc": "assets/videos/video_show_1.mp4",
-       "imageSrc": "assets/images/products/item_7.webp",
+       "imageSrc": "assets/images/products/box_1.webp",
        "subtitle": "",
        "title": "How to Use the Product",
-       "content": "To begin your ritual, add your desired amount of loose-leaf herbal tea directly into the glass chamber. Gently pour hot water over the leaves, place the lid on top with the plunger pulled completely up, and allow your blend to steep undisturbed. Once your infusion has reached its perfect strength, slowly and steadily press the plunger down to separate the leaves from the liquid, locking them at the bottom so you can pour out a beautifully clear, perfectly balanced cup of calm.",
+       "content": "To begin your intentional wellness ritual, unbox your selection and refer to the included instruction cards to learn the specific benefits and preparation methods for each element. Choose the infusion that aligns with your current needs, use the provided tea infuser to brew your herbs, and enjoy your honey or black seed oil as part of a quiet, undisturbed moment of self-care. By regularly utilizing the components in your wellness box, you create a consistent, grounding practice that restores balance to your body and calm to your mind.",
        "layout": "image-right",
        "showCTA": false
      }'>
@@ -157,15 +168,15 @@ and assign it to the `innerHTML` of the target container.
     "items": [
         {
             "title": "Dr. Ana Maria - 5 Stars",
-            "content": "I love using this infuser for my loose-leaf teas because it completely separates the leaves from the brew. It makes my afternoon tea ritual feel so smooth, clean, and elevated."
+            "content": "Receiving this box felt like a warm hug. Every detail, from the packaging to the instruction cards, made me feel truly seen and supported in my wellness journey."
         },
         {
             "title": "Amina - 5 Stars",
-            "content": "The glass construction is beautiful and holds temperature really well. It is incredibly easy to clean compared to small metal tea balls, and it makes enough to share."
+            "content": "The variety in the Wellness Box is incredible. Having everything I need for my tea ritual, including the candle and honey, has made it so easy to prioritize myself every evening."
         },
         {
             "title": "Sarah - 5 Stars",
-            "content": "A beautiful, sturdy addition to my kitchen counter. It turns loose-leaf brewing from a messy chore into a truly peaceful, intentional routine every single morning."
+            "content": "This is the ultimate self-care gift. The quality of the herbs and the thoughtfulness of the ritual guide have completely transformed how I start my mornings."
         }
     ]
   }'></section>
@@ -196,6 +207,11 @@ and assign it to the `innerHTML` of the target container.
             "image": "assets/images/products/item_4.2.webp",
             "alt": "Blackseed Infused Honey",
             "actionLink": "shop/products/blackseed-infused-honey.html"
+        },
+        {
+            "title": "Tea Infuser",
+            "image": "assets/images/products/item_7.webp",
+            "actionLink": "shop/accessories/tea-infuser.html"
         },
         {
             "title": "Vanilla Candle",
