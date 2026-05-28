@@ -3,8 +3,9 @@
    Architecture: Exportable ES Module generating a fluid, 2-column e-commerce 
                  interface. Uses event delegation for performance.
    SEO: Semantic heading structures (h1, h2, h3).
-   A11y: WCAG Compliant. Screen-reader safe dynamic pricing.
-   Security: Strict CSP Compliance (No inline style tags).
+   A11y: WCAG Compliant. Custom quantity controls with aria labels.
+   Security: Strict CSP Compliance.
+   Pricing: Dynamic algorithmic discounts.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -20,20 +21,21 @@ const defaultConfig = {
     title: "The Serenity Wellness Box",
     subtitle: "Organic Matcha, Raw Honey, and Artisan Accessories.",
     images: [],
-    composition: "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
+    ingredients: "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
     bestFor: "Morning rituals, mindfulness practices, or deep focus work sessions.",
     funFact: "Matcha contains L-theanine, an amino acid that promotes relaxed alertness without the caffeine crash.",
     proTip: "Allow your water to cool slightly (to about 175°F) before pouring over matcha to prevent burning the leaves.",
     deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
+    // subPrice is removed; the algorithm handles it dynamically
     sizes: [
-        { id: "s1", name: "Grand", desc: "60 Servings", price: 800, subPrice: 560 },
-        { id: "s2", name: "Deluxe", desc: "40 Servings", price: 700, subPrice: 490, popular: true, default: true },
-        { id: "s3", name: "Original", desc: "20 Servings", price: 600, subPrice: 420 }
+        { id: "s1", name: "Grand", desc: "60 Servings", price: 800 },
+        { id: "s2", name: "Deluxe", desc: "40 Servings", price: 700, popular: true, default: true },
+        { id: "s3", name: "Original", desc: "20 Servings", price: 600 }
     ],
     colors: [],
     subscription: {
-        priceText: "GH₵ 1000 + free shipping",
-        desc: "Best Value: Up to 30% off. Skip or cancel anytime."
+        priceText: "Up to 30% Off + Free Shipping",
+        desc: "Best Value: Skip or cancel anytime."
     }
 };
 
@@ -47,13 +49,15 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `<h3 class="cdlv-product-page__item-title">Item ${i} Configuration</h3>`;
         }
 
-        // Generate Sizes
         if (config.sizes && config.sizes.length > 0) {
             html += `<div class="cdlv-product-page__options-grid" role="group" aria-label="Select Size for Item ${i}">`;
             config.sizes.forEach(size => {
                 const isSelected = size.default ? 'is-selected' : '';
                 const isChecked = size.default ? 'checked' : '';
                 const popularBadge = size.popular ? `<span class="cdlv-product-page__popular-badge" aria-hidden="true">Most Popular Size</span>` : '';
+                
+                // AUTOMATED PRICING: Calculates 30% off dynamically and rounds to the nearest whole cedi
+                const calculatedSubPrice = Math.round(size.price * 0.7);
                 
                 html += `
                     <label class="cdlv-product-page__option-box ${isSelected}" data-type="size">
@@ -63,10 +67,9 @@ const generateOptionsForQuantity = (quantity, config) => {
                             <span class="cdlv-product-page__option-price cdlv-product-page__price-original">
                                 <span class="cdlv-product-page__sr-only">Original Price: </span>GH₵ ${sanitizeText(size.price.toString())}
                             </span>
-                            ${size.subPrice ? `
                             <span class="cdlv-product-page__option-price cdlv-product-page__price-discount">
-                                <span class="cdlv-product-page__sr-only">Subscription Price: </span>GH₵ ${sanitizeText(size.subPrice.toString())}
-                            </span>` : ''}
+                                <span class="cdlv-product-page__sr-only">Subscription Price: </span>GH₵ ${calculatedSubPrice.toString()}
+                            </span>
                         </div>
                         <span class="cdlv-product-page__option-name">${sanitizeText(size.name)}</span>
                         <span class="cdlv-product-page__option-desc">${sanitizeText(size.desc)}</span>
@@ -76,7 +79,6 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `</div>`;
         }
 
-        // Generate Colors
         if (config.colors && config.colors.length > 0) {
             html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors" role="group" aria-label="Select Color for Item ${i}">`;
             config.colors.forEach(color => {
@@ -133,7 +135,7 @@ export const init = (node, customConfig = {}) => {
                 <div class="cdlv-product-page__desc">
                     <h2 class="cdlv-product-page__subtitle">${sanitizeText(config.subtitle)}</h2>
                     <ul class="cdlv-product-page__bullet-list" id="desc-list">
-                        <li><strong>Ingredients:</strong> ${sanitizeText(config.composition)}</li>
+                        <li><strong>Ingredients:</strong> ${sanitizeText(config.ingredients)}</li>
                         <li><strong>Best For:</strong> ${sanitizeText(config.bestFor)}</li>
                         <li><strong>Fun Fact:</strong> ${sanitizeText(config.funFact)}</li>
                         <li><strong>Pro Tip:</strong> ${sanitizeText(config.proTip)}</li>
@@ -153,7 +155,11 @@ export const init = (node, customConfig = {}) => {
 
                 <div class="cdlv-product-page__form-group">
                     <label class="cdlv-product-page__label" for="qty">Quantity</label>
-                    <input type="number" id="qty" class="cdlv-product-page__input" value="1" min="1" max="10">
+                    <div class="cdlv-product-page__qty-wrapper">
+                        <button type="button" class="cdlv-product-page__qty-btn" id="qty-minus" aria-label="Decrease quantity">−</button>
+                        <input type="number" id="qty" class="cdlv-product-page__qty-input" value="1" min="1" max="10" readonly>
+                        <button type="button" class="cdlv-product-page__qty-btn" id="qty-plus" aria-label="Increase quantity">+</button>
+                    </div>
                 </div>
 
                 <div id="dynamic-options-container">
@@ -195,9 +201,42 @@ export const init = (node, customConfig = {}) => {
     const thumbnails = node.querySelectorAll('.cdlv-product-page__thumb-btn');
     const readMoreBtn = node.querySelector('#read-more-btn');
     const descList = node.querySelector('#desc-list');
+    
+    // Custom Quantity Logic Elements
     const qtyInput = node.querySelector('#qty');
+    const btnMinus = node.querySelector('#qty-minus');
+    const btnPlus = node.querySelector('#qty-plus');
+    
     const dynamicContainer = node.querySelector('#dynamic-options-container');
     const purchaseRadios = node.querySelectorAll('input[name="purchase_type"]');
+
+    // Custom Quantity Button Listeners
+    if (qtyInput && btnMinus && btnPlus) {
+        btnMinus.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value, 10);
+            if (val > 1) {
+                qtyInput.value = val - 1;
+                qtyInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        btnPlus.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value, 10);
+            if (val < parseInt(qtyInput.max, 10)) {
+                qtyInput.value = val + 1;
+                qtyInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        qtyInput.addEventListener('change', (e) => {
+            let val = parseInt(e.target.value, 10);
+            if (isNaN(val) || val < 1) {
+                val = 1;
+                e.target.value = 1;
+            }
+            dynamicContainer.innerHTML = generateOptionsForQuantity(val, config);
+        });
+    }
 
     // Dynamic Pricing Subscription Logic
     purchaseRadios.forEach(radio => {
@@ -286,17 +325,6 @@ export const init = (node, customConfig = {}) => {
             }, 150);
         });
     });
-
-    if (qtyInput && dynamicContainer) {
-        qtyInput.addEventListener('change', (e) => {
-            let val = parseInt(e.target.value, 10);
-            if (isNaN(val) || val < 1) {
-                val = 1;
-                e.target.value = 1;
-            }
-            dynamicContainer.innerHTML = generateOptionsForQuantity(val, config);
-        });
-    }
 
     if (dynamicContainer) {
         dynamicContainer.addEventListener('change', (e) => {

@@ -4087,17 +4087,61 @@ h2.cdlv-product-page__subtitle {
     box-shadow: 0 0 0 3px rgba(71, 59, 117, 0.15);
 }
 
-/* Custom Number Arrows */
-.cdlv-product-page__input[type="number"] {
-    padding-right: var(--spacing-xs);
+/* Custom Quantity Selector */
+.cdlv-product-page__qty-wrapper {
+    display: flex;
+    align-items: center;
+    border: 2px solid rgba(26, 26, 26, 0.15);
+    border-radius: var(--radius-strict);
+    width: max-content; 
+    background-color: var(--color-primary);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.cdlv-product-page__input[type="number"]::-webkit-inner-spin-button,
-.cdlv-product-page__input[type="number"]::-webkit-outer-spin-button {
+.cdlv-product-page__qty-wrapper:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(71, 59, 117, 0.15);
+}
+
+.cdlv-product-page__qty-btn {
+    background: none;
+    border: none;
+    font-size: clamp(1.2rem, 2vw, 1.5rem);
+    color: var(--color-accent);
     cursor: pointer;
-    opacity: 1;
-    width: calc(var(--icon-size-base) * 2);
-    height: calc(var(--icon-size-base) * 2);
+    padding: calc(var(--spacing-xs) * 0.8) var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--transition-fast);
+}
+
+.cdlv-product-page__qty-btn:hover {
+    background-color: rgba(71, 59, 117, 0.05); /* Soft accent highlight */
+}
+
+/* Hides native spinners and styles the text */
+.cdlv-product-page__qty-input {
+    border: none;
+    width: 3rem;
+    text-align: center;
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body);
+    color: var(--color-text-dark);
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    -moz-appearance: textfield; 
+}
+
+.cdlv-product-page__qty-input::-webkit-outer-spin-button,
+.cdlv-product-page__qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.cdlv-product-page__qty-input:focus {
+    outline: none;
 }
 
 /* Options Grid */
