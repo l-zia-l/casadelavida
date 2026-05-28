@@ -622,7 +622,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   z-index: 0;
   pointer-events: none; 
   /* Forces the video onto a dedicated GPU layer without using will-change */
@@ -923,7 +923,7 @@
 .cdlv-catalog-slider__image-box img {
   width: 100%;
   height: 100%;
-  object-fit: cover; 
+  object-fit: contain; 
 }
 
 .cdlv-catalog-slider__info {
@@ -1108,7 +1108,7 @@
 .cdlv-category-3-grid__image {
   width: 100%;
   height: 100%;
-  object-fit: cover; 
+  object-fit: contain; 
   transition: transform var(--transition-slow);
 }
 
@@ -1365,7 +1365,7 @@
 .cdlv-catalog-grid__img-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: var(--radius-strict);
   transition: transform var(--transition-slow);
 }
@@ -1831,7 +1831,7 @@ aspect-ratio: 4 / 3;
 .cdlv-article-feed__image {
 width: 100%;
 height: 100%;
-object-fit: cover;
+object-fit: contain;
 }
 
 .cdlv-article-feed__content {
@@ -2912,7 +2912,7 @@ display: inline-block;
 .cdlv-cart-item__image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .cdlv-cart-item__details {
@@ -3946,7 +3946,7 @@ display: inline-block;
 .cdlv-product-page__main-img-wrapper img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .cdlv-product-page__slider {
@@ -3981,7 +3981,7 @@ display: inline-block;
 .cdlv-product-page__thumb-btn img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
 }
 
@@ -4229,7 +4229,7 @@ h3.cdlv-product-page__item-title {
     width: var(--spacing-lg); 
     flex-shrink: 0; 
     height: 100%; 
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 0; 
 }
 
