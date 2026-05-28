@@ -140,8 +140,7 @@ and assign it to the `innerHTML` of the target container.
             { "id": "c1", "name": "Crimson Red", "img": "assets/images/products/box_1.webp", "default": true },
             { "id": "c2", "name": "Navy Blue", "img": "assets/images/products/box_2.webp" },
             { "id": "c3", "name": "Navy Blue", "img": "assets/images/products/box_2.webp" },
-            { "id": "c4", "name": "Navy Blue", "img": "assets/images/products/box_2.webp" },
-            { "id": "c5", "name": "Navy Blue", "img": "assets/images/products/box_2.webp" }
+            { "id": "c4", "name": "Navy Blue", "img": "assets/images/products/box_2.webp" }
         ],
         "subscription": {
             "priceText": "GH₵ 1000 + free shipping",
@@ -149,6 +148,58 @@ and assign it to the `innerHTML` of the target container.
         }
      }'>
     </div>
+
+    <div data-module="img-right-text-left" 
+     data-config='{
+       "mediaType": "video",
+       "videoSrc": "assets/videos/video_show_1.mp4",
+       "imageSrc": "assets/images/products/item_2.2.1.webp",
+       "title": "How to Use the Product",
+       "content": "Stepping into the soft life by embracing intentional, holistic self-care.",
+       "layout": "image-right",
+       "showCTA": false
+     }'>
+    </div>
+
+    <section data-module="catalog-slider" data-image-sync data-config='{
+    "heading": "More by Casa De La Vida",
+    "products": [
+        {
+            "title": "Premium Herbal Infusion",
+            "image": "assets/images/products/item_2.2.1.webp",
+            "alt": "The Premium Tea Leaves",
+            "actionLink": "shop/products/premium-herbal-infusion.html"
+        },
+        {
+            "title": "Honey Infused Tumeric",
+            "image": "assets/images/products/item_1.webp",
+            "alt": "Glass jar of creamy tumeric paste and black paper",
+            "actionLink": "shop/products/honey-infused-tumeric.html"
+        },
+        {
+            "title": "Saffron Infused Honey",
+            "image": "assets/images/products/item_4.webp",
+            "alt": "Saffron Infused Honey",
+            "actionLink": "shop/products/saffron-infused-honey.html"
+        },
+        {
+            "title": "Blackseed Infused Honey",
+            "image": "assets/images/products/item_4.2.webp",
+            "alt": "Blackseed Infused Honey",
+            "actionLink": "shop/products/blackseed-infused-honey.html"
+        },
+        {
+            "title": "Tea Infuser",
+            "image": "assets/images/products/item_7.webp",
+            "actionLink": "shop/accessories/tea-infuser.html"
+        },
+        {
+            "title": "Vanilla Candle",
+            "image": "assets/images/products/item_6.webp",
+            "actionLink": "shop/accessories/vanilla-candle.html"
+        }
+    ]
+  }'></section>
   </main>
 
   <!-- Footer Module Target -->

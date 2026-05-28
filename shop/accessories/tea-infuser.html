@@ -117,36 +117,89 @@ and assign it to the `innerHTML` of the target container.
 
   <!-- Page Fragment Target -->
   <main id="main-content" class="container">
-    <div data-module="hero-compact" 
-         data-theme="dark"
-         data-config='{"headingLevel": "h1", "bgImage": "assets/images/backgrounds/stock_1.webp", "showOverlay": false, "isPriority": true}'>
-    </div>
-
     <div data-module="product-page" 
      data-config='{
-        "title": "Raw Wildflower Honey",
-        "subtitle": "Unpasteurized and harvested seasonally.",
+        "title": "The Serenity Wellness Box",
+        "subtitle": "Organic Matcha, Raw Honey, and Artisan Accessories.",
         "images": [
-            "assets/images/products/honey-main.webp",
-            "assets/images/products/honey-open.webp"
+            "assets/images/products/box_1.webp",
+            "assets/images/products/box_2.webp",
+            "assets/images/products/box_3.webp"
         ],
-        "ingredients": "100% Raw Ghanaian Wildflower Honey.",
-        "bestFor": "Sweetening tea naturally or daily immunity boosts.",
-        "funFact": "Raw honey never spoils and has natural antibacterial properties.",
-        "proTip": "If your honey crystallizes, simply place the jar in warm water.",
+        "ingredients": "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
+        "bestFor": "Morning rituals, mindfulness practices, or deep focus work sessions.",
+        "funFact": "Matcha contains L-theanine, an amino acid that promotes relaxed alertness without the caffeine crash.",
+        "proTip": "Allow your water to cool slightly (to about 175°F) before pouring over matcha to prevent burning the leaves.",
         "deliveryCountryMsg": "Available for same-day local delivery in Accra and Tamale.",
         "sizes": [
-            { "id": "s1", "name": "Large", "desc": "500ml Jar", "price": 85, "default": true },
-            { "id": "s2", "name": "Small", "desc": "250ml Jar", "price": 50 }
+            { "id": "s1", "name": "Grand", "desc": "60 Servings", "price": 800, "default": true },
+            { "id": "s2", "name": "Deluxe", "desc": "40 Servings", "price": 700 },
+            { "id": "s3", "name": "Original", "desc": "20 Servings", "price": 600 }
         ],
-        "colors": [],
+        "colors": [
+            { "id": "c1", "name": "Crimson Red", "img": "assets/images/products/box_1.webp", "default": true },
+            { "id": "c2", "name": "Navy Blue", "img": "assets/images/products/box_2.webp" },
+            { "id": "c3", "name": "Navy Blue", "img": "assets/images/products/box_2.webp" },
+            { "id": "c4", "name": "Navy Blue", "img": "assets/images/products/box_2.webp" }
+        ],
         "subscription": {
-            "priceText": "GH₵ 75 + free shipping",
-            "desc": "Best Value: Up to 15% off. Skip or cancel anytime."
-        },
-        "oneTimePrice": "GH₵ 85"
+            "priceText": "GH₵ 1000 + free shipping",
+            "desc": "Best Value: Up to 30% off. Skip or cancel anytime."
+        }
      }'>
-</div>
+    </div>
+
+    <div data-module="img-right-text-left" 
+     data-config='{
+       "mediaType": "video",
+       "videoSrc": "assets/videos/video_show_1.mp4",
+       "imageSrc": "assets/images/products/item_2.2.1.webp",
+       "title": "How to Use the Product",
+       "content": "Stepping into the soft life by embracing intentional, holistic self-care.",
+       "layout": "image-right",
+       "showCTA": false
+     }'>
+    </div>
+
+    <section data-module="catalog-slider" data-image-sync data-config='{
+    "heading": "More by Casa De La Vida",
+    "products": [
+        {
+            "title": "Premium Herbal Infusion",
+            "image": "assets/images/products/item_2.2.1.webp",
+            "alt": "The Premium Tea Leaves",
+            "actionLink": "shop/products/premium-herbal-infusion.html"
+        },
+        {
+            "title": "Honey Infused Tumeric",
+            "image": "assets/images/products/item_1.webp",
+            "alt": "Glass jar of creamy tumeric paste and black paper",
+            "actionLink": "shop/products/honey-infused-tumeric.html"
+        },
+        {
+            "title": "Saffron Infused Honey",
+            "image": "assets/images/products/item_4.webp",
+            "alt": "Saffron Infused Honey",
+            "actionLink": "shop/products/saffron-infused-honey.html"
+        },
+        {
+            "title": "Blackseed Infused Honey",
+            "image": "assets/images/products/item_4.2.webp",
+            "alt": "Blackseed Infused Honey",
+            "actionLink": "shop/products/blackseed-infused-honey.html"
+        },
+        {
+            "title": "Tea Infuser",
+            "image": "assets/images/products/item_7.webp",
+            "actionLink": "shop/accessories/tea-infuser.html"
+        },
+        {
+            "title": "Vanilla Candle",
+            "image": "assets/images/products/item_6.webp",
+            "actionLink": "shop/accessories/vanilla-candle.html"
+        }
+    ]
+  }'></section>
   </main>
 
   <!-- Footer Module Target -->

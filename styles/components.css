@@ -1639,6 +1639,63 @@
     align-items: center;
 }
 
+/* --- MULTIMEDIA: VIDEO ENHANCEMENTS --- */
+
+.cdlv-video-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cdlv-img-right-text-left__video {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: var(--radius-strict);
+    cursor: pointer; /* Indicates it can be clicked to play */
+}
+
+/* Custom Controls matching the provided design */
+.cdlv-video-controls {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: var(--color-primary); /* White block */
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    gap: var(--spacing-xs);
+    z-index: 10;
+    /* Ensuring strict 0px border radius per system architecture */
+    border-radius: var(--radius-strict); 
+}
+
+.cdlv-video-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-accent); /* The purple-ish hue from the design */
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.cdlv-video-btn:hover,
+.cdlv-video-btn:focus-visible {
+    color: var(--color-secondary);
+    transform: scale(1.1);
+}
+
+.cdlv-video-btn svg {
+    display: block;
+}
+
 @media (min-width: 992px) {
     .cdlv-img-right-text-left__media {
         grid-row: 1;
