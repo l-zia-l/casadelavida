@@ -4135,10 +4135,51 @@ h3.cdlv-product-page__item-title {
     font-family: var(--font-family-body);
 }
 
+/* Most Popular Size Badge */
+.cdlv-product-page__popular-badge {
+    position: absolute;
+    top: calc(-1 * var(--spacing-sm) - 0.8rem);
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-accent);
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Price Wrapper */
+.cdlv-product-page__price-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--spacing-xs) * 0.8);
+}
+
+.cdlv-product-page__price-original {
+    transition: all var(--transition-fast);
+}
+
+.cdlv-product-page__price-discount {
+    display: none;
+    color: var(--color-accent);
+}
+
+/* Subscription Active State Toggles */
+.cdlv-product-page--subscription-active .cdlv-product-page__price-discount {
+    display: inline-block;
+}
+
+.cdlv-product-page--subscription-active .cdlv-product-page__price-original {
+    text-decoration: line-through;
+    opacity: 0.5;
+    font-size: 0.85em; 
+}
+
 .cdlv-product-page__options-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-xs);
+    margin-top: calc(var(--spacing-md) + 0.5rem);
     margin-bottom: var(--spacing-sm);
 }
 

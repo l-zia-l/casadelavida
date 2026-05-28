@@ -3,8 +3,8 @@
    Architecture: Exportable ES Module generating a fluid, 2-column e-commerce 
                  interface. Uses event delegation for performance.
    SEO: Semantic heading structures (h1, h2, h3).
-   A11y: WCAG Compliant. Uses semantic <button> and native <input type="radio">.
-   Security: Strict CSP Compliance (No inline style tags), DOMPurify-style fallback.
+   A11y: WCAG Compliant. Screen-reader safe dynamic pricing.
+   Security: Strict CSP Compliance (No inline style tags).
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -26,13 +26,13 @@ const defaultConfig = {
     proTip: "Allow your water to cool slightly (to about 175°F) before pouring over matcha to prevent burning the leaves.",
     deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
     sizes: [
-        { id: "s1", name: "Grand", desc: "60 Servings", price: 125, default: true },
-        { id: "s2", name: "Deluxe", desc: "40 Servings", price: 94 },
-        { id: "s3", name: "Original", desc: "20 Servings", price: 69 }
+        { id: "s1", name: "Grand", desc: "60 Servings", price: 800, subPrice: 560 },
+        { id: "s2", name: "Deluxe", desc: "40 Servings", price: 700, subPrice: 490, popular: true, default: true },
+        { id: "s3", name: "Original", desc: "20 Servings", price: 600, subPrice: 420 }
     ],
     colors: [],
     subscription: {
-        priceText: "GH₵ 66 + free shipping",
+        priceText: "GH₵ 1000 + free shipping",
         desc: "Best Value: Up to 30% off. Skip or cancel anytime."
     }
 };
@@ -47,15 +47,28 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `<h3 class="cdlv-product-page__item-title">Item ${i} Configuration</h3>`;
         }
 
+        // Generate Sizes
         if (config.sizes && config.sizes.length > 0) {
             html += `<div class="cdlv-product-page__options-grid" role="group" aria-label="Select Size for Item ${i}">`;
             config.sizes.forEach(size => {
                 const isSelected = size.default ? 'is-selected' : '';
                 const isChecked = size.default ? 'checked' : '';
+                const popularBadge = size.popular ? `<span class="cdlv-product-page__popular-badge" aria-hidden="true">Most Popular Size</span>` : '';
+                
+                // A11y: Inject hidden text so screen readers read "Original Price X, Subscription Price Y" instead of just "X Y".
                 html += `
                     <label class="cdlv-product-page__option-box ${isSelected}" data-type="size">
+                        ${popularBadge}
                         <input type="radio" name="item_${i}_size" value="${sanitizeText(size.id)}" class="cdlv-product-page__sr-only" ${isChecked}>
-                        <span class="cdlv-product-page__option-price">GH₵ ${sanitizeText(size.price.toString())}</span>
+                        <div class="cdlv-product-page__price-wrapper">
+                            <span class="cdlv-product-page__option-price cdlv-product-page__price-original">
+                                <span class="cdlv-product-page__sr-only">Original Price: </span>GH₵ ${sanitizeText(size.price.toString())}
+                            </span>
+                            ${size.subPrice ? `
+                            <span class="cdlv-product-page__option-price cdlv-product-page__price-discount">
+                                <span class="cdlv-product-page__sr-only">Subscription Price: </span>GH₵ ${sanitizeText(size.subPrice.toString())}
+                            </span>` : ''}
+                        </div>
                         <span class="cdlv-product-page__option-name">${sanitizeText(size.name)}</span>
                         <span class="cdlv-product-page__option-desc">${sanitizeText(size.desc)}</span>
                     </label>
@@ -64,6 +77,7 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `</div>`;
         }
 
+        // Generate Colors
         if (config.colors && config.colors.length > 0) {
             html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors" role="group" aria-label="Select Color for Item ${i}">`;
             config.colors.forEach(color => {
@@ -141,7 +155,7 @@ export const init = (node, customConfig = {}) => {
                 <div class="cdlv-product-page__form-row">
                     <div class="cdlv-product-page__form-group">
                         <label class="cdlv-product-page__label" for="del-date">Delivery Date*</label>
-                        <input type="date" id="del-date" class="cdlv-product-page__input">
+                        <input type="text" id="del-date" class="cdlv-product-page__input" placeholder="Select A Date">
                     </div>
 
                     <div class="cdlv-product-page__form-group">
@@ -158,7 +172,7 @@ export const init = (node, customConfig = {}) => {
                     <legend class="cdlv-product-page__label cdlv-product-page__purchase-legend">Purchasing Options</legend>
                     <div class="cdlv-product-page__purchase-options">
                         <label class="cdlv-product-page__radio-row">
-                            <input type="radio" name="purchase_type" value="subscription" class="cdlv-product-page__radio-input">
+                            <input type="radio" name="purchase_type" value="subscription" id="radio-sub" class="cdlv-product-page__radio-input">
                             <div class="cdlv-product-page__radio-content">
                                 <span class="cdlv-product-page__radio-title">Start a Subscription: ${sanitizeText(config.subscription.priceText)}</span>
                                 <span class="cdlv-product-page__radio-desc">${sanitizeText(config.subscription.desc)}</span>
@@ -166,7 +180,7 @@ export const init = (node, customConfig = {}) => {
                         </label>
                         
                         <label class="cdlv-product-page__radio-row">
-                            <input type="radio" name="purchase_type" value="one_time" class="cdlv-product-page__radio-input" checked>
+                            <input type="radio" name="purchase_type" value="one_time" id="radio-onetime" class="cdlv-product-page__radio-input" checked>
                             <div class="cdlv-product-page__radio-content">
                                 <span class="cdlv-product-page__radio-title">One Time Purchase</span>
                             </div>
@@ -183,13 +197,46 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = moduleHTML;
 
+    // DOM Elements
+    const mainWrapper = node.querySelector('.cdlv-product-page');
     const mainImg = node.querySelector('#main-product-image');
     const thumbnails = node.querySelectorAll('.cdlv-product-page__thumb-btn');
     const readMoreBtn = node.querySelector('#read-more-btn');
     const descList = node.querySelector('#desc-list');
     const qtyInput = node.querySelector('#qty');
+    const dateInput = node.querySelector('#del-date');
     const dynamicContainer = node.querySelector('#dynamic-options-container');
+    const purchaseRadios = node.querySelectorAll('input[name="purchase_type"]');
 
+    // Date Input Placeholder Logic
+    if (dateInput) {
+        dateInput.addEventListener('focus', () => dateInput.type = 'date');
+        dateInput.addEventListener('click', () => {
+            dateInput.type = 'date';
+            if (dateInput.showPicker) dateInput.showPicker();
+        });
+        dateInput.addEventListener('blur', () => {
+            if (!dateInput.value) dateInput.type = 'text';
+        });
+    }
+
+    // Dynamic Pricing Subscription Logic
+    purchaseRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'subscription') {
+                mainWrapper.classList.add('cdlv-product-page--subscription-active');
+            } else {
+                mainWrapper.classList.remove('cdlv-product-page--subscription-active');
+            }
+        });
+    });
+
+    // Determine initial active state based on HTML checked property
+    if (node.querySelector('#radio-sub').checked) {
+        mainWrapper.classList.add('cdlv-product-page--subscription-active');
+    }
+
+    // Read More Logic with Debounced ResizeObserver
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
             const isExpanded = descList.classList.contains('is-expanded');
@@ -240,6 +287,7 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
+    // Thumbnail logic
     thumbnails.forEach(thumb => {
         thumb.addEventListener('click', (e) => {
             const targetSrc = e.currentTarget.getAttribute('data-target-src');
