@@ -2,10 +2,10 @@
    MODULE: PRODUCT PAGE (modules/product-page.js)
    Architecture: Exportable ES Module generating a fluid, 2-column e-commerce 
                  interface. Uses event delegation for performance.
+   SEO: Perfect heading hierarchy (H1-H3), semantic <article> wrappers, 
+        and descriptive variant image alt-text for Google Images indexing.
    A11y: WCAG Compliant. Uses semantic <button> and native <input type="radio">.
-   Performance: Hardware-accelerated states, LCP prioritization, lazy-loading 
-                offscreen assets, and rAF debounced observers.
-   Security: Strict text sanitization (DOMPurify-style fallback).
+   Performance: Hardware-accelerated states, LCP prioritization, lazy-loading.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -45,7 +45,8 @@ const generateOptionsForQuantity = (quantity, config) => {
         html += `<div class="cdlv-product-page__item-config" data-item-index="${i}">`;
         
         if (quantity > 1) {
-            html += `<h4 class="cdlv-product-page__item-title">Item ${i} Configuration</h4>`;
+            /* SEO FIX: Upgraded from H4 to H3 to prevent skipping heading levels */
+            html += `<h3 class="cdlv-product-page__item-title">Item ${i} Configuration</h3>`;
         }
 
         if (config.sizes && config.sizes.length > 0) {
@@ -71,11 +72,11 @@ const generateOptionsForQuantity = (quantity, config) => {
                 const isSelected = color.default ? 'is-selected' : '';
                 const isChecked = color.default ? 'checked' : '';
                 const resolvedImgPath = buildPath(sanitizeText(color.img));
-                // PERFORMANCE: Off-screen variants get async decoding and lazy loading
+                /* SEO FIX: Removed aria-hidden and added descriptive alt text for Google Images indexing */
                 html += `
                     <label class="cdlv-product-page__option-box cdlv-product-page__option-box--color ${isSelected}" data-type="color">
                         <input type="radio" name="item_${i}_color" value="${sanitizeText(color.id)}" class="cdlv-product-page__sr-only" ${isChecked}>
-                        <img src="${resolvedImgPath}" alt="" class="cdlv-product-page__option-img u-img-loader u-img-reveal" aria-hidden="true" loading="lazy" decoding="async">
+                        <img src="${resolvedImgPath}" alt="${sanitizeText(config.title)} in ${sanitizeText(color.name)}" class="cdlv-product-page__option-img u-img-loader u-img-reveal" loading="lazy" decoding="async">
                         <div class="cdlv-product-page__color-text">
                             <span class="cdlv-product-page__option-name">${sanitizeText(color.name)}</span>
                         </div>
@@ -93,13 +94,14 @@ export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     const mainImgPath = config.images.length > 0 ? buildPath(sanitizeText(config.images[0])) : '';
     
+    /* SEO FIX: Changed generic <div> to semantic <article> */
     const moduleHTML = `
-        <div class="cdlv-product-page" data-image-sync>
+        <article class="cdlv-product-page" data-image-sync>
             <h1 class="cdlv-product-page__title-mobile">${sanitizeText(config.title)}</h1>
 
-            <section class="cdlv-product-page__overview">
+            <section class="cdlv-product-page__overview" aria-label="Product Gallery and Description">
                 <div class="cdlv-product-page__main-img-wrapper u-img-loader">
-                    <img id="main-product-image" src="${mainImgPath}" alt="${sanitizeText(config.title)}" class="u-img-reveal" fetchpriority="high" loading="eager" decoding="sync">
+                    <img id="main-product-image" src="${mainImgPath}" alt="${sanitizeText(config.title)} - Main Product View" class="u-img-reveal" fetchpriority="high" loading="eager" decoding="sync">
                 </div>
                 
                 <div class="cdlv-product-page__slider" role="group" aria-label="Product Image Gallery">
@@ -108,7 +110,6 @@ export const init = (node, customConfig = {}) => {
                         const isCurrent = idx === 0 ? 'aria-current="true"' : 'aria-current="false"';
                         const activeClass = idx === 0 ? 'is-active' : '';
                         
-                        // PERFORMANCE: Thumbnails get async decoding and lazy loading to free up the main thread
                         return `
                             <button type="button" class="cdlv-product-page__thumb-btn ${activeClass}" 
                                     data-target-src="${resolvedThumbPath}" 
@@ -121,7 +122,7 @@ export const init = (node, customConfig = {}) => {
                 </div>
 
                 <div class="cdlv-product-page__desc">
-                    <div class="cdlv-product-page__subtitle">${sanitizeText(config.subtitle)}</div>
+                    <h2 class="cdlv-product-page__subtitle">${sanitizeText(config.subtitle)}</h2>
                     <ul class="cdlv-product-page__bullet-list" id="desc-list">
                         <li><strong>Ingredients:</strong> ${sanitizeText(config.ingredients)}</li>
                         <li><strong>Best For:</strong> ${sanitizeText(config.bestFor)}</li>
@@ -138,8 +139,8 @@ export const init = (node, customConfig = {}) => {
                 </div>
             </section>
 
-            <section class="cdlv-product-page__details">
-                <h1 class="cdlv-product-page__title-desktop">${sanitizeText(config.title)}</h1>
+            <section class="cdlv-product-page__details" aria-label="Product Configuration and Checkout">
+                <div class="cdlv-product-page__title-desktop" aria-hidden="true">${sanitizeText(config.title)}</div>
 
                 <div class="cdlv-product-page__form-row">
                     <div class="cdlv-product-page__form-group">
@@ -181,7 +182,7 @@ export const init = (node, customConfig = {}) => {
                     <button type="button" class="cdlv-product-page__btn" id="add-to-cart-btn">Add to Cart</button>
                 </div>
             </section>
-        </div>
+        </article>
     `;
 
     node.innerHTML = moduleHTML;
@@ -219,7 +220,6 @@ export const init = (node, customConfig = {}) => {
             }
         };
 
-        // PERFORMANCE: Debounce the ResizeObserver so it doesn't thrash the main thread during window resizing
         let resizeTimer;
         const resizeObserver = new ResizeObserver(() => {
             if (resizeTimer) cancelAnimationFrame(resizeTimer);
