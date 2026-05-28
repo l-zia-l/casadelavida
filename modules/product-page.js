@@ -20,7 +20,7 @@ const defaultConfig = {
     title: "The Serenity Wellness Box",
     subtitle: "Organic Matcha, Raw Honey, and Artisan Accessories.",
     images: [],
-    ingredients: "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
+    composition: "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
     bestFor: "Morning rituals, mindfulness practices, or deep focus work sessions.",
     funFact: "Matcha contains L-theanine, an amino acid that promotes relaxed alertness without the caffeine crash.",
     proTip: "Allow your water to cool slightly (to about 175°F) before pouring over matcha to prevent burning the leaves.",
@@ -133,7 +133,7 @@ export const init = (node, customConfig = {}) => {
                 <div class="cdlv-product-page__desc">
                     <h2 class="cdlv-product-page__subtitle">${sanitizeText(config.subtitle)}</h2>
                     <ul class="cdlv-product-page__bullet-list" id="desc-list">
-                        <li><strong>Ingredients:</strong> ${sanitizeText(config.ingredients)}</li>
+                        <li><strong>Ingredients:</strong> ${sanitizeText(config.composition)}</li>
                         <li><strong>Best For:</strong> ${sanitizeText(config.bestFor)}</li>
                         <li><strong>Fun Fact:</strong> ${sanitizeText(config.funFact)}</li>
                         <li><strong>Pro Tip:</strong> ${sanitizeText(config.proTip)}</li>
