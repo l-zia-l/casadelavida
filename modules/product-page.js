@@ -2,8 +2,9 @@
    MODULE: PRODUCT PAGE (modules/product-page.js)
    Architecture: Exportable ES Module generating a fluid, 2-column e-commerce 
                  interface. Uses event delegation for performance.
-   A11y: WCAG Compliant. Uses semantic <button> and native <input type="radio"> 
-         for robust screen reader and keyboard navigation support.
+   A11y: WCAG Compliant. Uses semantic <button> and native <input type="radio">.
+   Performance: Hardware-accelerated states, LCP prioritization, lazy-loading 
+                offscreen assets, and rAF debounced observers.
    Security: Strict text sanitization (DOMPurify-style fallback).
    ========================================================================== */
 
@@ -37,9 +38,6 @@ const defaultConfig = {
     }
 };
 
-/**
- * Generates the HTML for the dynamic size and color selections using semantic labels and native radios.
- */
 const generateOptionsForQuantity = (quantity, config) => {
     let html = '';
     
@@ -50,7 +48,6 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `<h4 class="cdlv-product-page__item-title">Item ${i} Configuration</h4>`;
         }
 
-        // Generate Sizes (A11y: Native visually hidden radio inputs wrapped in labels)
         if (config.sizes && config.sizes.length > 0) {
             html += `<div class="cdlv-product-page__options-grid" role="group" aria-label="Select Size for Item ${i}">`;
             config.sizes.forEach(size => {
@@ -68,17 +65,17 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `</div>`;
         }
 
-        // Generate Colors/Accessories (A11y: Native visually hidden radio inputs wrapped in labels)
         if (config.colors && config.colors.length > 0) {
             html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors" role="group" aria-label="Select Color for Item ${i}">`;
             config.colors.forEach(color => {
                 const isSelected = color.default ? 'is-selected' : '';
                 const isChecked = color.default ? 'checked' : '';
                 const resolvedImgPath = buildPath(sanitizeText(color.img));
+                // PERFORMANCE: Off-screen variants get async decoding and lazy loading
                 html += `
                     <label class="cdlv-product-page__option-box cdlv-product-page__option-box--color ${isSelected}" data-type="color">
                         <input type="radio" name="item_${i}_color" value="${sanitizeText(color.id)}" class="cdlv-product-page__sr-only" ${isChecked}>
-                        <img src="${resolvedImgPath}" alt="" class="cdlv-product-page__option-img u-img-loader u-img-reveal" aria-hidden="true" loading="lazy">
+                        <img src="${resolvedImgPath}" alt="" class="cdlv-product-page__option-img u-img-loader u-img-reveal" aria-hidden="true" loading="lazy" decoding="async">
                         <div class="cdlv-product-page__color-text">
                             <span class="cdlv-product-page__option-name">${sanitizeText(color.name)}</span>
                         </div>
@@ -102,7 +99,7 @@ export const init = (node, customConfig = {}) => {
 
             <section class="cdlv-product-page__overview">
                 <div class="cdlv-product-page__main-img-wrapper u-img-loader">
-                    <img id="main-product-image" src="${mainImgPath}" alt="${sanitizeText(config.title)}" class="u-img-reveal">
+                    <img id="main-product-image" src="${mainImgPath}" alt="${sanitizeText(config.title)}" class="u-img-reveal" fetchpriority="high" loading="eager" decoding="sync">
                 </div>
                 
                 <div class="cdlv-product-page__slider" role="group" aria-label="Product Image Gallery">
@@ -111,12 +108,13 @@ export const init = (node, customConfig = {}) => {
                         const isCurrent = idx === 0 ? 'aria-current="true"' : 'aria-current="false"';
                         const activeClass = idx === 0 ? 'is-active' : '';
                         
+                        // PERFORMANCE: Thumbnails get async decoding and lazy loading to free up the main thread
                         return `
                             <button type="button" class="cdlv-product-page__thumb-btn ${activeClass}" 
                                     data-target-src="${resolvedThumbPath}" 
                                     aria-label="View product image ${idx + 1}" 
                                     ${isCurrent}>
-                                <img src="${resolvedThumbPath}" alt="" aria-hidden="true" class="u-img-loader u-img-reveal">
+                                <img src="${resolvedThumbPath}" alt="" aria-hidden="true" class="u-img-loader u-img-reveal" loading="lazy" decoding="async">
                             </button>
                         `;
                     }).join('')}
@@ -188,7 +186,7 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = moduleHTML;
 
-    // 2. DOM Elements & Event Bindings
+    // DOM Elements
     const mainImg = node.querySelector('#main-product-image');
     const thumbnails = node.querySelectorAll('.cdlv-product-page__thumb-btn');
     const readMoreBtn = node.querySelector('#read-more-btn');
@@ -196,12 +194,12 @@ export const init = (node, customConfig = {}) => {
     const qtyInput = node.querySelector('#qty');
     const dynamicContainer = node.querySelector('#dynamic-options-container');
 
-    // Bulletproof Read More Logic + ARIA toggling
+    // Read More Logic with Debounced ResizeObserver
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
             const isExpanded = descList.classList.contains('is-expanded');
-
             const currentMax = descList.style.maxHeight;
+            
             descList.style.maxHeight = 'none';
             const trueHeight = descList.scrollHeight;
 
@@ -221,7 +219,12 @@ export const init = (node, customConfig = {}) => {
             }
         };
 
-        const resizeObserver = new ResizeObserver(() => requestAnimationFrame(evaluateReadMore));
+        // PERFORMANCE: Debounce the ResizeObserver so it doesn't thrash the main thread during window resizing
+        let resizeTimer;
+        const resizeObserver = new ResizeObserver(() => {
+            if (resizeTimer) cancelAnimationFrame(resizeTimer);
+            resizeTimer = requestAnimationFrame(evaluateReadMore);
+        });
         resizeObserver.observe(descList);
 
         readMoreBtn.addEventListener('click', () => {
@@ -243,7 +246,7 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Thumbnail logic (Now targeting buttons & updating ARIA states)
+    // Thumbnail logic
     thumbnails.forEach(thumb => {
         thumb.addEventListener('click', (e) => {
             const targetSrc = e.currentTarget.getAttribute('data-target-src');
@@ -276,7 +279,7 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Options Grid Delegation: Listens to native 'change' event on the hidden radio inputs
+    // Grid Event Delegation for radios
     if (dynamicContainer) {
         dynamicContainer.addEventListener('change', (e) => {
             if (e.target.type === 'radio') {

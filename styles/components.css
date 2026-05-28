@@ -4050,20 +4050,19 @@ display: inline-block;
     padding: var(--spacing-xs);
     cursor: pointer;
     text-align: center;
-    transition: all var(--transition-fast);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     border-radius: var(--radius-strict);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative; /* For focus ring pseudo-element if needed */
+    position: relative;
 }
 
 .cdlv-product-page__option-box:hover,
 .cdlv-product-page__option-box.is-selected {
     border-color: var(--color-accent);
-    border-width: 2px;
-    padding: calc(var(--spacing-xs) - 1px); 
+    box-shadow: inset 0 0 0 1px var(--color-accent);
 }
 
 .cdlv-product-page__option-price {
