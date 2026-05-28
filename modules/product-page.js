@@ -31,9 +31,6 @@ const defaultConfig = {
     title: "The Serenity Wellness Box",
     subtitle: "Organic Matcha, Raw Honey, and Artisan Accessories.",
     images: [
-        "assets/images/products/wellness-box-main.webp",
-        "assets/images/products/wellness-box-top.webp",
-        "assets/images/products/wellness-box-open.webp"
     ],
     ingredients: "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
     bestFor: "Morning rituals, mindfulness practices, or deep focus work sessions.",
