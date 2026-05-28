@@ -4022,9 +4022,8 @@ display: inline-block;
 .cdlv-product-page__input[type="number"]::-webkit-outer-spin-button {
     cursor: pointer;
     opacity: 1;
-    width: 30px;
+    width: 50px;
     height: 40px;
-    filter: invert(24%) sepia(21%) saturate(1637%) hue-rotate(212deg) brightness(92%) contrast(89%);
 }
 
 /* Options Grid */
@@ -4086,8 +4085,8 @@ display: inline-block;
 
 /* Color Option - Vertically Taller, Horizontally Compact */
 .cdlv-product-page__option-box--color {
-    height: 140px; 
-    flex-direction: column; /* Stack image on top, text on bottom */
+    width: 140px; 
+    flex-direction: row;
     gap: 0; 
     padding: 0; 
     text-align: center;
