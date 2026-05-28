@@ -198,20 +198,23 @@ export const init = (node, customConfig = {}) => {
     // Bulletproof Read More Logic
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
-            if (descList.classList.contains('is-expanded')) {
+            const isExpanded = descList.classList.contains('is-expanded');
+
+            // Uncap entirely to measure true content height securely
+            const currentMax = descList.style.maxHeight;
+            descList.style.maxHeight = 'none';
+            const trueHeight = descList.scrollHeight;
+
+            if (isExpanded) {
                 // If it's already expanded, keep the inline style updated if screen resizes
-                descList.style.maxHeight = descList.scrollHeight + 'px';
+                descList.style.maxHeight = trueHeight + 'px';
+                readMoreBtn.style.display = 'inline-block';
                 return;
             }
 
-            // Remove inline style to let CSS clamp do the constraining
+            // Put back to CSS state to measure the constrained height
             descList.style.maxHeight = '';
             const constrainedHeight = descList.clientHeight;
-            
-            // Uncap entirely to measure true content height
-            descList.style.maxHeight = 'none';
-            const trueHeight = descList.scrollHeight;
-            descList.style.maxHeight = ''; // reset back to CSS
 
             // Only show button if true height surpasses the CSS clamp constraints
             if (trueHeight > constrainedHeight) {
@@ -233,9 +236,11 @@ export const init = (node, customConfig = {}) => {
                 descList.style.maxHeight = descList.scrollHeight + 'px';
                 readMoreBtn.textContent = 'Read Less';
             } else {
-                // Collapsing: Remove class and inline style so it transitions DOWN to CSS clamp naturally
+                // Collapsing: Remove class and inline style, force reflow so it transitions DOWN naturally
+                descList.style.maxHeight = descList.scrollHeight + 'px'; // Lock to current height
+                void descList.offsetHeight; // The magic line: Forces browser reflow
                 descList.classList.remove('is-expanded');
-                descList.style.maxHeight = '';
+                descList.style.maxHeight = ''; // Strip inline to let CSS take over
                 readMoreBtn.textContent = 'Read More';
             }
         });
