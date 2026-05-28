@@ -1,22 +1,11 @@
 /* ==========================================================================
    MODULE: ACCORDION (modules/accordion.js)
-   Architecture: Exportable ES Module. Generates a semantic, accessible 
-   accordion using button triggers and ARIA attributes.
-   Security: Implements DOMPurify-style text sanitization for all injected 
-   strings to mitigate XSS vulnerabilities. No local storage usage. DOMPurify-style text sanitization for XSS prevention.
-   Dependencies: Relies on `utils/components.js` for initialization and 
-   `components.css` for styling.
-   A11y: Full WCAG compliance. Arrow key navigation (Up/Down/Home/End), 
-   dynamic aria-expanded toggling, and aria-labelledby region linking.
-   Performance: Hardware-accelerated transforms for iconography. Native CSS 
-   Grid interpolation for height transitions (prevents JS layout thrashing).
+   Architecture: Exportable ES Module. 
+   Features: Dynamic Main Heading, SEO FAQ Schema, Event Delegation.
+   A11y: WCAG compliant with Arrow key navigation.
+   Security: DOMPurify-style text sanitization for XSS prevention.
    ========================================================================== */
 
-/**
- * Basic text sanitizer to prevent HTML injection from config strings.
- * @param {string} str - Raw input string
- * @returns {string} - Sanitized string safe for DOM insertion
- */
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
     const tempDiv = document.createElement('div');
@@ -24,33 +13,52 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
+const injectFAQSchema = (items) => {
+    const existingSchema = document.querySelector('script[data-schema="accordion-faq"]');
+    if (existingSchema) return; 
+
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": items.map(item => ({
+            "@type": "Question",
+            "name": sanitizeText(item.title),
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": sanitizeText(item.content)
+            }
+        }))
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-schema', 'accordion-faq');
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+};
+
 const defaultConfig = {
+    mainHeading: "", // Left blank by default so it's strictly opt-in
+    mainHeadingLevel: "h2", // Semantic outline level for the main title
+    headingLevel: "h3", // Semantic outline level for the accordion triggers
     items: [
         {
             title: "Why 'Casa De La Vida'?",
-            content: "Our name translates to 'House of Life'. We chose this because we view wellness not as a quick fix, but as a foundational home you build for your mind and body. Every product is curated to be a structural pillar in that daily routine."
-        },
-        {
-            title: "Where do you source your products?",
-            content: "We partner directly with organic farms and ethical apiaries across Ghana. For instance, our honey is harvested seasonally by local beekeepers, ensuring raw, unpasteurized quality that supports both the ecosystem and local economy."
-        },
-        {
-            title: "How does delivery work?",
-            content: "We offer seamless local delivery in Accra and Tamale. Orders placed before 1 PM are eligible for same-day dispatch. We package everything in strictly minimalist, zero-waste materials because respecting the earth is part of the wellness cycle."
+            content: "Our name translates to 'House of Life'. We chose this because we view wellness not as a quick fix, but as a foundational home you build for your mind and body."
         }
     ]
 };
 
-/**
- * Core initialization function triggered by the global component loader.
- * @param {HTMLElement} node - The target DOM element.
- * @param {Object} customConfig - Optional JSON config from data-config.
- */
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
-    
-    // Generate a unique ID for this specific accordion instance to prevent ID clashing
     const instanceId = Math.random().toString(36).substring(2, 9);
+    
+    const H_MAIN = config.mainHeadingLevel;
+    const H_TAG = config.headingLevel;
+
+    if (config.items.length > 0) {
+        injectFAQSchema(config.items);
+    }
 
     const chevronIcon = `
         <svg class="cdlv-accordion__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
@@ -58,18 +66,25 @@ export const init = (node, customConfig = {}) => {
         </svg>
     `;
 
-    // 1. Build HTML
+    // 1. Build HTML with Conditional Main Heading
+    const mainHeadingHTML = config.mainHeading 
+        ? `<${H_MAIN} class="cdlv-accordion__main-heading">${sanitizeText(config.mainHeading)}</${H_MAIN}>` 
+        : '';
+
     const accordionHTML = `
+        ${mainHeadingHTML}
         <div class="cdlv-accordion">
             ${config.items.map((item, index) => {
                 const btnId = `cdlv-accordion-btn-${instanceId}-${index}`;
                 const panelId = `cdlv-accordion-panel-${instanceId}-${index}`;
                 return `
                     <div class="cdlv-accordion__item">
-                        <button id="${btnId}" class="cdlv-accordion__trigger" aria-expanded="false" aria-controls="${panelId}">
-                            <span class="cdlv-accordion__title">${sanitizeText(item.title)}</span>
-                            ${chevronIcon}
-                        </button>
+                        <${H_TAG} class="cdlv-accordion__heading">
+                            <button id="${btnId}" class="cdlv-accordion__trigger" aria-expanded="false" aria-controls="${panelId}">
+                                <span class="cdlv-accordion__title">${sanitizeText(item.title)}</span>
+                                ${chevronIcon}
+                            </button>
+                        </${H_TAG}>
                         <div id="${panelId}" class="cdlv-accordion__panel" role="region" aria-labelledby="${btnId}" hidden>
                             <div class="cdlv-accordion__panel-inner">
                                 <div class="cdlv-accordion__content">
@@ -92,9 +107,6 @@ export const init = (node, customConfig = {}) => {
 
         const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
         const panelId = trigger.getAttribute('aria-controls');
-        
-        // BUG FIX: Reverted to node.querySelector to safely scope the search 
-        // to the fragment, avoiding unattached DOM null errors.
         const panel = node.querySelector(`#${panelId}`); 
 
         const activeTrigger = node.querySelector('.cdlv-accordion__trigger[aria-expanded="true"]');

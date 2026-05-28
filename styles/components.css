@@ -1189,6 +1189,10 @@
    A11y: :focus-visible and prefers-reduced-motion implemented.
    ========================================================================== */
 
+.cdlv-accordion-wrapper {
+    margin-block: var(--spacing-lg);
+}
+
 .cdlv-accordion {
     display: flex;
     flex-direction: column;
@@ -1207,6 +1211,11 @@
     font-size: inherit;
     font-weight: inherit;
     line-height: inherit;
+}
+
+.cdlv-accordion__main-heading {
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text-dark);
 }
 
 .cdlv-accordion__trigger {
