@@ -2,19 +2,13 @@
    MODULE: PRODUCT PAGE (modules/product-page.js)
    Architecture: Exportable ES Module generating a fluid, 2-column e-commerce 
                  interface. Uses event delegation for performance.
-   Security: Strict text sanitization (DOMPurify-style fallback) on all inputs 
-             and data configurations. Prevents XSS via innerHTML. No sensitive 
-             data stored locally.
-   Dependencies: Expects CSS variables from `globals.css` and scoped styles 
-                 from `components.css`. Integrates with global image-render.js 
-                 via `data-image-sync`. Uses `utils/path.js` for dynamic routing.
+   A11y: WCAG Compliant. Uses semantic <button> and native <input type="radio"> 
+         for robust screen reader and keyboard navigation support.
+   Security: Strict text sanitization (DOMPurify-style fallback).
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
 
-/**
- * Text Sanitizer to prevent XSS injection.
- */
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
     const tempDiv = document.createElement('div');
@@ -22,7 +16,6 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
-// Default Configuration (Can be overridden via data-config)
 const defaultConfig = {
     title: "The Serenity Wellness Box",
     subtitle: "Organic Matcha, Raw Honey, and Artisan Accessories.",
@@ -45,7 +38,7 @@ const defaultConfig = {
 };
 
 /**
- * Generates the HTML for the dynamic size and color selections based on quantity.
+ * Generates the HTML for the dynamic size and color selections using semantic labels and native radios.
  */
 const generateOptionsForQuantity = (quantity, config) => {
     let html = '';
@@ -57,35 +50,39 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `<h4 class="cdlv-product-page__item-title">Item ${i} Configuration</h4>`;
         }
 
-        // Generate Sizes
+        // Generate Sizes (A11y: Native visually hidden radio inputs wrapped in labels)
         if (config.sizes && config.sizes.length > 0) {
-            html += `<div class="cdlv-product-page__options-grid">`;
+            html += `<div class="cdlv-product-page__options-grid" role="group" aria-label="Select Size for Item ${i}">`;
             config.sizes.forEach(size => {
                 const isSelected = size.default ? 'is-selected' : '';
+                const isChecked = size.default ? 'checked' : '';
                 html += `
-                    <div class="cdlv-product-page__option-box ${isSelected}" data-type="size" data-id="${sanitizeText(size.id)}">
+                    <label class="cdlv-product-page__option-box ${isSelected}" data-type="size">
+                        <input type="radio" name="item_${i}_size" value="${sanitizeText(size.id)}" class="cdlv-product-page__sr-only" ${isChecked}>
                         <span class="cdlv-product-page__option-price">GH₵ ${sanitizeText(size.price.toString())}</span>
                         <span class="cdlv-product-page__option-name">${sanitizeText(size.name)}</span>
                         <span class="cdlv-product-page__option-desc">${sanitizeText(size.desc)}</span>
-                    </div>
+                    </label>
                 `;
             });
             html += `</div>`;
         }
 
-        // Generate Colors/Accessories
+        // Generate Colors/Accessories (A11y: Native visually hidden radio inputs wrapped in labels)
         if (config.colors && config.colors.length > 0) {
-            html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors">`;
+            html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors" role="group" aria-label="Select Color for Item ${i}">`;
             config.colors.forEach(color => {
                 const isSelected = color.default ? 'is-selected' : '';
+                const isChecked = color.default ? 'checked' : '';
                 const resolvedImgPath = buildPath(sanitizeText(color.img));
                 html += `
-                    <div class="cdlv-product-page__option-box cdlv-product-page__option-box--color ${isSelected}" data-type="color" data-id="${sanitizeText(color.id)}">
-                        <img src="${resolvedImgPath}" alt="${sanitizeText(color.name)}" class="cdlv-product-page__option-img u-img-loader u-img-reveal" loading="lazy">
+                    <label class="cdlv-product-page__option-box cdlv-product-page__option-box--color ${isSelected}" data-type="color">
+                        <input type="radio" name="item_${i}_color" value="${sanitizeText(color.id)}" class="cdlv-product-page__sr-only" ${isChecked}>
+                        <img src="${resolvedImgPath}" alt="" class="cdlv-product-page__option-img u-img-loader u-img-reveal" aria-hidden="true" loading="lazy">
                         <div class="cdlv-product-page__color-text">
                             <span class="cdlv-product-page__option-name">${sanitizeText(color.name)}</span>
                         </div>
-                    </div>
+                    </label>
                 `;
             });
             html += `</div>`;
@@ -95,9 +92,6 @@ const generateOptionsForQuantity = (quantity, config) => {
     return html;
 };
 
-/**
- * Core initialization function.
- */
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     const mainImgPath = config.images.length > 0 ? buildPath(sanitizeText(config.images[0])) : '';
@@ -111,14 +105,19 @@ export const init = (node, customConfig = {}) => {
                     <img id="main-product-image" src="${mainImgPath}" alt="${sanitizeText(config.title)}" class="u-img-reveal">
                 </div>
                 
-                <div class="cdlv-product-page__slider">
+                <div class="cdlv-product-page__slider" role="group" aria-label="Product Image Gallery">
                     ${config.images.map((img, idx) => {
                         const resolvedThumbPath = buildPath(sanitizeText(img));
+                        const isCurrent = idx === 0 ? 'aria-current="true"' : 'aria-current="false"';
+                        const activeClass = idx === 0 ? 'is-active' : '';
+                        
                         return `
-                            <img src="${resolvedThumbPath}" 
-                                 alt="Thumbnail ${idx + 1}" 
-                                 class="cdlv-product-page__thumb u-img-loader u-img-reveal ${idx === 0 ? 'is-active' : ''}" 
-                                 data-target-src="${resolvedThumbPath}">
+                            <button type="button" class="cdlv-product-page__thumb-btn ${activeClass}" 
+                                    data-target-src="${resolvedThumbPath}" 
+                                    aria-label="View product image ${idx + 1}" 
+                                    ${isCurrent}>
+                                <img src="${resolvedThumbPath}" alt="" aria-hidden="true" class="u-img-loader u-img-reveal">
+                            </button>
                         `;
                     }).join('')}
                 </div>
@@ -131,10 +130,10 @@ export const init = (node, customConfig = {}) => {
                         <li><strong>Fun Fact:</strong> ${sanitizeText(config.funFact)}</li>
                         <li><strong>Pro Tip:</strong> ${sanitizeText(config.proTip)}</li>
                     </ul>
-                    <button class="cdlv-product-page__read-more-btn" id="read-more-btn">Read More</button>
+                    <button type="button" class="cdlv-product-page__read-more-btn" id="read-more-btn" aria-expanded="false" aria-controls="desc-list">Read More</button>
                     
                     ${config.deliveryCountryMsg ? `
-                        <div class="cdlv-product-page__delivery-msg">
+                        <div class="cdlv-product-page__delivery-msg" role="status">
                             ${sanitizeText(config.deliveryCountryMsg)}
                         </div>
                     ` : ''}
@@ -160,26 +159,28 @@ export const init = (node, customConfig = {}) => {
                     ${generateOptionsForQuantity(1, config)}
                 </div>
 
-                <div class="cdlv-product-page__label">Purchasing Options</div>
-                <div class="cdlv-product-page__purchase-options">
-                    <label class="cdlv-product-page__radio-row">
-                        <input type="radio" name="purchase_type" value="subscription" class="cdlv-product-page__radio-input">
-                        <div class="cdlv-product-page__radio-content">
-                            <span class="cdlv-product-page__radio-title">Start a Subscription: ${sanitizeText(config.subscription.priceText)}</span>
-                            <span class="cdlv-product-page__radio-desc">${sanitizeText(config.subscription.desc)}</span>
-                        </div>
-                    </label>
-                    
-                    <label class="cdlv-product-page__radio-row">
-                        <input type="radio" name="purchase_type" value="one_time" class="cdlv-product-page__radio-input" checked>
-                        <div class="cdlv-product-page__radio-content">
-                            <span class="cdlv-product-page__radio-title">One Time Purchase</span>
-                        </div>
-                    </label>
-                </div>
+                <fieldset class="cdlv-product-page__purchase-options" style="border: none; padding: 0; margin: 0;">
+                    <legend class="cdlv-product-page__label" style="margin-bottom: var(--spacing-xs);">Purchasing Options</legend>
+                    <div style="border: 1px solid rgba(26, 26, 26, 0.2); padding: var(--spacing-xs); display: flex; flex-direction: column; gap: var(--spacing-xs);">
+                        <label class="cdlv-product-page__radio-row">
+                            <input type="radio" name="purchase_type" value="subscription" class="cdlv-product-page__radio-input">
+                            <div class="cdlv-product-page__radio-content">
+                                <span class="cdlv-product-page__radio-title">Start a Subscription: ${sanitizeText(config.subscription.priceText)}</span>
+                                <span class="cdlv-product-page__radio-desc">${sanitizeText(config.subscription.desc)}</span>
+                            </div>
+                        </label>
+                        
+                        <label class="cdlv-product-page__radio-row">
+                            <input type="radio" name="purchase_type" value="one_time" class="cdlv-product-page__radio-input" checked>
+                            <div class="cdlv-product-page__radio-content">
+                                <span class="cdlv-product-page__radio-title">One Time Purchase</span>
+                            </div>
+                        </label>
+                    </div>
+                </fieldset>
 
                 <div class="cdlv-product-page__submit-wrapper">
-                    <button class="cdlv-product-page__btn" id="add-to-cart-btn">Add to Cart</button>
+                    <button type="button" class="cdlv-product-page__btn" id="add-to-cart-btn">Add to Cart</button>
                 </div>
             </section>
         </div>
@@ -189,34 +190,30 @@ export const init = (node, customConfig = {}) => {
 
     // 2. DOM Elements & Event Bindings
     const mainImg = node.querySelector('#main-product-image');
-    const thumbnails = node.querySelectorAll('.cdlv-product-page__thumb');
+    const thumbnails = node.querySelectorAll('.cdlv-product-page__thumb-btn');
     const readMoreBtn = node.querySelector('#read-more-btn');
     const descList = node.querySelector('#desc-list');
     const qtyInput = node.querySelector('#qty');
     const dynamicContainer = node.querySelector('#dynamic-options-container');
 
-    // Bulletproof Read More Logic
+    // Bulletproof Read More Logic + ARIA toggling
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
             const isExpanded = descList.classList.contains('is-expanded');
 
-            // Uncap entirely to measure true content height securely
             const currentMax = descList.style.maxHeight;
             descList.style.maxHeight = 'none';
             const trueHeight = descList.scrollHeight;
 
             if (isExpanded) {
-                // If it's already expanded, keep the inline style updated if screen resizes
                 descList.style.maxHeight = trueHeight + 'px';
                 readMoreBtn.style.display = 'inline-block';
                 return;
             }
 
-            // Put back to CSS state to measure the constrained height
             descList.style.maxHeight = '';
             const constrainedHeight = descList.clientHeight;
 
-            // Only show button if true height surpasses the CSS clamp constraints
             if (trueHeight > constrainedHeight) {
                 readMoreBtn.style.display = 'inline-block';
             } else {
@@ -231,29 +228,34 @@ export const init = (node, customConfig = {}) => {
             const isExpanded = descList.classList.contains('is-expanded');
             
             if (!isExpanded) {
-                // Expanding: Add class and exact scrollHeight to transition UP smoothly
                 descList.classList.add('is-expanded');
                 descList.style.maxHeight = descList.scrollHeight + 'px';
                 readMoreBtn.textContent = 'Read Less';
+                readMoreBtn.setAttribute('aria-expanded', 'true');
             } else {
-                // Collapsing: Remove class and inline style, force reflow so it transitions DOWN naturally
-                descList.style.maxHeight = descList.scrollHeight + 'px'; // Lock to current height
-                void descList.offsetHeight; // The magic line: Forces browser reflow
+                descList.style.maxHeight = descList.scrollHeight + 'px'; 
+                void descList.offsetHeight; 
                 descList.classList.remove('is-expanded');
-                descList.style.maxHeight = ''; // Strip inline to let CSS take over
+                descList.style.maxHeight = ''; 
                 readMoreBtn.textContent = 'Read More';
+                readMoreBtn.setAttribute('aria-expanded', 'false');
             }
         });
     }
 
-    // Thumbnail click logic
+    // Thumbnail logic (Now targeting buttons & updating ARIA states)
     thumbnails.forEach(thumb => {
         thumb.addEventListener('click', (e) => {
             const targetSrc = e.currentTarget.getAttribute('data-target-src');
             if (!targetSrc || !mainImg) return;
 
-            thumbnails.forEach(t => t.classList.remove('is-active'));
+            thumbnails.forEach(t => {
+                t.classList.remove('is-active');
+                t.setAttribute('aria-current', 'false');
+            });
+            
             e.currentTarget.classList.add('is-active');
+            e.currentTarget.setAttribute('aria-current', 'true');
             
             mainImg.style.opacity = '0.5';
             setTimeout(() => {
@@ -263,7 +265,6 @@ export const init = (node, customConfig = {}) => {
         });
     });
 
-    // Dynamic Quantity Re-rendering
     if (qtyInput && dynamicContainer) {
         qtyInput.addEventListener('change', (e) => {
             let val = parseInt(e.target.value, 10);
@@ -275,17 +276,18 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Options Grid Event Delegation 
+    // Options Grid Delegation: Listens to native 'change' event on the hidden radio inputs
     if (dynamicContainer) {
-        dynamicContainer.addEventListener('click', (e) => {
-            const optionBox = e.target.closest('.cdlv-product-page__option-box');
-            if (!optionBox) return;
-
-            const gridContainer = optionBox.closest('.cdlv-product-page__options-grid');
-            if (gridContainer) {
-                const siblings = gridContainer.querySelectorAll('.cdlv-product-page__option-box');
-                siblings.forEach(sib => sib.classList.remove('is-selected'));
-                optionBox.classList.add('is-selected');
+        dynamicContainer.addEventListener('change', (e) => {
+            if (e.target.type === 'radio') {
+                const labelBox = e.target.closest('.cdlv-product-page__option-box');
+                const gridContainer = labelBox.closest('.cdlv-product-page__options-grid');
+                
+                if (gridContainer) {
+                    const allLabels = gridContainer.querySelectorAll('.cdlv-product-page__option-box');
+                    allLabels.forEach(label => label.classList.remove('is-selected'));
+                    labelBox.classList.add('is-selected');
+                }
             }
         });
     }
