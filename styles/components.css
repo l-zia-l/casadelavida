@@ -3810,6 +3810,345 @@ display: inline-block;
     margin-inline: auto;
 }
 
+/* ==========================================================================
+   COMPONENT: PRODUCT PAGE (styles/components.css)
+   Architecture: Fluid, 100vw spanning module utilizing CSS Grid. 
+                 Follows a Mobile-First approach.
+   Design System: Strict 0px corner radius, system-defined easing, and 
+                  fluid typography/spacing variables inherited from globals.css.
+   ========================================================================== */
+
+/* Main Wrapper - Spans 100vw on desktop as requested */
+.cdlv-product-page {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding: var(--spacing-sm) var(--layout-gutter);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    position: relative;
+    padding-bottom: calc(var(--spacing-xl) + 80px); 
+}
+
+/* Mobile Title */
+.cdlv-product-page__title-mobile {
+    display: block;
+    font-size: var(--font-size-h2);
+    margin-bottom: 0;
+}
+
+/* Desktop Title - Hidden on mobile */
+.cdlv-product-page__title-desktop {
+    display: none;
+    font-size: var(--font-size-h2);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Overview Layout (Images & Text) */
+.cdlv-product-page__overview {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.cdlv-product-page__main-img-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: var(--color-neutral-bg);
+}
+
+.cdlv-product-page__main-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cdlv-product-page__slider {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: var(--spacing-xs);
+}
+
+.cdlv-product-page__thumb {
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color var(--transition-fast);
+}
+
+.cdlv-product-page__thumb:hover,
+.cdlv-product-page__thumb.is-active {
+    border-color: var(--color-accent);
+}
+
+/* Description & Typography */
+.cdlv-product-page__desc {
+    margin-top: var(--spacing-sm);
+}
+
+.cdlv-product-page__subtitle {
+    font-weight: 600;
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin-bottom: var(--spacing-xs);
+}
+
+.cdlv-product-page__bullet-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: var(--spacing-sm);
+    overflow: hidden;
+    transition: max-height var(--transition-slow);
+    max-height: 250px; 
+}
+
+.cdlv-product-page__bullet-list.is-expanded {
+    max-height: 2000px;
+}
+
+.cdlv-product-page__bullet-list li {
+    font-size: var(--font-size-small);
+    margin-bottom: var(--spacing-xs);
+    position: relative;
+    padding-left: 1.25rem;
+}
+
+.cdlv-product-page__bullet-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+    font-weight: bold;
+}
+
+.cdlv-product-page__read-more-btn {
+    background: none;
+    border: none;
+    color: var(--color-accent);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.cdlv-product-page__delivery-msg {
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-xs);
+    background-color: rgba(174, 191, 178, 0.15);
+    border-left: 4px solid var(--color-accent);
+    font-size: var(--font-size-small);
+}
+
+/* Details & Forms */
+.cdlv-product-page__details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.cdlv-product-page__form-group {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-xs) / 2);
+}
+
+.cdlv-product-page__label {
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.cdlv-product-page__input {
+    padding: var(--spacing-xs);
+    border: 1px solid var(--color-text-dark);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body);
+    border-radius: var(--radius-strict);
+    background-color: var(--color-primary);
+    color: var(--color-text-dark);
+    width: 100%;
+}
+
+.cdlv-product-page__input:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -1px;
+}
+
+/* Options Grid (Sizes/Colors) */
+.cdlv-product-page__item-config {
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.cdlv-product-page__item-title {
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.cdlv-product-page__options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.cdlv-product-page__option-box {
+    border: 1px solid rgba(26, 26, 26, 0.2);
+    padding: var(--spacing-xs);
+    cursor: pointer;
+    text-align: center;
+    transition: all var(--transition-fast);
+    border-radius: var(--radius-strict);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cdlv-product-page__option-box:hover,
+.cdlv-product-page__option-box.is-selected {
+    border-color: var(--color-accent);
+    border-width: 2px;
+    padding: calc(var(--spacing-xs) - 1px); 
+}
+
+.cdlv-product-page__option-price {
+    font-size: var(--font-size-h4);
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+.cdlv-product-page__option-name {
+    font-size: var(--font-size-small);
+    text-transform: uppercase;
+}
+
+.cdlv-product-page__option-desc {
+    font-size: clamp(0.7rem, 1vw, 0.8rem);
+    color: rgba(26, 26, 26, 0.6);
+}
+
+/* Color Option specific styles - Centered for missing price */
+.cdlv-product-page__option-box--color {
+    flex-direction: row;
+    gap: var(--spacing-xs);
+    text-align: left;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.cdlv-product-page__option-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: var(--radius-strict);
+}
+
+/* Purchasing Options (Radio boxes) */
+.cdlv-product-page__purchase-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    border: 1px solid rgba(26, 26, 26, 0.2);
+    padding: var(--spacing-xs);
+}
+
+.cdlv-product-page__radio-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    cursor: pointer;
+}
+
+.cdlv-product-page__radio-input {
+    margin-top: 4px;
+    accent-color: var(--color-accent);
+}
+
+.cdlv-product-page__radio-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.cdlv-product-page__radio-title {
+    font-weight: 600;
+}
+
+.cdlv-product-page__radio-desc {
+    font-size: var(--font-size-small);
+    color: rgba(26, 26, 26, 0.7);
+}
+
+/* Sticky Submit Wrapper */
+.cdlv-product-page__submit-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: var(--spacing-xs) var(--layout-gutter);
+    background-color: var(--color-primary);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.cdlv-product-page__btn {
+    width: 100%;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-accent);
+    color: var(--color-text-light);
+    border: none;
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body);
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-radius: var(--radius-strict);
+}
+
+.cdlv-product-page__btn:hover {
+    background-color: var(--color-text-dark);
+}
+
+/* DESKTOP QUERIES (100vw layout) */
+@media (min-width: 992px) {
+    .cdlv-product-page {
+        flex-direction: row;
+        align-items: flex-start;
+        padding-bottom: var(--spacing-xl); 
+    }
+
+    .cdlv-product-page__title-mobile { display: none; }
+    .cdlv-product-page__title-desktop { display: block; }
+
+    .cdlv-product-page__overview {
+        flex: 1.2;
+        position: sticky;
+        top: var(--header-offset);
+    }
+
+    .cdlv-product-page__details {
+        flex: 1;
+        padding-left: var(--spacing-md);
+    }
+
+    /* Reset sticky wrapper for desktop */
+    .cdlv-product-page__submit-wrapper {
+        position: static;
+        padding: 0;
+        box-shadow: none;
+        background: transparent;
+        margin-top: var(--spacing-sm);
+    }
+}
 
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
