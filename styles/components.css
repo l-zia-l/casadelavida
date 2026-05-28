@@ -1262,7 +1262,7 @@
     transition: grid-template-rows var(--transition-base);
 }
 
-.cdlv-accordion__trigger[aria-expanded="true"] + .cdlv-accordion__panel {
+.cdlv-accordion__heading:has(.cdlv-accordion__trigger[aria-expanded="true"]) + .cdlv-accordion__panel {
     grid-template-rows: 1fr;
 }
 
