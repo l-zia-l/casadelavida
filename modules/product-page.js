@@ -55,7 +55,6 @@ const generateOptionsForQuantity = (quantity, config) => {
                 const isChecked = size.default ? 'checked' : '';
                 const popularBadge = size.popular ? `<span class="cdlv-product-page__popular-badge" aria-hidden="true">Most Popular Size</span>` : '';
                 
-                // A11y: Inject hidden text so screen readers read "Original Price X, Subscription Price Y" instead of just "X Y".
                 html += `
                     <label class="cdlv-product-page__option-box ${isSelected}" data-type="size">
                         ${popularBadge}
@@ -152,16 +151,9 @@ export const init = (node, customConfig = {}) => {
             <section class="cdlv-product-page__details" aria-label="Product Configuration and Checkout">
                 <div class="cdlv-product-page__title-desktop" aria-hidden="true">${sanitizeText(config.title)}</div>
 
-                <div class="cdlv-product-page__form-row">
-                    <div class="cdlv-product-page__form-group">
-                        <label class="cdlv-product-page__label" for="del-date">Delivery Date*</label>
-                        <input type="text" id="del-date" class="cdlv-product-page__input" placeholder="Select A Date">
-                    </div>
-
-                    <div class="cdlv-product-page__form-group">
-                        <label class="cdlv-product-page__label" for="qty">Quantity</label>
-                        <input type="number" id="qty" class="cdlv-product-page__input" value="1" min="1" max="10">
-                    </div>
+                <div class="cdlv-product-page__form-group">
+                    <label class="cdlv-product-page__label" for="qty">Quantity</label>
+                    <input type="number" id="qty" class="cdlv-product-page__input" value="1" min="1" max="10">
                 </div>
 
                 <div id="dynamic-options-container">
@@ -204,21 +196,8 @@ export const init = (node, customConfig = {}) => {
     const readMoreBtn = node.querySelector('#read-more-btn');
     const descList = node.querySelector('#desc-list');
     const qtyInput = node.querySelector('#qty');
-    const dateInput = node.querySelector('#del-date');
     const dynamicContainer = node.querySelector('#dynamic-options-container');
     const purchaseRadios = node.querySelectorAll('input[name="purchase_type"]');
-
-    // Date Input Placeholder Logic
-    if (dateInput) {
-        dateInput.addEventListener('focus', () => dateInput.type = 'date');
-        dateInput.addEventListener('click', () => {
-            dateInput.type = 'date';
-            if (dateInput.showPicker) dateInput.showPicker();
-        });
-        dateInput.addEventListener('blur', () => {
-            if (!dateInput.value) dateInput.type = 'text';
-        });
-    }
 
     // Dynamic Pricing Subscription Logic
     purchaseRadios.forEach(radio => {
@@ -231,7 +210,6 @@ export const init = (node, customConfig = {}) => {
         });
     });
 
-    // Determine initial active state based on HTML checked property
     if (node.querySelector('#radio-sub').checked) {
         mainWrapper.classList.add('cdlv-product-page--subscription-active');
     }
