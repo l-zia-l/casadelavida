@@ -46,14 +46,11 @@ const defaultConfig = {
         { id: "s3", name: "Original", desc: "20 Servings", price: 69 }
     ],
     colors: [
-        { id: "c1", name: "Bamboo Whisk Set", img: "assets/images/products/whisk.webp", default: true },
-        { id: "c2", name: "Ceramic Bowl", img: "assets/images/products/bowl.webp" }
     ],
     subscription: {
         priceText: "GH₵ 66 + free shipping",
         desc: "Best Value: Up to 30% off. Skip or cancel anytime."
-    },
-    oneTimePrice: "GH₵ 94"
+    }
 };
 
 /**
@@ -192,7 +189,7 @@ export const init = (node, customConfig = {}) => {
                     <label class="cdlv-product-page__radio-row">
                         <input type="radio" name="purchase_type" value="one_time" class="cdlv-product-page__radio-input" checked>
                         <div class="cdlv-product-page__radio-content">
-                            <span class="cdlv-product-page__radio-title">One Time Purchase: ${sanitizeText(config.oneTimePrice)}</span>
+                            <span class="cdlv-product-page__radio-title">One Time Purchase</span>
                         </div>
                     </label>
                 </div>
