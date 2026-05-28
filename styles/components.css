@@ -3828,7 +3828,7 @@ display: inline-block;
     flex-direction: column;
     gap: var(--spacing-md);
     position: relative;
-    padding-bottom: calc(var(--spacing-xl) + 80px); 
+    padding-bottom: calc(var(--spacing-xl) + var(--spacing-lg)); 
 }
 
 /* Mobile Title */
@@ -3850,6 +3850,9 @@ display: inline-block;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+    /* Fluid max-width replaces fixed 650px */
+    max-width: clamp(30rem, 45vw, 42rem); 
+    margin: 0 auto;
     width: 100%;
 }
 
@@ -3873,9 +3876,10 @@ display: inline-block;
     gap: var(--spacing-xs);
 }
 
+/* Fluid thumbnails using your spacing variable */
 .cdlv-product-page__thumb {
-    width: 80px;
-    height: 80px;
+    width: var(--spacing-lg);
+    height: var(--spacing-lg);
     object-fit: cover;
     cursor: pointer;
     border: 2px solid transparent;
@@ -3910,12 +3914,9 @@ display: inline-block;
     padding-left: 0;
     margin-bottom: var(--spacing-sm);
     overflow: hidden;
+    /* Base height uses fluid clamp instead of fixed 250px */
+    max-height: clamp(12rem, 30vw, 16rem); 
     transition: max-height var(--transition-slow);
-    max-height: 250px; 
-}
-
-.cdlv-product-page__bullet-list.is-expanded {
-    max-height: 2000px;
 }
 
 .cdlv-product-page__bullet-list li {
@@ -3999,12 +4000,12 @@ display: inline-block;
     box-shadow: 0 0 0 3px rgba(71, 59, 117, 0.15);
 }
 
-/* Custom Date Icon */
+/* Custom Date Icon (Fluid Sizing) */
 .cdlv-product-page__input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     opacity: 1;
-    width: 28px;
-    height: 28px;
+    width: calc(var(--icon-size-base) * 1.5);
+    height: calc(var(--icon-size-base) * 1.5);
     background-image: url('data:image/svg+xml;utf8,<svg fill="%23473b75" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>');
     transition: transform var(--transition-fast);
 }
@@ -4013,17 +4014,17 @@ display: inline-block;
     transform: scale(1.1);
 }
 
-/* Custom Number Arrows */
+/* Custom Number Arrows (Fluid Sizing) */
 .cdlv-product-page__input[type="number"] {
-    padding-right: 8px;
+    padding-right: var(--spacing-xs);
 }
 
 .cdlv-product-page__input[type="number"]::-webkit-inner-spin-button,
 .cdlv-product-page__input[type="number"]::-webkit-outer-spin-button {
     cursor: pointer;
     opacity: 1;
-    width: 50px;
-    height: 40px;
+    width: calc(var(--icon-size-base) * 2);
+    height: calc(var(--icon-size-base) * 2);
 }
 
 /* Options Grid */
@@ -4088,9 +4089,9 @@ display: inline-block;
     color: rgba(26, 26, 26, 0.6);
 }
 
-/* Color Option - Image Left, Text Right, Full Height */
+/* Color Option - Uses global spacing for height and image width */
 .cdlv-product-page__option-box--color {
-    height: 80px; 
+    height: var(--spacing-lg); 
     flex-direction: row; 
     gap: 0; 
     padding: 0; 
@@ -4106,20 +4107,29 @@ display: inline-block;
 }
 
 .cdlv-product-page__option-img {
-    width: 80px; /* Locks the image width */
-    height: 100%; /* Forces image to fill container height */
+    width: var(--spacing-lg); 
+    flex-shrink: 0; 
+    height: 100%; 
     object-fit: cover;
     border-radius: 0; 
 }
 
 .cdlv-product-page__color-text {
-    padding: var(--spacing-xs) calc(var(--spacing-xs) * 1.5);
+    padding: var(--spacing-xs);
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* Aligns text neatly to the left of the remaining space */
+    justify-content: flex-start; 
+    flex: 1; 
+    min-width: 0; 
+}
+
+.cdlv-product-page__color-text .cdlv-product-page__option-name {
+    font-size: clamp(0.75rem, 1.2vw, 0.95rem); 
     font-weight: 600; 
     letter-spacing: 0.05em;
-    flex: 1; 
+    line-height: 1.2;
+    overflow-wrap: break-word; 
+    word-break: break-word;
 }
 
 /* Purchasing Options */
@@ -4140,8 +4150,8 @@ display: inline-block;
 
 .cdlv-product-page__radio-input {
     margin-top: 4px;
-    width: 18px;
-    height: 18px;
+    width: calc(var(--icon-size-base) * 1.2);
+    height: calc(var(--icon-size-base) * 1.2);
     accent-color: var(--color-accent);
 }
 

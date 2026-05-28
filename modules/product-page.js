@@ -75,7 +75,7 @@ const generateOptionsForQuantity = (quantity, config) => {
 
         // Generate Colors/Accessories
         if (config.colors && config.colors.length > 0) {
-            html += `<div class="cdlv-product-page__options-grid">`;
+            html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors">`;
             config.colors.forEach(color => {
                 const isSelected = color.default ? 'is-selected' : '';
                 const resolvedImgPath = buildPath(sanitizeText(color.img));
@@ -195,28 +195,49 @@ export const init = (node, customConfig = {}) => {
     const qtyInput = node.querySelector('#qty');
     const dynamicContainer = node.querySelector('#dynamic-options-container');
 
-    // Bulletproof Read More Logic utilizing ResizeObserver for web font loads
+    // Bulletproof Read More Logic
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
-            const currentMax = descList.style.maxHeight;
+            if (descList.classList.contains('is-expanded')) {
+                // If it's already expanded, keep the inline style updated if screen resizes
+                descList.style.maxHeight = descList.scrollHeight + 'px';
+                return;
+            }
+
+            // Remove inline style to let CSS clamp do the constraining
+            descList.style.maxHeight = '';
+            const constrainedHeight = descList.clientHeight;
+            
+            // Uncap entirely to measure true content height
             descList.style.maxHeight = 'none';
             const trueHeight = descList.scrollHeight;
-            descList.style.maxHeight = currentMax;
+            descList.style.maxHeight = ''; // reset back to CSS
 
-            if (trueHeight > 250) {
+            // Only show button if true height surpasses the CSS clamp constraints
+            if (trueHeight > constrainedHeight) {
                 readMoreBtn.style.display = 'inline-block';
             } else {
                 readMoreBtn.style.display = 'none';
             }
         };
 
-        // ResizeObserver guarantees measurement *after* layout shifts and font loads
         const resizeObserver = new ResizeObserver(() => requestAnimationFrame(evaluateReadMore));
         resizeObserver.observe(descList);
 
         readMoreBtn.addEventListener('click', () => {
-            const isExpanded = descList.classList.toggle('is-expanded');
-            readMoreBtn.textContent = isExpanded ? 'Read Less' : 'Read More';
+            const isExpanded = descList.classList.contains('is-expanded');
+            
+            if (!isExpanded) {
+                // Expanding: Add class and exact scrollHeight to transition UP smoothly
+                descList.classList.add('is-expanded');
+                descList.style.maxHeight = descList.scrollHeight + 'px';
+                readMoreBtn.textContent = 'Read Less';
+            } else {
+                // Collapsing: Remove class and inline style so it transitions DOWN to CSS clamp naturally
+                descList.classList.remove('is-expanded');
+                descList.style.maxHeight = '';
+                readMoreBtn.textContent = 'Read More';
+            }
         });
     }
 
