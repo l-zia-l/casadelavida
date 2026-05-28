@@ -64,7 +64,7 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `<h4 class="cdlv-product-page__item-title">Item ${i} Configuration</h4>`;
         }
 
-        // Generate Sizes (Pricing relies on the size)
+        // Generate Sizes
         if (config.sizes && config.sizes.length > 0) {
             html += `<div class="cdlv-product-page__options-grid">`;
             config.sizes.forEach(size => {
@@ -82,7 +82,8 @@ const generateOptionsForQuantity = (quantity, config) => {
 
         // Generate Colors/Accessories
         if (config.colors && config.colors.length > 0) {
-            html += `<div class="cdlv-product-page__options-grid">`;
+            // Apply the new --colors modifier for the 2-column layout
+            html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors">`;
             config.colors.forEach(color => {
                 const isSelected = color.default ? 'is-selected' : '';
                 const resolvedImgPath = buildPath(sanitizeText(color.img));
@@ -157,11 +158,6 @@ export const init = (node, customConfig = {}) => {
                 <h1 class="cdlv-product-page__title-desktop">${sanitizeText(config.title)}</h1>
 
                 <div class="cdlv-product-page__form-group">
-                    <label class="cdlv-product-page__label" for="zipcode">Where are you sending this?</label>
-                    <input type="text" id="zipcode" class="cdlv-product-page__input" placeholder="Enter City or Region (e.g., Accra)">
-                </div>
-
-                <div class="cdlv-product-page__form-group">
                     <label class="cdlv-product-page__label" for="del-date">Delivery Date*</label>
                     <input type="date" id="del-date" class="cdlv-product-page__input">
                 </div>
@@ -210,15 +206,25 @@ export const init = (node, customConfig = {}) => {
     const qtyInput = node.querySelector('#qty');
     const dynamicContainer = node.querySelector('#dynamic-options-container');
 
-    // Smart Read More Logic (Hides if text is short)
+    // Smart Read More Logic (Strips max-height to measure true length of text)
     if (readMoreBtn && descList) {
-        // We use requestAnimationFrame to let the browser paint the DOM first,
-        // otherwise scrollHeight might calculate as 0 initially.
-        requestAnimationFrame(() => {
-            if (descList.scrollHeight <= 250) {
+        const evaluateReadMore = () => {
+            // Uncap height temporarily to measure true scroll height safely
+            const currentMax = descList.style.maxHeight;
+            descList.style.maxHeight = 'none';
+            const trueHeight = descList.scrollHeight;
+            descList.style.maxHeight = currentMax;
+
+            if (trueHeight <= 250) {
                 readMoreBtn.style.display = 'none';
+            } else {
+                readMoreBtn.style.display = 'inline-block';
             }
-        });
+        };
+
+        // Fire once DOM is painted and listen for screen resizing
+        requestAnimationFrame(evaluateReadMore);
+        window.addEventListener('resize', evaluateReadMore);
 
         readMoreBtn.addEventListener('click', () => {
             const isExpanded = descList.classList.toggle('is-expanded');
@@ -226,7 +232,7 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Thumbnail click logic - strictly assigning the target SRC
+    // Thumbnail click logic
     thumbnails.forEach(thumb => {
         thumb.addEventListener('click', (e) => {
             const targetSrc = e.currentTarget.getAttribute('data-target-src');
