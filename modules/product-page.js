@@ -6,6 +6,7 @@
    A11y: WCAG Compliant. Custom quantity controls with aria labels.
    Security: Strict CSP Compliance.
    Pricing: Dynamic algorithmic discounts.
+   UX: Smart rendering prevents duplicate configuration blocks if no choices exist.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -26,12 +27,7 @@ const defaultConfig = {
     funFact: "Matcha contains L-theanine, an amino acid that promotes relaxed alertness without the caffeine crash.",
     proTip: "Allow your water to cool slightly (to about 175°F) before pouring over matcha to prevent burning the leaves.",
     deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
-    // subPrice is removed; the algorithm handles it dynamically
-    sizes: [
-        { id: "s1", name: "Grand", desc: "60 Servings", price: 800 },
-        { id: "s2", name: "Deluxe", desc: "40 Servings", price: 700, popular: true, default: true },
-        { id: "s3", name: "Original", desc: "20 Servings", price: 600 }
-    ],
+    sizes: [],
     colors: [],
     subscription: {
         priceText: "Up to 30% Off + Free Shipping",
@@ -42,21 +38,29 @@ const defaultConfig = {
 const generateOptionsForQuantity = (quantity, config) => {
     let html = '';
     
-    for (let i = 1; i <= quantity; i++) {
+    // AWARENESS LOGIC: Check if there are actually multiple options to choose from
+    const hasMultipleSizes = config.sizes && config.sizes.length > 1;
+    const hasMultipleColors = config.colors && config.colors.length > 1;
+    const hasChoices = hasMultipleSizes || hasMultipleColors;
+    
+    // If no choices exist, lock the rendering loop to 1 iteration to prevent UI clutter
+    const iterations = hasChoices ? quantity : 1;
+    
+    for (let i = 1; i <= iterations; i++) {
         html += `<div class="cdlv-product-page__item-config" data-item-index="${i}">`;
         
-        if (quantity > 1) {
+        // Only show "Item X Configuration" if we are rendering multiple blocks
+        if (iterations > 1) {
             html += `<h3 class="cdlv-product-page__item-title">Item ${i} Configuration</h3>`;
         }
 
         if (config.sizes && config.sizes.length > 0) {
             html += `<div class="cdlv-product-page__options-grid" role="group" aria-label="Select Size for Item ${i}">`;
             config.sizes.forEach(size => {
-                const isSelected = size.default ? 'is-selected' : '';
-                const isChecked = size.default ? 'checked' : '';
+                const isSelected = size.default || config.sizes.length === 1 ? 'is-selected' : '';
+                const isChecked = size.default || config.sizes.length === 1 ? 'checked' : '';
                 const popularBadge = size.popular ? `<span class="cdlv-product-page__popular-badge" aria-hidden="true">Most Popular Size</span>` : '';
                 
-                // AUTOMATED PRICING: Calculates 30% off dynamically and rounds to the nearest whole cedi
                 const calculatedSubPrice = Math.round(size.price * 0.7);
                 
                 html += `
@@ -82,8 +86,8 @@ const generateOptionsForQuantity = (quantity, config) => {
         if (config.colors && config.colors.length > 0) {
             html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors" role="group" aria-label="Select Color for Item ${i}">`;
             config.colors.forEach(color => {
-                const isSelected = color.default ? 'is-selected' : '';
-                const isChecked = color.default ? 'checked' : '';
+                const isSelected = color.default || config.colors.length === 1 ? 'is-selected' : '';
+                const isChecked = color.default || config.colors.length === 1 ? 'checked' : '';
                 const resolvedImgPath = buildPath(sanitizeText(color.img));
                 html += `
                     <label class="cdlv-product-page__option-box cdlv-product-page__option-box--color ${isSelected}" data-type="color">
