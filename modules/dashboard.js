@@ -3,6 +3,7 @@
    Architecture: Exportable ES Module. Multi-page router with internal Sub-Views.
    Security: Strict DOMPurify-style sanitization applied.
    Performance: Leverages data-image-sync for batch image loading.
+   Accessibility: Strict WCAG compliance with ARIA states and focus management.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -116,11 +117,10 @@ const generateItemGrid = (items, type) => `
     </div>
 `;
 
-// THE MISSING FUNCTION: Placed securely at the top level
 const generateEditablePanel = (id, title, viewFields, editFields = viewFields, customHTML = '') => `
     <div class="cdlv-dashboard__panel-header">
         <h2 class="cdlv-dashboard__panel-title">${sanitizeText(title)}</h2>
-        <button class="cdlv-dashboard__edit-btn" data-action="edit" data-target="${id}">EDIT</button>
+        <button class="cdlv-dashboard__edit-btn" data-action="edit" data-target="${id}" aria-expanded="false" aria-controls="wrapper-${id}">EDIT</button>
     </div>
     <div class="cdlv-dashboard__content-wrapper" id="wrapper-${id}">
         <div class="cdlv-dashboard__view-state">
@@ -138,13 +138,13 @@ const generateEditablePanel = (id, title, viewFields, editFields = viewFields, c
                     <label class="cdlv-dashboard__label" for="${sanitizeText(f.id)}">${sanitizeText(f.label)}</label>
                     ${f.type === 'password' ? `
                         <div class="cdlv-dashboard__input-wrapper">
-                            <input class="cdlv-dashboard__input" type="password" id="${sanitizeText(f.id)}" name="${sanitizeText(f.id)}" value="${sanitizeText(f.value)}" required>
-                            <button type="button" class="cdlv-dashboard__pwd-toggle" aria-label="Toggle password visibility">SHOW</button>
+                            <input class="cdlv-dashboard__input" type="password" id="${sanitizeText(f.id)}" name="${sanitizeText(f.id)}" value="${sanitizeText(f.value)}" required aria-invalid="false">
+                            <button type="button" class="cdlv-dashboard__pwd-toggle" aria-label="Toggle password visibility" aria-pressed="false">SHOW</button>
                         </div>
                     ` : `
-                        <input class="cdlv-dashboard__input" type="${sanitizeText(f.type)}" id="${sanitizeText(f.id)}" name="${sanitizeText(f.id)}" value="${sanitizeText(f.value)}" required>
+                        <input class="cdlv-dashboard__input" type="${sanitizeText(f.type)}" id="${sanitizeText(f.id)}" name="${sanitizeText(f.id)}" value="${sanitizeText(f.value)}" required aria-invalid="false">
                     `}
-                    <div class="cdlv-dashboard__error-msg">This field is required.</div>
+                    <div class="cdlv-dashboard__error-msg" role="alert" aria-live="polite">This field is required.</div>
                 </div>
             `).join('')}
             ${customHTML}
@@ -159,7 +159,7 @@ export const init = (node, customConfig = {}) => {
     const activeTabId = node.getAttribute('data-account-tab') || 'overview';
     let activePanelHTML = '';
     
-    // NEW: State tracker for unsaved changes
+    // State tracker for unsaved changes
     let isFormDirty = false;
 
     switch (activeTabId) {
@@ -363,6 +363,7 @@ export const init = (node, customConfig = {}) => {
         </div>
     `;
 
+    // Track Form Changes
     node.addEventListener('input', (e) => {
         if (e.target.closest('.cdlv-dashboard__form')) {
             isFormDirty = true;
@@ -371,14 +372,13 @@ export const init = (node, customConfig = {}) => {
 
     // Event Delegation
     node.addEventListener('click', (e) => {
-        // Sub-View Switching (UPDATED)
+        // Sub-View Switching
         const switchBtn = e.target.closest('[data-action="switch-view"]');
         if (switchBtn) {
-            // Check for unsaved changes before allowing the sub-view swap
             if (isFormDirty) {
                 const proceed = window.confirm("You have unsaved changes. Are you sure you want to discard them?");
-                if (!proceed) return; // Stop the switch if they cancel
-                isFormDirty = false; // Reset the flag if they choose to proceed
+                if (!proceed) return;
+                isFormDirty = false;
             }
 
             const currentActiveView = node.querySelector('.cdlv-dashboard__sub-view.is-active');
@@ -389,22 +389,25 @@ export const init = (node, customConfig = {}) => {
             }
         }
 
-        // Edit Toggling
+        // Edit Toggling (with ARIA management)
         const editBtn = e.target.closest('.cdlv-dashboard__edit-btn[data-action="edit"]');
         if (editBtn) {
             const wrapper = node.querySelector(`#wrapper-${editBtn.getAttribute('data-target')}`);
             if (wrapper) {
-                if (wrapper.classList.contains('is-editing')) {
+                const isEditing = wrapper.classList.contains('is-editing');
+                if (isEditing) {
                     wrapper.classList.remove('is-editing');
                     editBtn.textContent = 'EDIT';
+                    editBtn.setAttribute('aria-expanded', 'false');
                 } else {
                     wrapper.classList.add('is-editing');
                     editBtn.textContent = 'CANCEL';
+                    editBtn.setAttribute('aria-expanded', 'true');
                 }
             }
         }
 
-        // Password Toggling
+        // Password Toggling (with ARIA management)
         const pwdToggleBtn = e.target.closest('.cdlv-dashboard__pwd-toggle');
         if (pwdToggleBtn) {
             const inputField = pwdToggleBtn.previousElementSibling;
@@ -412,25 +415,28 @@ export const init = (node, customConfig = {}) => {
                 if (inputField.type === 'password') {
                     inputField.type = 'text';
                     pwdToggleBtn.textContent = 'HIDE';
+                    pwdToggleBtn.setAttribute('aria-pressed', 'true');
                 } else {
                     inputField.type = 'password';
                     pwdToggleBtn.textContent = 'SHOW';
+                    pwdToggleBtn.setAttribute('aria-pressed', 'false');
                 }
             }
         }
 
-        // Modal Operations (Now correctly routing data-id)
+        // Modal Operations (Open)
         const modal = node.querySelector('#cdlv-cancel-modal');
-        
-        // Open Modal
         const openModalBtn = e.target.closest('[data-action="cancel-sub"]');
         if (openModalBtn) {
             if (modal) {
                 modal.classList.add('is-open');
+                modal.setAttribute('tabindex', '-1');
+                modal.focus();
+                
                 const confirmBtn = modal.querySelector('[data-action="confirm-cancel"]');
                 if (confirmBtn) {
                     confirmBtn.setAttribute('data-target-id', openModalBtn.getAttribute('data-id'));
-                    confirmBtn.textContent = 'Confirm Cancellation'; // Reset text
+                    confirmBtn.textContent = 'Confirm Cancellation';
                 }
             }
         }
@@ -440,7 +446,7 @@ export const init = (node, customConfig = {}) => {
             if (modal) modal.classList.remove('is-open');
         }
 
-        // Confirm Cancel & Swap original button to "Renew"
+        // Confirm Cancel Swap
         const confirmCancelBtn = e.target.closest('[data-action="confirm-cancel"]');
         if (confirmCancelBtn) {
             confirmCancelBtn.textContent = 'CANCELED';
@@ -457,6 +463,7 @@ export const init = (node, customConfig = {}) => {
         }
     });
 
+    // Form Validation & Submission
     node.addEventListener('submit', (e) => {
         if (e.target.matches('.cdlv-dashboard__form')) {
             e.preventDefault();
@@ -471,31 +478,40 @@ export const init = (node, customConfig = {}) => {
                 if (!input.value.trim()) {
                     isValid = false;
                     input.classList.add('is-invalid');
+                    input.setAttribute('aria-invalid', 'true');
                     if(errorMsg) errorMsg.style.display = 'block';
                 } else {
                     input.classList.remove('is-invalid');
+                    input.setAttribute('aria-invalid', 'false');
                     if(errorMsg) errorMsg.style.display = 'none';
                 }
             });
 
             if (isValid) {
-                // NEW: Clear the dirty flag upon successful save
                 isFormDirty = false; 
-
                 const submitBtn = e.target.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
                 submitBtn.textContent = 'SAVED ✓';
                 setTimeout(() => submitBtn.textContent = originalText, 2000);
             }
-        } // <-- You were missing this closing bracket for the if statement
-    }); // <-- And this closing bracket for the submit listener
+        }
+    });
 
-    // NEW: Intercept actual page departures (placed securely at the top level of init)
+    // Handle Escape Key to close modal
+    node.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const openModal = node.querySelector('#cdlv-cancel-modal.is-open');
+            if (openModal) {
+                openModal.classList.remove('is-open');
+            }
+        }
+    });
+
+    // Intercept Hard Page Departures
     window.addEventListener('beforeunload', (e) => {
         if (isFormDirty) {
-            // This triggers the browser's native "Leave site? Changes you made may not be saved" dialog
             e.preventDefault(); 
             e.returnValue = ''; 
         }
     });
-}; // <-- End of the init function
+};

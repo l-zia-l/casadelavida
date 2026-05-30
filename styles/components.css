@@ -4497,13 +4497,13 @@ h3.cdlv-product-page__item-title {
     display: flex;
     gap: var(--spacing-md);
     overflow-x: auto;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     padding-bottom: 2px;
 }
 
 .cdlv-dashboard__nav::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
 }
 
 .cdlv-dashboard__tab-link {
@@ -4529,10 +4529,9 @@ h3.cdlv-product-page__item-title {
 .cdlv-dashboard__tab-link.is-active {
     opacity: 1;
     border-bottom-color: var(--color-accent);
-    pointer-events: none; /* Prevent clicking the active tab */
+    pointer-events: none;
 }
 
-/* Removed the .is-active toggle classes for panels since only one panel renders per page */
 .cdlv-dashboard__panel {
     animation: fade-in-up var(--transition-fast) forwards;
 }
@@ -4541,7 +4540,7 @@ h3.cdlv-product-page__item-title {
     display: block;
 }
 
-/* Tab Header (e.g., "PERSONAL INFO" + "EDIT" button) */
+/* Tab Header */
 .cdlv-dashboard__panel-header {
     display: flex;
     justify-content: space-between;
@@ -4652,7 +4651,7 @@ h3.cdlv-product-page__item-title {
 /* Custom Checkbox Styling */
 .cdlv-dashboard__checkbox-label {
     display: flex;
-    align-items: flex-start; /* Aligns text with the top of the larger checkbox */
+    align-items: flex-start;
     gap: var(--spacing-xs);
     font-size: var(--font-size-body);
     font-weight: 600;
@@ -4664,7 +4663,7 @@ h3.cdlv-product-page__item-title {
     -webkit-appearance: none;
     width: 24px;
     height: 24px;
-    flex-shrink: 0; /* Prevents shrinking on smaller screens */
+    flex-shrink: 0;
     border: 2px solid rgba(26, 26, 26, 0.4);
     border-radius: var(--radius-strict);
     background-color: transparent;
@@ -4679,7 +4678,6 @@ h3.cdlv-product-page__item-title {
     border-color: var(--color-accent);
 }
 
-/* Custom Checkmark */
 .cdlv-dashboard__checkbox-label input[type="checkbox"]:checked::after {
     content: '';
     position: absolute;
@@ -4687,14 +4685,9 @@ h3.cdlv-product-page__item-title {
     left: 7px;
     width: 6px;
     height: 12px;
-    border: solid var(--color-text-light); /* White checkmark */
+    border: solid var(--color-text-light);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
-}
-
-.cdlv-dashboard__checkbox-label input[type="checkbox"]:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 4px;
 }
 
 .cdlv-dashboard__btn {
@@ -4757,14 +4750,12 @@ h3.cdlv-product-page__item-title {
     opacity: 0.8;
 }
 
-/* Enhanced Billing Controls */
 .cdlv-dashboard__actions {
     margin-top: var(--spacing-md);
     display: flex;
     justify-content: flex-end;
 }
 
-/* Enhanced Preferences */
 .cdlv-dashboard__pref-group {
     margin-bottom: var(--spacing-md);
 }
@@ -4863,7 +4854,6 @@ h3.cdlv-product-page__item-title {
     opacity: 0.8;
 }
 
-/* Ensure password input leaves room for the toggle button */
 .cdlv-dashboard__input-wrapper .cdlv-dashboard__input {
     padding-right: 70px; 
 }
@@ -4878,7 +4868,6 @@ h3.cdlv-product-page__item-title {
     display: block;
 }
 
-/* Back Button for Sub-Views */
 .cdlv-dashboard__back-btn {
     background: none;
     border: none;
@@ -4929,8 +4918,6 @@ h3.cdlv-product-page__item-title {
     border: 1px solid rgba(26, 26, 26, 0.1);
     overflow: hidden;
     transition: transform var(--transition-base);
-    
-    /* HARDENING: Prevents infinite height expansion in WebKit engines */
     height: 100%;
     min-height: 0;
 }
@@ -4964,8 +4951,6 @@ h3.cdlv-product-page__item-title {
     padding: var(--spacing-sm);
     display: flex;
     flex-direction: column;
-    
-    /* HARDENING: Establishes a predictable, uncollapsible interior flexible container */
     flex: 1 1 auto;
     min-height: 0;
 }
@@ -4985,7 +4970,7 @@ h3.cdlv-product-page__item-title {
 }
 
 .cdlv-dashboard__item-actions {
-    margin-top: auto; /* Clean baseline alignment across rows */
+    margin-top: auto; 
     display: flex;
     gap: var(--spacing-xs);
     padding-top: var(--spacing-md);
@@ -4994,7 +4979,7 @@ h3.cdlv-product-page__item-title {
 
 .cdlv-dashboard__item-actions .cdlv-dashboard__btn {
     width: 100%;
-    margin-top: 0; /* Overrides the default margin-top on dashboard buttons */
+    margin-top: 0; 
 }
 
 .cdlv-dashboard__btn--outline {
@@ -5074,7 +5059,7 @@ h3.cdlv-product-page__item-title {
 
 .cdlv-dashboard__modal-content {
     background: var(--color-primary);
-    width: min(90vw, 640px); /* Increased from 500px to accommodate fluid padding */
+    width: min(90vw, 640px);
     padding: var(--spacing-md);
     transform: translateY(20px);
     transition: transform var(--transition-base);
@@ -5101,7 +5086,7 @@ h3.cdlv-product-page__item-title {
 
 .cdlv-dashboard__modal-actions {
     display: flex;
-    flex-direction: column-reverse; /* Stacks on mobile, secondary button on bottom */
+    flex-direction: column-reverse;
     gap: var(--spacing-sm);
     margin-top: var(--spacing-md);
 }
@@ -5119,9 +5104,63 @@ h3.cdlv-product-page__item-title {
     align-items: center;
     text-align: center;
     flex: 1; 
-    white-space: normal; /* Changed from nowrap to prevent aggressive overflowing */
+    white-space: normal; 
     line-height: 1.2;
-    padding-inline: var(--spacing-sm); /* Ensure text doesn't touch the button edges */
+    padding-inline: var(--spacing-sm); 
+}
+
+/* ==========================================================================
+   ACCESSIBILITY HARDENING
+   ========================================================================== */
+
+/* 1. Universal Focus Management for Dashboard Interactives */
+.cdlv-dashboard__tab-link:focus-visible,
+.cdlv-dashboard__edit-btn:focus-visible,
+.cdlv-dashboard__pwd-toggle:focus-visible,
+.cdlv-dashboard__back-btn:focus-visible,
+.cdlv-dashboard__modal-content:focus-visible,
+.cdlv-dashboard__checkbox-label input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: var(--radius-strict);
+}
+
+.cdlv-dashboard__modal:focus-visible {
+    outline: none;
+}
+
+/* 2. Motion Sensitivity Compliance */
+@media (prefers-reduced-motion: reduce) {
+    .cdlv-dashboard__panel,
+    .cdlv-dashboard__sub-view {
+        animation: none !important;
+    }
+
+    .cdlv-dashboard__modal {
+        transition: none !important;
+    }
+    
+    .cdlv-dashboard__modal-content {
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .cdlv-dashboard__toggle-slider,
+    .cdlv-dashboard__toggle-slider:before {
+        transition: none !important;
+    }
+
+    .cdlv-dashboard__item-card:hover {
+        transform: none;
+    }
+    
+    .cdlv-dashboard__item-img-wrapper img {
+        transition: none;
+    }
+    
+    .cdlv-dashboard__item-card:hover .cdlv-dashboard__item-img-wrapper img {
+        transform: none;
+    }
 }
 
 /* ==========================================================================
