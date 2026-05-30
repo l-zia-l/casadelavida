@@ -59,7 +59,7 @@ export const init = (node) => {
             </header>
             
             <div class="cdlv-support-chat__stream" id="cdlv-chat-stream">
-                </div>
+            </div>
 
             <div class="cdlv-support-chat__modal-overlay" id="cdlv-chat-modal">
                 <div class="cdlv-support-chat__modal">
@@ -99,7 +99,7 @@ export const init = (node) => {
         elements.stream.innerHTML = ''; 
         messageQueue.length = 0; 
         isTyping = false;
-        humanContacted = false; // Hard reset the human pipeline state
+        humanContacted = false;
     };
 
     // --- 3.5 Message Queuing System ---
@@ -117,7 +117,7 @@ export const init = (node) => {
         typingRow.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
         typingRow.id = 'cdlv-chat-typing-indicator';
         typingRow.innerHTML = `
-            <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">
+            <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">
             <div class="cdlv-support-chat__typing">
                 <div class="cdlv-support-chat__gem"></div>
                 <span class="cdlv-support-chat__typing-text">typing...</span>
@@ -131,9 +131,9 @@ export const init = (node) => {
             const indicator = document.getElementById('cdlv-chat-typing-indicator');
             if (indicator) indicator.remove();
             
-            nextAction(); // Inject the actual message/form
+            nextAction(); 
             isTyping = false;
-            processQueue(); // Loop to the next item in the queue
+            processQueue(); 
         }, 2000);
     };
 
@@ -159,7 +159,6 @@ export const init = (node) => {
     };
 
     const appendUserMessage = (text) => {
-        // User messages bypass the queue and appear instantly
         const row = document.createElement('div');
         row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--user';
         row.innerHTML = `
@@ -247,7 +246,6 @@ export const init = (node) => {
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData.entries());
                 
-                // Keep data visible, but disabled
                 Array.from(form.elements).forEach(el => el.disabled = true);
                 submitBtn.textContent = 'Submitted ✓';
                 submitBtn.style.backgroundColor = 'var(--color-text-dark)';
@@ -265,7 +263,6 @@ export const init = (node) => {
     
     const triggerGlobalEnd = () => {
         setTimeout(() => {
-            // Dynamically build end options based on session history
             const endOptions = [
                 { label: 'Nope, all set', value: 'end' },
                 { label: 'Another Question', value: 'menu' }
@@ -278,7 +275,6 @@ export const init = (node) => {
             appendOptions(endOptions, (choice) => {
                 if (choice === 'end') {
                     appendBotMessage("Thank you for chatting with me today. Wishing you a beautiful, balanced day!");
-                    // Terminal pill that closes the chat completely
                     appendOptions([{label: 'End Session', value: 'close_chat'}], (val) => {
                         if (val === 'close_chat') closeAndResetChat();
                     });
@@ -295,28 +291,110 @@ export const init = (node) => {
         appendBotMessage("I'll connect you with our wellness team to look into this personally. They will email you within minutes. Please confirm your email address below.");
         
         appendForm([{ label: 'Email Address', name: 'email', type: 'email', required: true }], 'Confirm Email', (data) => {
-            humanContacted = true; // Lock out this option for the rest of the session
+            humanContacted = true; 
             appendBotMessage(`Thank you. A team member will reach out to ${sanitizeText(data.email)} shortly.`);
             
-            // Immediately loop back to the main menu without triggering the global end
             setTimeout(() => {
                 showMainMenu();
             }, 1200);
         });
     };
 
+    const runOrderPipeline = () => {
+        appendBotMessage("To best assist you with your order, could you let me know if you checked out as a guest or if you are logged into your account?");
+        appendOptions([
+            { label: 'Guest Checkout', value: 'guest' },
+            { label: 'Logged into my account', value: 'logged' }
+        ], (accountStatus) => {
+            const orderOpts = [
+                { label: 'Cancel order', value: 'cancel' },
+                { label: 'Place order', value: 'place' },
+                { label: 'Track order', value: 'track' },
+                { label: 'Change order', value: 'change' }
+            ];
+            
+            appendOptions(orderOpts, (action) => {
+                if (accountStatus === 'guest') {
+                    triggerHumanPipeline();
+                } else {
+                    if (action === 'place') {
+                        appendBotMessage(`Ready to step into the soft life? You can explore our artisanal collections and place a new order right here: <a href="${buildPath('shop.html')}" style="text-decoration:underline;">Shop</a>`);
+                        triggerGlobalEnd();
+                    } else if (action === 'track') {
+                        runTrackOrderPipeline();
+                    } else {
+                        appendBotMessage(`To ensure your rituals arrive quickly, we process orders immediately. Once placed, an order cannot be modified. However, if your order has not yet shipped, you can cancel it directly in your account dashboard <a href="${buildPath('account/orders.html')}" style="text-decoration:underline;">here</a> and place a new one.`);
+                        triggerGlobalEnd();
+                    }
+                }
+            });
+        });
+    };
+
+    const runTrackOrderPipeline = () => {
+        appendBotMessage("Please share your Order ID and delivery region so we can pull up your natural self-care rituals.");
+        
+        const ghanaRegions = ['Ahafo', 'Ashanti', 'Bono', 'Bono East', 'Central', 'Eastern', 'Greater Accra', 'North East', 'Northern', 'Oti', 'Savannah', 'Upper East', 'Upper West', 'Western', 'Western North'];
+
+        appendForm([
+            { label: 'Order ID', name: 'orderId', type: 'text', placeholder: 'e.g. CDLV-12345', required: true },
+            { label: 'Region', name: 'region', type: 'select', options: ghanaRegions, required: true }
+        ], 'Track Order', (data) => {
+            appendBotMessage("Searching for your rituals...");
+            
+            setTimeout(() => {
+                if (data.orderId.length > 3) { 
+                    appendBotMessage(`<strong>Order: ${sanitizeText(data.orderId)}</strong><br>Status: Processing<br>Expected delivery: 2-3 Business Days.`);
+                    triggerGlobalEnd();
+                } else { 
+                    appendBotMessage("It looks like those details don't match our records. Let's try again.");
+                    setTimeout(() => {
+                        showMainMenu();
+                    }, 1200); 
+                }
+            }, 1000);
+        });
+    };
+
+    const handleTopicSelection = (topic) => {
+        if (topic === 'order') runOrderPipeline();
+        else if (topic === 'tech') {
+            appendBotMessage("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.");
+            appendForm([{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
+        }
+        else if (topic === 'shop') {
+            appendBotMessage("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.");
+            appendForm([
+                { label: 'Category Preference', name: 'cat', type: 'text', required: false },
+                { label: 'Budget', name: 'budget', type: 'text', required: false }
+            ], 'Find Products', () => {
+                appendBotMessage(`Based on your vibes, check out our catalog <a href="${buildPath('shop.html')}" style="text-decoration:underline;">here</a>.`);
+                appendOptions([
+                    {label: 'I want to explore more', value: 'more'},
+                    {label: 'I want a consultation', value: 'consult'},
+                    {label: 'I\'m done looking', value: 'done'}
+                ], (res) => {
+                    if(res === 'consult') appendBotMessage(`Book here: <a href="${buildPath('appointments.html')}">Consultations</a>`);
+                    triggerGlobalEnd();
+                });
+            });
+        }
+        else {
+            triggerHumanPipeline();
+        }
+    };
+
     const showMainMenu = () => {
         appendBotMessage(`Thank you, ${sanitizeText(userData.firstName)}! How can I help you today? 🫖`);
         
-        // Combine Card and Pills into ONE unified queue action
         enqueueBotAction(() => {
             const wrapper = document.createElement('div');
             wrapper.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
             wrapper.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
-            wrapper.style.flexDirection = 'column'; // Stack the card and pills
+            wrapper.style.flexDirection = 'column'; 
             wrapper.style.gap = 'var(--spacing-sm)';
             
-            // Generate a unique ID so the track button works on multiple loops
+            // Unique ID per render to prevent click-binding collision on loops
             const uniqueTrackId = 'cdlv-track-btn-' + Math.random().toString(36).substr(2, 9);
 
             const cardHTML = `
@@ -351,7 +429,6 @@ export const init = (node) => {
                         else child.style.opacity = '0.5';
                     });
                     
-                    // Dim the track card button if a pill is selected
                     const trackBtn = document.getElementById(uniqueTrackId);
                     if(trackBtn) { 
                         trackBtn.style.pointerEvents = 'none'; 
@@ -369,14 +446,13 @@ export const init = (node) => {
             elements.stream.appendChild(wrapper);
             scrollToBottom();
 
-            // Bind the unique Card Button
             setTimeout(() => {
                 const trackBtn = document.getElementById(uniqueTrackId);
                 if(trackBtn) {
                     trackBtn.onclick = (e) => {
                         e.target.classList.add('is-selected');
                         e.target.disabled = true;
-                        // Dim the topic pills if the track button is selected
+                        
                         pillsContainer.style.pointerEvents = 'none';
                         pillsContainer.style.opacity = '0.5';
                         
@@ -388,37 +464,8 @@ export const init = (node) => {
         });
     };
 
-    // Extracted topic routing logic for cleaner code
-    const handleTopicSelection = (topic) => {
-        if (topic === 'order') runOrderPipeline();
-        else if (topic === 'tech') {
-            appendBotMessage("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.");
-            appendForm([{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
-        }
-        else if (topic === 'shop') {
-            appendBotMessage("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.");
-            appendForm([
-                { label: 'Category Preference', name: 'cat', type: 'text', required: false },
-                { label: 'Budget', name: 'budget', type: 'text', required: false }
-            ], 'Find Products', () => {
-                appendBotMessage(`Based on your vibes, check out our catalog <a href="${buildPath('shop.html')}" style="text-decoration:underline;">here</a>.`);
-                appendOptions([
-                    {label: 'I want to explore more', value: 'more'},
-                    {label: 'I want a consultation', value: 'consult'},
-                    {label: 'I\'m done looking', value: 'done'}
-                ], (res) => {
-                    if(res === 'consult') appendBotMessage(`Book here: <a href="${buildPath('appointments.html')}">Consultations</a>`);
-                    triggerGlobalEnd();
-                });
-            });
-        }
-        else {
-            triggerHumanPipeline();
-        }
-    };
-
     const startFlow = () => {
-        elements.stream.innerHTML = ''; // Clear stream
+        elements.stream.innerHTML = ''; 
         appendBotMessage("Welcome to Casa De La Vida. We are here to support your holistic wellness journey. Please tell us a little about yourself to get started.");
         
         appendForm([
@@ -434,7 +481,7 @@ export const init = (node) => {
     // 5. Event Listeners for State Management
     elements.launcher.addEventListener('click', () => {
         elements.window.classList.add('is-open');
-        document.body.classList.add('u-chat-open'); // Lock scroll
+        document.body.classList.add('u-chat-open'); 
         if (elements.stream.children.length === 0) {
             setTimeout(() => startFlow(), 600); 
         }
@@ -442,7 +489,7 @@ export const init = (node) => {
 
     elements.btnMin.addEventListener('click', () => {
         elements.window.classList.remove('is-open');
-        document.body.classList.remove('u-chat-open'); // Unlock scroll
+        document.body.classList.remove('u-chat-open'); 
     });
 
     elements.btnClose.addEventListener('click', () => {
@@ -456,10 +503,5 @@ export const init = (node) => {
     elements.btnModalConfirm.addEventListener('click', () => {
         elements.modal.classList.remove('is-active');
         closeAndResetChat();
-        elements.window.classList.remove('is-open');
-        document.body.classList.remove('u-chat-open'); // Unlock scroll
-        elements.stream.innerHTML = ''; 
-        messageQueue.length = 0; // Clear queue if restarting
-        isTyping = false;
     });
 };
