@@ -4475,6 +4475,214 @@ h3.cdlv-product-page__item-title {
 }
 
 /* ==========================================================================
+   MODULE: DASHBOARD (components.css)
+   Architecture: Scoped BEM methodology. Utilizes global CSS variables for 
+   fluid typography, colors, and motion. 
+   Performance: Relies on native CSS Grid/Flexbox and avoids expensive 
+   re-paints. Hardware-accelerated transitions.
+   ========================================================================== */
+
+.cdlv-dashboard {
+    width: 100%;
+    margin-block: var(--spacing-md) var(--spacing-xl);
+}
+
+/* Tab Navigation */
+.cdlv-dashboard__nav-wrapper {
+    border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+    margin-bottom: var(--spacing-md);
+}
+
+.cdlv-dashboard__nav {
+    display: flex;
+    gap: var(--spacing-md);
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    padding-bottom: 2px;
+}
+
+.cdlv-dashboard__nav::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.cdlv-dashboard__tab-btn {
+    background: none;
+    border: none;
+    padding: var(--spacing-xs) 0;
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    color: var(--color-text-dark);
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+}
+
+.cdlv-dashboard__tab-btn:hover {
+    opacity: 1;
+}
+
+.cdlv-dashboard__tab-btn.is-active {
+    opacity: 1;
+    border-bottom-color: var(--color-accent);
+}
+
+/* Content Panels */
+.cdlv-dashboard__panel {
+    display: none;
+    animation: fade-in-up var(--transition-fast) forwards;
+}
+
+.cdlv-dashboard__panel.is-active {
+    display: block;
+}
+
+/* Tab Header (e.g., "PERSONAL INFO" + "EDIT" button) */
+.cdlv-dashboard__panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+    padding-bottom: var(--spacing-xs);
+}
+
+.cdlv-dashboard__panel-title {
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    color: var(--color-text-dark);
+    margin: 0;
+}
+
+.cdlv-dashboard__edit-btn {
+    background: none;
+    border: none;
+    color: var(--color-accent);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    letter-spacing: var(--letter-spacing-wide);
+    cursor: pointer;
+}
+
+/* Data Tables */
+.cdlv-dashboard__table-wrapper {
+    overflow-x: auto;
+}
+
+.cdlv-dashboard__table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.cdlv-dashboard__table th {
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+    padding: var(--spacing-xs);
+    opacity: 0.7;
+}
+
+.cdlv-dashboard__table td {
+    padding: var(--spacing-xs);
+    border-bottom: 1px solid rgba(26, 26, 26, 0.05);
+    font-size: var(--font-size-body);
+}
+
+.cdlv-dashboard__table tr:last-child td {
+    border-bottom: none;
+}
+
+.cdlv-dashboard__link {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+/* Display & Forms */
+.cdlv-dashboard__view-state { display: block; }
+.cdlv-dashboard__edit-state { display: none; }
+
+.is-editing .cdlv-dashboard__view-state { display: none; }
+.is-editing .cdlv-dashboard__edit-state { display: block; }
+
+.cdlv-dashboard__field-group {
+    margin-bottom: var(--spacing-sm);
+}
+
+.cdlv-dashboard__label {
+    display: block;
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin-bottom: calc(var(--spacing-xs) / 2);
+    opacity: 0.7;
+}
+
+.cdlv-dashboard__value {
+    font-size: var(--font-size-body);
+}
+
+.cdlv-dashboard__input {
+    width: 100%;
+    padding: var(--spacing-xs);
+    border: 1px solid rgba(26, 26, 26, 0.2);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-body);
+    background: transparent;
+    color: var(--color-text-dark);
+}
+
+.cdlv-dashboard__input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.cdlv-dashboard__checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-body);
+    cursor: pointer;
+}
+
+.cdlv-dashboard__btn {
+    background-color: var(--color-accent);
+    color: var(--color-text-light);
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    cursor: pointer;
+    margin-top: var(--spacing-md);
+}
+
+.cdlv-dashboard__error-msg {
+    color: #d32f2f;
+    font-size: var(--font-size-small);
+    margin-top: calc(var(--spacing-xs) / 2);
+    display: none;
+}
+
+.cdlv-dashboard__input.is-invalid {
+    border-color: #d32f2f;
+}
+
+/* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
 
