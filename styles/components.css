@@ -4479,7 +4479,7 @@ h3.cdlv-product-page__item-title {
    Architecture: Scoped BEM methodology. Utilizes global CSS variables for 
    fluid typography, colors, and motion. 
    Performance: Relies on native CSS Grid/Flexbox and avoids expensive 
-   re-paints. Hardware-accelerated transitions.
+   re-paints. Strictly hardware-accelerated transitions.
    ========================================================================== */
 
 .cdlv-dashboard {
@@ -4734,7 +4734,7 @@ h3.cdlv-product-page__item-title {
     }
 }
 
-.cdlv-dashboard__card-content h3 {
+.cdlv-dashboard__card-title {
     font-size: var(--font-size-small);
     font-family: var(--font-family-body);
     font-weight: 600;
@@ -4910,6 +4910,7 @@ h3.cdlv-product-page__item-title {
     }
 }
 
+/* PERFORMANCE: GPU-accelerated transition */
 .cdlv-dashboard__item-card {
     display: flex;
     flex-direction: column;
@@ -4917,7 +4918,7 @@ h3.cdlv-product-page__item-title {
     border-radius: var(--radius-strict);
     border: 1px solid rgba(26, 26, 26, 0.1);
     overflow: hidden;
-    transition: transform var(--transition-base);
+    transition: transform var(--transition-base); 
     height: 100%;
     min-height: 0;
 }
@@ -5024,6 +5025,7 @@ h3.cdlv-product-page__item-title {
     text-transform: uppercase;
     letter-spacing: var(--letter-spacing-wide);
     font-size: var(--font-size-small);
+    margin: 0;
 }
 
 .cdlv-dashboard__payment-badge {
@@ -5037,6 +5039,7 @@ h3.cdlv-product-page__item-title {
 }
 
 /* Modal System */
+/* PERFORMANCE: GPU-accelerated transition */
 .cdlv-dashboard__modal {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -5049,7 +5052,7 @@ h3.cdlv-product-page__item-title {
     justify-content: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--transition-base);
+    transition: opacity var(--transition-base); /* Locked to opacity only */
 }
 
 .cdlv-dashboard__modal.is-open {
@@ -5062,7 +5065,7 @@ h3.cdlv-product-page__item-title {
     width: min(90vw, 640px);
     padding: var(--spacing-md);
     transform: translateY(20px);
-    transition: transform var(--transition-base);
+    transition: transform var(--transition-base); /* Locked to transform only */
     border: 1px solid rgba(26, 26, 26, 0.1);
 }
 

@@ -2,8 +2,9 @@
    MODULE: DASHBOARD (modules/dashboard.js)
    Architecture: Exportable ES Module. Multi-page router with internal Sub-Views.
    Security: Strict DOMPurify-style sanitization applied.
-   Performance: Leverages data-image-sync for batch image loading.
-   Accessibility: Strict WCAG compliance with ARIA states and focus management.
+   Performance: Hardware-accelerated, synced paint cycles, prioritized LCP.
+   Accessibility: Strict WCAG compliance (ARIA states, focus, motion).
+   SEO: Semantic HTML5 landmarks and strict heading hierarchy.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -95,13 +96,12 @@ const generateTable = (headers, rows, mapRow) => `
 const generateItemGrid = (items, type) => `
     <div class="cdlv-dashboard__grid" data-image-sync>
         ${items.map((item, index) => {
-            // PERFORMANCE: Prioritize the first image (LCP), lazy-load the rest, and decode asynchronously to free up the main thread.
             const isLCP = index === 0;
             const loadingAttr = index < 2 ? 'eager' : 'lazy';
             const priorityAttr = isLCP ? 'fetchpriority="high"' : '';
             
             return `
-            <div class="cdlv-dashboard__item-card">
+            <article class="cdlv-dashboard__item-card">
                 <div class="cdlv-dashboard__item-img-wrapper u-img-loader">
                     <img src="${buildPath(item.img)}" alt="${sanitizeText(item.title)}" loading="${loadingAttr}" ${priorityAttr} decoding="async">
                 </div>
@@ -118,16 +118,16 @@ const generateItemGrid = (items, type) => `
                         }
                     </div>
                 </div>
-            </div>
+            </article>
         `}).join('')}
     </div>
 `;
 
 const generateEditablePanel = (id, title, viewFields, editFields = viewFields, customHTML = '') => `
-    <div class="cdlv-dashboard__panel-header">
+    <header class="cdlv-dashboard__panel-header">
         <h2 class="cdlv-dashboard__panel-title">${sanitizeText(title)}</h2>
         <button class="cdlv-dashboard__edit-btn" data-action="edit" data-target="${id}" aria-expanded="false" aria-controls="wrapper-${id}">EDIT</button>
-    </div>
+    </header>
     <div class="cdlv-dashboard__content-wrapper" id="wrapper-${id}">
         <div class="cdlv-dashboard__view-state">
             ${viewFields.map(f => `
@@ -171,22 +171,22 @@ export const init = (node, customConfig = {}) => {
     switch (activeTabId) {
         case 'overview': {
             activePanelHTML = `
-                <div class="cdlv-dashboard__panel">
+                <section class="cdlv-dashboard__panel">
                     <div class="cdlv-dashboard__sub-view is-active" data-view="default">
-                        <div class="cdlv-dashboard__card">
+                        <article class="cdlv-dashboard__card">
                             <div class="cdlv-dashboard__card-content">
-                                <h3>Active Subscription</h3>
+                                <h2 class="cdlv-dashboard__card-title">Active Subscription</h2>
                                 <p>${sanitizeText(data.activeSubscription.plan)} &middot; Renews ${sanitizeText(data.activeSubscription.renewal)}</p>
                             </div>
                             <button class="cdlv-dashboard__btn" data-action="switch-view" data-target="subscriptions">Manage Subscriptions</button>
-                        </div>
-                        <div class="cdlv-dashboard__panel-header" style="margin-top: 2rem;">
+                        </article>
+                        <header class="cdlv-dashboard__panel-header" style="margin-top: 2rem;">
                             <h2 class="cdlv-dashboard__panel-title">Your Wishlist</h2>
                             <button class="cdlv-dashboard__edit-btn" data-action="switch-view" data-target="wishlist">VIEW ALL</button>
-                        </div>
-                        <div class="cdlv-dashboard__panel-header" style="margin-top: 2rem;">
+                        </header>
+                        <header class="cdlv-dashboard__panel-header" style="margin-top: 2rem;">
                             <h2 class="cdlv-dashboard__panel-title">Recent Activity</h2>
-                        </div>
+                        </header>
                         ${generateTable(['Date', 'Activity'], data.overview, r => `
                             <td>${sanitizeText(r.date)}</td>
                             <td><a href="${buildPath(r.link)}" class="cdlv-dashboard__link">${sanitizeText(r.activity)}</a></td>
@@ -194,44 +194,44 @@ export const init = (node, customConfig = {}) => {
                     </div>
                     <div class="cdlv-dashboard__sub-view" data-view="wishlist">
                         <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="default">← Back to Overview</button>
-                        <div class="cdlv-dashboard__panel-header">
+                        <header class="cdlv-dashboard__panel-header">
                             <h2 class="cdlv-dashboard__panel-title">Wishlist</h2>
-                        </div>
+                        </header>
                         ${generateItemGrid(data.wishlist, 'wishlist')}
                     </div>
                     <div class="cdlv-dashboard__sub-view" data-view="subscriptions">
                         <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="default">← Back to Overview</button>
-                        <div class="cdlv-dashboard__panel-header">
+                        <header class="cdlv-dashboard__panel-header">
                             <h2 class="cdlv-dashboard__panel-title">Manage Subscriptions</h2>
-                        </div>
+                        </header>
                         ${generateItemGrid(data.subscriptions, 'subscription')}
                     </div>
-                </div>
+                </section>
             `;
             break;
         }
 
         case 'orders': {
             activePanelHTML = `
-                <div class="cdlv-dashboard__panel">
+                <section class="cdlv-dashboard__panel">
                     ${generateTable(['Order ID', 'Date', 'Status', 'Total'], data.orders, r => `
                         <td><a href="${buildPath(r.link)}" class="cdlv-dashboard__link">${sanitizeText(r.orderId)}</a></td>
                         <td>${sanitizeText(r.date)}</td>
                         <td>${sanitizeText(r.status)}</td>
                         <td>${sanitizeText(r.total)}</td>
                     `)}
-                </div>
+                </section>
             `;
             break;
         }
 
         case 'billing': {
             activePanelHTML = `
-                <div class="cdlv-dashboard__panel">
+                <section class="cdlv-dashboard__panel">
                     <div class="cdlv-dashboard__sub-view is-active" data-view="default">
-                        <div class="cdlv-dashboard__panel-header">
+                        <header class="cdlv-dashboard__panel-header">
                             <h2 class="cdlv-dashboard__panel-title">Recent Billing</h2>
-                        </div>
+                        </header>
                         ${generateTable(['Method', 'Expires', 'Status'], data.paymentMethods.filter(pm => pm.isDefault), r => `
                             <td>${sanitizeText(r.type)} ending in ${sanitizeText(r.last4)}</td>
                             <td>${sanitizeText(r.exp)}</td>
@@ -243,21 +243,21 @@ export const init = (node, customConfig = {}) => {
                     </div>
                     <div class="cdlv-dashboard__sub-view" data-view="payment-methods">
                         <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="default">← Back to Billing</button>
-                        <div class="cdlv-dashboard__panel-header">
+                        <header class="cdlv-dashboard__panel-header">
                             <h2 class="cdlv-dashboard__panel-title">Saved Payment Methods</h2>
-                        </div>
+                        </header>
                         <div class="cdlv-dashboard__payment-list">
                             ${data.paymentMethods.map(pm => `
-                                <div class="cdlv-dashboard__payment-card">
+                                <article class="cdlv-dashboard__payment-card">
                                     <div class="cdlv-dashboard__payment-info">
-                                        <span class="cdlv-dashboard__payment-title">
+                                        <h3 class="cdlv-dashboard__payment-title">
                                             ${sanitizeText(pm.type)} ending in ${sanitizeText(pm.last4)}
                                             ${pm.isDefault ? `<span class="cdlv-dashboard__payment-badge">Default</span>` : ''}
-                                        </span>
+                                        </h3>
                                         <span class="cdlv-dashboard__item-meta">Expires ${sanitizeText(pm.exp)} &middot; ${sanitizeText(pm.name)}</span>
                                     </div>
                                     <button class="cdlv-dashboard__edit-btn" data-action="switch-view" data-target="edit-payment-${pm.id}">EDIT</button>
-                                </div>
+                                </article>
                             `).join('')}
                         </div>
                         <button class="cdlv-dashboard__btn cdlv-dashboard__btn--outline" style="margin-top: 1rem;">+ Add New Method</button>
@@ -265,9 +265,9 @@ export const init = (node, customConfig = {}) => {
                     ${data.paymentMethods.map(pm => `
                         <div class="cdlv-dashboard__sub-view" data-view="edit-payment-${pm.id}">
                             <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="payment-methods">← Back to Payment Methods</button>
-                            <div class="cdlv-dashboard__panel-header">
+                            <header class="cdlv-dashboard__panel-header">
                                 <h2 class="cdlv-dashboard__panel-title">Edit Payment Method</h2>
-                            </div>
+                            </header>
                             <form class="cdlv-dashboard__form cdlv-dashboard__edit-state" style="display:block;">
                                 <div class="cdlv-dashboard__field-group">
                                     <label class="cdlv-dashboard__label">Name on Card</label>
@@ -289,16 +289,16 @@ export const init = (node, customConfig = {}) => {
                             </form>
                         </div>
                     `).join('')}
-                </div>
+                </section>
             `;
             break;
         }
 
         case 'settings': {
             activePanelHTML = `
-                <div class="cdlv-dashboard__panel">
+                <section class="cdlv-dashboard__panel">
                     ${generateEditablePanel('settings', 'Personal Info', data.personalInfo)}
-                </div>
+                </section>
             `;
             break;
         }
@@ -314,19 +314,19 @@ export const init = (node, customConfig = {}) => {
                 </div>
             `;
             activePanelHTML = `
-                <div class="cdlv-dashboard__panel">
+                <section class="cdlv-dashboard__panel">
                     ${generateEditablePanel('security', 'Security & Passwords', data.security.viewFields, data.security.editFields, twoFactorHTML)}
-                </div>
+                </section>
             `;
             break;
         }
 
         case 'preferences': {
             activePanelHTML = `
-                <div class="cdlv-dashboard__panel">
-                    <div class="cdlv-dashboard__panel-header">
+                <section class="cdlv-dashboard__panel">
+                    <header class="cdlv-dashboard__panel-header">
                         <h2 class="cdlv-dashboard__panel-title">Preferences</h2>
-                    </div>
+                    </header>
                     <form class="cdlv-dashboard__form">
                         ${data.preferences.map(p => `
                             <div class="cdlv-dashboard__pref-group">
@@ -339,7 +339,7 @@ export const init = (node, customConfig = {}) => {
                         `).join('')}
                         <button type="submit" class="cdlv-dashboard__btn">Save Preferences</button>
                     </form>
-                </div>
+                </section>
             `;
             break;
         }
@@ -378,7 +378,7 @@ export const init = (node, customConfig = {}) => {
 
     // Event Delegation
     node.addEventListener('click', (e) => {
-        // Sub-View Switching
+        // Sub-View Switching (Hardware Accelerated & Synced)
         const switchBtn = e.target.closest('[data-action="switch-view"]');
         if (switchBtn) {
             if (isFormDirty) {
@@ -389,9 +389,7 @@ export const init = (node, customConfig = {}) => {
 
             const currentActiveView = node.querySelector('.cdlv-dashboard__sub-view.is-active');
             const targetView = node.querySelector(`.cdlv-dashboard__sub-view[data-view="${switchBtn.getAttribute('data-target')}"]`);
-            
             if (currentActiveView && targetView) {
-                // PERFORMANCE: Sync class toggling with the browser's paint cycle
                 requestAnimationFrame(() => {
                     currentActiveView.classList.remove('is-active');
                     targetView.classList.add('is-active');
@@ -434,12 +432,11 @@ export const init = (node, customConfig = {}) => {
             }
         }
 
-        // Modal Operations (Open)
+        // Modal Operations (Open, Paint-Synced, ARIA-focused)
         const modal = node.querySelector('#cdlv-cancel-modal');
         const openModalBtn = e.target.closest('[data-action="cancel-sub"]');
         if (openModalBtn) {
             if (modal) {
-                // PERFORMANCE: Sync modal opening with the paint cycle
                 requestAnimationFrame(() => {
                     modal.classList.add('is-open');
                     modal.setAttribute('tabindex', '-1');
@@ -457,9 +454,7 @@ export const init = (node, customConfig = {}) => {
         // Close Modal
         if (e.target.closest('[data-action="close-modal"]') || (e.target === modal)) {
             if (modal) {
-                requestAnimationFrame(() => {
-                    modal.classList.remove('is-open');
-                });
+                requestAnimationFrame(() => modal.classList.remove('is-open'));
             }
         }
 
@@ -521,7 +516,7 @@ export const init = (node, customConfig = {}) => {
         if (e.key === 'Escape') {
             const openModal = node.querySelector('#cdlv-cancel-modal.is-open');
             if (openModal) {
-                openModal.classList.remove('is-open');
+                requestAnimationFrame(() => openModal.classList.remove('is-open'));
             }
         }
     });
