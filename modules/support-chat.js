@@ -181,8 +181,8 @@ export const init = (node) => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
             
-            const likeIconPath = buildPath('assets/images/icons/like.svg');
-            const dislikeIconPath = buildPath('assets/images/icons/dislike.svg');
+            const likeIconPath = buildPath('assets/icons/like.svg');
+            const dislikeIconPath = buildPath('assets/icons/dislike.svg');
 
             row.innerHTML = `
                 <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">
