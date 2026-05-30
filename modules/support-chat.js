@@ -33,7 +33,14 @@ const getTimestamp = () => {
 const svgs = {
     chat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
     close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
-    minimize: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`
+    minimize: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+    play: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
+    pause: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`,
+    rewind: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>`,
+    fastForward: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>`,
+    volume: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>`,
+    mute: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="1" x2="1" y2="23"></line></svg>`,
+    cc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><path d="M9 10a2 2 0 0 0-2 2v0a2 2 0 0 0 2 2"></path><path d="M17 10a2 2 0 0 0-2 2v0a2 2 0 0 0 2 2"></path></svg>`
 };
 
 /**
@@ -73,6 +80,20 @@ export const init = (node) => {
                     </div>
                 </div>
             </div>
+
+            <div class="cdlv-support-chat-video-overlay" id="cdlv-chat-video-overlay">
+                <div class="cdlv-support-chat-video-container">
+                    <button class="cdlv-support-chat-video-close" id="cdlv-video-close" aria-label="Close Video">${svgs.close}</button>
+                    <video id="cdlv-chat-video-el" class="cdlv-support-chat-video-el" playsinline></video>
+                    <div class="cdlv-support-chat-video-controls">
+                        <button class="cdlv-video-btn" id="cdlv-video-rewind" aria-label="Rewind 10 Seconds">${svgs.rewind}</button>
+                        <button class="cdlv-video-btn" id="cdlv-video-playpause" aria-label="Play or Pause">${svgs.play}</button>
+                        <button class="cdlv-video-btn" id="cdlv-video-ff" aria-label="Fast Forward 10 Seconds">${svgs.fastForward}</button>
+                        <button class="cdlv-video-btn" id="cdlv-video-mute" aria-label="Mute or Unmute">${svgs.volume}</button>
+                        <button class="cdlv-video-btn" id="cdlv-video-cc" aria-label="Toggle Captions">${svgs.cc}</button>
+                    </div>
+                </div>
+            </div>
         </section>
     `;
     
@@ -87,7 +108,16 @@ export const init = (node) => {
         btnClose: document.getElementById('cdlv-chat-close'),
         modal: document.getElementById('cdlv-chat-modal'),
         btnModalCancel: document.getElementById('cdlv-modal-cancel'),
-        btnModalConfirm: document.getElementById('cdlv-modal-confirm')
+        btnModalConfirm: document.getElementById('cdlv-modal-confirm'),
+        // Video Elements
+        videoOverlay: document.getElementById('cdlv-chat-video-overlay'),
+        videoEl: document.getElementById('cdlv-chat-video-el'),
+        videoClose: document.getElementById('cdlv-video-close'),
+        videoPlayPause: document.getElementById('cdlv-video-playpause'),
+        videoRewind: document.getElementById('cdlv-video-rewind'),
+        videoFF: document.getElementById('cdlv-video-ff'),
+        videoMute: document.getElementById('cdlv-video-mute'),
+        videoCC: document.getElementById('cdlv-video-cc')
     };
 
     // 3. UI Helper Functions
@@ -111,6 +141,59 @@ export const init = (node) => {
             img.addEventListener('error', () => { img.style.display = 'none'; });
         });
     };
+
+    // --- Video Player Controller ---
+    const openVideo = (srcUrl) => {
+        elements.videoEl.src = srcUrl;
+        elements.videoOverlay.classList.add('is-active');
+        elements.videoEl.play().catch(e => console.log("Autoplay prevented.", e));
+        elements.videoPlayPause.innerHTML = svgs.pause;
+    };
+
+    const closeVideo = () => {
+        elements.videoEl.pause();
+        elements.videoEl.src = '';
+        elements.videoOverlay.classList.remove('is-active');
+    };
+
+    elements.videoClose.addEventListener('click', closeVideo);
+
+    elements.videoPlayPause.addEventListener('click', () => {
+        if (elements.videoEl.paused) {
+            elements.videoEl.play();
+            elements.videoPlayPause.innerHTML = svgs.pause;
+        } else {
+            elements.videoEl.pause();
+            elements.videoPlayPause.innerHTML = svgs.play;
+        }
+    });
+
+    elements.videoRewind.addEventListener('click', () => {
+        elements.videoEl.currentTime = Math.max(0, elements.videoEl.currentTime - 10);
+    });
+
+    elements.videoFF.addEventListener('click', () => {
+        elements.videoEl.currentTime = Math.min(elements.videoEl.duration, elements.videoEl.currentTime + 10);
+    });
+
+    elements.videoMute.addEventListener('click', () => {
+        elements.videoEl.muted = !elements.videoEl.muted;
+        elements.videoMute.innerHTML = elements.videoEl.muted ? svgs.mute : svgs.volume;
+    });
+
+    elements.videoCC.addEventListener('click', () => {
+        const track = elements.videoEl.textTracks[0];
+        if (track) {
+            track.mode = track.mode === 'showing' ? 'hidden' : 'showing';
+            elements.videoCC.classList.toggle('is-active');
+        } else {
+            elements.videoCC.classList.toggle('is-active');
+        }
+    });
+
+    elements.videoEl.addEventListener('ended', () => {
+        elements.videoPlayPause.innerHTML = svgs.play;
+    });
 
     // --- 3.5 Message Queuing System ---
     let isTyping = false;
@@ -393,20 +476,18 @@ export const init = (node) => {
             
             const cardsHTML = items.map((item, index) => {
                 const loadingStrategy = index < 2 ? 'loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
-                
-                // Gracefully handles shop prices vs text labels (like "Video 1")
                 const displayPrice = isNaN(item.price) ? item.price : `GH₵ ${item.price}`;
 
                 return `
-                    <article class="cdlv-catalog-slider__card" style="flex: 0 0 140px; min-width: 140px;">
-                        <a href="${buildPath(item.link || '#')}" target="_blank" class="cdlv-catalog-slider__image-box img-hover-scale" style="display:block; aspect-ratio:1/1; overflow:hidden; border-radius:var(--radius-strict); margin-bottom:var(--spacing-xs);">
-                            <img src="${buildPath(item.image)}" alt="${sanitizeText(item.title)}" style="width:100%; height:100%; object-fit:cover;" ${loadingStrategy}>
+                    <article class="cdlv-catalog-slider__card cdlv-support-chat__slider-card">
+                        <a href="${buildPath(item.link || '#')}" target="_blank" class="cdlv-catalog-slider__image-box img-hover-scale cdlv-support-chat__slider-img-box">
+                            <img src="${buildPath(item.image)}" alt="${sanitizeText(item.title)}" class="cdlv-support-chat__slider-img" ${loadingStrategy}>
                         </a>
                         <div class="cdlv-catalog-slider__info">
-                            <h3 style="font-size: 0.8rem; line-height: 1.2; margin: 0;">
-                                <a href="${buildPath(item.link || '#')}" target="_blank" style="text-decoration:none; color:inherit;">${sanitizeText(item.title)}</a>
+                            <h3 class="cdlv-support-chat__slider-title">
+                                <a href="${buildPath(item.link || '#')}" target="_blank" class="cdlv-support-chat__slider-link">${sanitizeText(item.title)}</a>
                             </h3>
-                            <p style="font-size: 0.75rem; color: #666; margin: 0; font-weight: bold;">${sanitizeText(displayPrice)}</p>
+                            <p class="cdlv-support-chat__slider-price">${sanitizeText(displayPrice)}</p>
                         </div>
                     </article>
                 `;
@@ -416,9 +497,9 @@ export const init = (node) => {
                 <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
                 <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
                 
-                <section class="cdlv-catalog-slider animate-enter u-mt-xs" style="padding-block: 0; padding-inline: 0; margin-inline: 0; border: 1px solid var(--color-text-dark); background: var(--color-primary); border-radius: var(--radius-strict); padding: var(--spacing-xs);">
-                    <div class="cdlv-catalog-slider__carousel-wrapper" style="margin-inline: 0; padding-inline: 0;">
-                        <div class="cdlv-catalog-slider__track" style="gap: var(--spacing-sm); padding-bottom: 0;">
+                <section class="cdlv-catalog-slider animate-enter u-mt-xs cdlv-support-chat__slider-section">
+                    <div class="cdlv-catalog-slider__carousel-wrapper cdlv-support-chat__slider-wrapper">
+                        <div class="cdlv-catalog-slider__track cdlv-support-chat__slider-track">
                             ${cardsHTML}
                         </div>
                     </div>
@@ -453,6 +534,88 @@ export const init = (node) => {
             scrollToBottom();
         });
     };
+
+    const askWithVideoSlider = (text, videos, followUpOptions, callback) => {
+        enqueueBotAction(() => {
+            const row = document.createElement('div');
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">`;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper u-w-100';
+            
+            const cardsHTML = videos.map((video, index) => {
+                const loadingStrategy = index < 2 ? 'loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
+                return `
+                    <article class="cdlv-catalog-slider__card cdlv-support-chat__slider-card cdlv-video-trigger" data-video-src="${buildPath(video.link)}">
+                        <div class="cdlv-catalog-slider__image-box img-hover-scale cdlv-support-chat__slider-img-box">
+                            <img src="${buildPath(video.image)}" alt="${sanitizeText(video.title)}" class="cdlv-support-chat__slider-img" ${loadingStrategy}>
+                            <div class="cdlv-support-chat__video-overlay-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            </div>
+                        </div>
+                        <div class="cdlv-catalog-slider__info">
+                            <h3 class="cdlv-support-chat__slider-title">
+                                ${sanitizeText(video.title)}
+                            </h3>
+                            <p class="cdlv-support-chat__slider-price cdlv-support-chat__slider-price--accent">▶ Watch Guide</p>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+
+            wrapper.innerHTML = `
+                <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
+                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+                
+                <section class="cdlv-catalog-slider animate-enter u-mt-xs cdlv-support-chat__slider-section">
+                    <div class="cdlv-catalog-slider__carousel-wrapper cdlv-support-chat__slider-wrapper">
+                        <div class="cdlv-catalog-slider__track cdlv-support-chat__slider-track">
+                            ${cardsHTML}
+                        </div>
+                    </div>
+                </section>
+            `;
+
+            const pillsContainer = document.createElement('div');
+            pillsContainer.className = 'cdlv-support-chat__pills u-mt-xs';
+
+            followUpOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'cdlv-support-chat__pill';
+                btn.textContent = opt.label;
+                btn.addEventListener('click', () => {
+                    pillsContainer.style.pointerEvents = 'none'; 
+                    Array.from(pillsContainer.children).forEach(child => {
+                        if (child === btn) child.classList.add('is-selected');
+                        else child.style.opacity = '0.5';
+                    });
+                    appendUserMessage(opt.label);
+                    setTimeout(() => callback(opt.value), 300);
+                });
+                pillsContainer.appendChild(btn);
+            });
+
+            wrapper.appendChild(pillsContainer);
+            row.innerHTML = avatarHTML;
+            row.appendChild(wrapper);
+            
+            elements.stream.appendChild(row);
+
+            const triggers = row.querySelectorAll('.cdlv-video-trigger');
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', () => {
+                    const src = trigger.getAttribute('data-video-src');
+                    if(src && src !== '#') openVideo(src);
+                });
+            });
+
+            attachAvatarFallbacks();
+            scrollToBottom();
+        });
+    };
+
 
     // 4. Chat Flow Logic (Pipelines)
     
@@ -729,14 +892,28 @@ export const init = (node) => {
         });
     };
 
-    // --- NEW: Care Tips Video Slider ---
     const runCareTipsPipeline = () => {
-        askWithSlider(
+        askWithVideoSlider(
             "Embracing intentional self-care is a beautiful journey. Here are some gentle guides on how to properly brew and enjoy your Casa De La Vida products.",
             [
-                { title: "Brewing Perfect Tea", image: "assets/images/backgrounds/stock_1.webp", link: "#", price: "Video" },
-                { title: "Honey Pairing Tips", image: "assets/images/backgrounds/stock_2.webp", link: "#", price: "Video" },
-                { title: "Storage Guide", image: "assets/images/backgrounds/stock_3.webp", link: "#", price: "Video" }
+                { 
+                    title: "Brewing Perfect Tea", 
+                    image: "assets/images/backgrounds/stock_1.webp", 
+                    link: "assets/videos/video_show_1.mp4", 
+                    price: "Video" 
+                },
+                { 
+                    title: "Honey Pairing Tips", 
+                    image: "assets/images/backgrounds/stock_2.webp", 
+                    link: "assets/videos/video_show_1.mp4", 
+                    price: "Video" 
+                },
+                { 
+                    title: "Storage Guide", 
+                    image: "assets/images/backgrounds/stock_3.webp", 
+                    link: "assets/videos/video_show_1.mp4", 
+                    price: "Video" 
+                }
             ],
             [
                 { label: 'I\'m done, thank you', value: 'done' }
