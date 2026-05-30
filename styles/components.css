@@ -5230,7 +5230,7 @@ h3.cdlv-product-page__item-title {
     color: var(--color-text-light);
     border: none;
     padding: 0 1.25rem;
-    border-radius: 2rem;
+    border-radius: var(--radius-strict);
     display: flex;
     align-items: center;
     justify-content: center;
