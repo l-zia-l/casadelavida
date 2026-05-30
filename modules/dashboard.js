@@ -94,10 +94,16 @@ const generateTable = (headers, rows, mapRow) => `
 
 const generateItemGrid = (items, type) => `
     <div class="cdlv-dashboard__grid" data-image-sync>
-        ${items.map(item => `
+        ${items.map((item, index) => {
+            // PERFORMANCE: Prioritize the first image (LCP), lazy-load the rest, and decode asynchronously to free up the main thread.
+            const isLCP = index === 0;
+            const loadingAttr = index < 2 ? 'eager' : 'lazy';
+            const priorityAttr = isLCP ? 'fetchpriority="high"' : '';
+            
+            return `
             <div class="cdlv-dashboard__item-card">
                 <div class="cdlv-dashboard__item-img-wrapper u-img-loader">
-                    <img src="${buildPath(item.img)}" alt="${sanitizeText(item.title)}" loading="eager">
+                    <img src="${buildPath(item.img)}" alt="${sanitizeText(item.title)}" loading="${loadingAttr}" ${priorityAttr} decoding="async">
                 </div>
                 <div class="cdlv-dashboard__item-details">
                     <h3 class="cdlv-dashboard__item-title">${sanitizeText(item.title)}</h3>
@@ -113,7 +119,7 @@ const generateItemGrid = (items, type) => `
                     </div>
                 </div>
             </div>
-        `).join('')}
+        `}).join('')}
     </div>
 `;
 
@@ -383,9 +389,13 @@ export const init = (node, customConfig = {}) => {
 
             const currentActiveView = node.querySelector('.cdlv-dashboard__sub-view.is-active');
             const targetView = node.querySelector(`.cdlv-dashboard__sub-view[data-view="${switchBtn.getAttribute('data-target')}"]`);
+            
             if (currentActiveView && targetView) {
-                currentActiveView.classList.remove('is-active');
-                targetView.classList.add('is-active');
+                // PERFORMANCE: Sync class toggling with the browser's paint cycle
+                requestAnimationFrame(() => {
+                    currentActiveView.classList.remove('is-active');
+                    targetView.classList.add('is-active');
+                });
             }
         }
 
@@ -429,9 +439,12 @@ export const init = (node, customConfig = {}) => {
         const openModalBtn = e.target.closest('[data-action="cancel-sub"]');
         if (openModalBtn) {
             if (modal) {
-                modal.classList.add('is-open');
-                modal.setAttribute('tabindex', '-1');
-                modal.focus();
+                // PERFORMANCE: Sync modal opening with the paint cycle
+                requestAnimationFrame(() => {
+                    modal.classList.add('is-open');
+                    modal.setAttribute('tabindex', '-1');
+                    modal.focus();
+                });
                 
                 const confirmBtn = modal.querySelector('[data-action="confirm-cancel"]');
                 if (confirmBtn) {
@@ -443,7 +456,11 @@ export const init = (node, customConfig = {}) => {
 
         // Close Modal
         if (e.target.closest('[data-action="close-modal"]') || (e.target === modal)) {
-            if (modal) modal.classList.remove('is-open');
+            if (modal) {
+                requestAnimationFrame(() => {
+                    modal.classList.remove('is-open');
+                });
+            }
         }
 
         // Confirm Cancel Swap
@@ -453,7 +470,9 @@ export const init = (node, customConfig = {}) => {
             const targetId = confirmCancelBtn.getAttribute('data-target-id');
             
             setTimeout(() => { 
-                if (modal) modal.classList.remove('is-open'); 
+                if (modal) {
+                    requestAnimationFrame(() => modal.classList.remove('is-open')); 
+                }
                 
                 const originalCardBtn = node.querySelector(`[data-action="cancel-sub"][data-id="${targetId}"]`);
                 if (originalCardBtn) {
