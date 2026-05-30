@@ -679,18 +679,9 @@ export const init = (node) => {
     const runShopPipeline = () => {
         askWithForm("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.", [
             { label: 'Category Preference', name: 'cat', type: 'select', options: ['Tea', 'Honey', 'Oils', 'Accessories', 'Packages'], required: false },
-            { label: 'Quantity', name: 'qty', type: 'number', required: false },
-            { label: 'Budget (Max GH₵)', name: 'budget', type: 'number', required: false },
-            { label: 'Delivery Date', name: 'date', type: 'date', required: false }
+            { label: 'Budget (Max GH₵)', name: 'budget', type: 'number', required: false }
         ], 'Find Products', (data) => {
             
-            // Check if user submitted at least one preference
-            if (!data.cat && !data.qty && !data.budget && !data.date) {
-                appendBotMessage("Oops! Please provide at least one preference so I can tailor the selection.");
-                setTimeout(() => runShopPipeline(), 1200); // Loop back
-                return;
-            }
-
             // Raw Catalog Data mapping
             const catalogData = [
                 { title: "Premium Herbal Infusion", image: "assets/images/products/item_2.2.1.webp", link: "shop/products/premium-herbal-infusion.html", price: 100, category: "Tea" },
@@ -704,29 +695,35 @@ export const init = (node) => {
 
             // Filter Engine
             let filteredProducts = catalogData;
+            let foundMatch = true;
             
-            if (data.cat && data.cat !== 'Any') {
+            if (data.cat) {
                 filteredProducts = filteredProducts.filter(item => item.category.toLowerCase() === data.cat.toLowerCase());
             }
             if (data.budget) {
                 filteredProducts = filteredProducts.filter(item => item.price <= parseInt(data.budget));
             }
             
-            // Fallback if filters yield no results
+            // Fallback Logic
             if (filteredProducts.length === 0) {
-                filteredProducts = catalogData; 
+                foundMatch = false;
+                appendBotMessage("This item is not available at the moment, but here are other items you might be interested in:");
+                // Sort catalog: Category match first, then the rest
+                filteredProducts = catalogData.sort((a, b) => {
+                    const matchA = data.cat && a.category.toLowerCase() === data.cat.toLowerCase();
+                    return matchA ? -1 : 1;
+                });
             }
 
             const postSliderOptions = [
                 {label: 'I want to explore more', value: 'more'},
-                {label: 'I want a personalized consultation', value: 'consult'},
+                {label: 'I want a consultation', value: 'consult'},
                 {label: 'I\'m done looking', value: 'done'}
             ];
 
-            // Inject the integrated Slider UI 
-            askWithSlider("Based on your preferences, check out this curated selection:", filteredProducts, postSliderOptions, (res) => {
+            askWithSlider(foundMatch ? "Based on your vibes, check out this curated selection:" : "Discover our full wellness collection:", filteredProducts, postSliderOptions, (res) => {
                 if (res === 'more') {
-                    runShopPipeline(); // Recurse
+                    runShopPipeline(); 
                 } else if (res === 'consult') {
                     askWithCard("Book your consultation here:", "Wellness Consultation", "assets/images/backgrounds/stock_1.webp", "Speak with our experts to personalize your routine.", "appointments.html", "Book Now");
                     triggerGlobalEnd();
