@@ -5660,10 +5660,9 @@ select.cdlv-support-chat__input {
     padding-block: 0;
     padding-inline: 0;
     margin-inline: 0;
-    border: 1px solid var(--color-text-dark);
-    background: var(--color-primary);
+    background: transparent; /* Removed the black border and primary background */
     border-radius: var(--radius-strict);
-    padding: var(--spacing-xs);
+    padding: var(--spacing-xs) 0;
 }
 
 .cdlv-support-chat__slider-wrapper {
@@ -5697,10 +5696,13 @@ select.cdlv-support-chat__input {
     object-fit: cover;
 }
 
+/* Forcing strict typography to prevent global overrides */
 .cdlv-support-chat__slider-title {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
     line-height: 1.2;
-    margin: 0;
+    margin: 0 0 0.25rem 0;
+    color: var(--color-text-dark);
 }
 
 .cdlv-support-chat__slider-link {
@@ -5712,11 +5714,14 @@ select.cdlv-support-chat__input {
     font-size: 0.75rem;
     color: #666;
     margin: 0;
-    font-weight: bold;
+    font-weight: 500;
 }
 
 .cdlv-support-chat__slider-price--accent {
     color: var(--color-accent);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .cdlv-support-chat__video-overlay-icon {
@@ -5755,19 +5760,23 @@ select.cdlv-support-chat__input {
 .cdlv-support-chat-video-container {
     width: 90%;
     max-width: 800px;
-    background: var(--color-primary); /* Primary White */
+    max-height: 90vh; /* Constrains the entire modal to the viewport height */
+    background: var(--color-primary); 
     border-radius: var(--radius-strict);
     position: relative;
     display: flex;
     flex-direction: column;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow: hidden;
 }
 
 .cdlv-support-chat-video-el {
     width: 100%;
+    max-height: calc(90vh - 60px); /* Fits video securely above the controls bar */
     height: auto;
     background: #000;
     display: block;
+    object-fit: contain; /* Ensures tall/vertical videos scale down automatically */
 }
 
 /* Custom Controls Bar */
@@ -5777,13 +5786,14 @@ select.cdlv-support-chat__input {
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-xs);
-    background: var(--color-primary); /* Primary White */
+    background: var(--color-primary); 
+    flex-shrink: 0; /* Prevents controls from squishing */
 }
 
 .cdlv-video-btn {
     background: transparent;
     border: none;
-    color: var(--color-accent); /* Accent Purple */
+    color: var(--color-accent); 
     width: clamp(2rem, 3.5vw, 2.5rem);
     height: clamp(2rem, 3.5vw, 2.5rem);
     cursor: pointer;
@@ -5803,7 +5813,7 @@ select.cdlv-support-chat__input {
 }
 
 .cdlv-video-btn.is-active {
-    opacity: 0.5; /* Visual indicator for toggled states like CC */
+    opacity: 0.5; 
 }
 
 /* Close Button Floating Top Right */
