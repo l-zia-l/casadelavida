@@ -5084,18 +5084,26 @@ h3.cdlv-product-page__item-title {
 }
 
 .cdlv-dashboard__modal-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Forces equal, fluid widths */
+    display: flex;
+    flex-direction: column-reverse; /* Stacks on mobile, secondary button on bottom */
     gap: var(--spacing-sm);
     margin-top: var(--spacing-md);
 }
 
+@media (min-width: 768px) {
+    .cdlv-dashboard__modal-actions {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
 .cdlv-dashboard__modal-actions .cdlv-dashboard__btn {
-    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
+    flex: 1; /* Distributes space equally on desktop */
+    white-space: nowrap; /* Prevents text from wrapping to a second line */
 }
 
 /* ==========================================================================

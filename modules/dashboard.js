@@ -116,6 +116,7 @@ const generateItemGrid = (items, type) => `
     </div>
 `;
 
+// THE MISSING FUNCTION: Placed securely at the top level
 const generateEditablePanel = (id, title, viewFields, editFields = viewFields, customHTML = '') => `
     <div class="cdlv-dashboard__panel-header">
         <h2 class="cdlv-dashboard__panel-title">${sanitizeText(title)}</h2>
@@ -402,30 +403,28 @@ export const init = (node, customConfig = {}) => {
             }
         }
 
-        // Modal Operations
+        // Modal Operations (Now correctly routing data-id)
         const modal = node.querySelector('#cdlv-cancel-modal');
         
-        // 1. Open Modal & Pass ID
+        // Open Modal
         const openModalBtn = e.target.closest('[data-action="cancel-sub"]');
         if (openModalBtn) {
             if (modal) {
                 modal.classList.add('is-open');
                 const confirmBtn = modal.querySelector('[data-action="confirm-cancel"]');
                 if (confirmBtn) {
-                    // Pass the subscription ID to the confirm button
                     confirmBtn.setAttribute('data-target-id', openModalBtn.getAttribute('data-id'));
-                    // Reset button text just in case it was used previously
-                    confirmBtn.textContent = 'Confirm Cancellation';
+                    confirmBtn.textContent = 'Confirm Cancellation'; // Reset text
                 }
             }
         }
 
-        // 2. Close Modal
+        // Close Modal
         if (e.target.closest('[data-action="close-modal"]') || (e.target === modal)) {
             if (modal) modal.classList.remove('is-open');
         }
 
-        // 3. Confirm Cancel & Transform Button
+        // Confirm Cancel & Swap original button to "Renew"
         const confirmCancelBtn = e.target.closest('[data-action="confirm-cancel"]');
         if (confirmCancelBtn) {
             confirmCancelBtn.textContent = 'CANCELED';
@@ -434,11 +433,8 @@ export const init = (node, customConfig = {}) => {
             setTimeout(() => { 
                 if (modal) modal.classList.remove('is-open'); 
                 
-                // Find the original cancel button on the card using the passed ID
                 const originalCardBtn = node.querySelector(`[data-action="cancel-sub"][data-id="${targetId}"]`);
-                
                 if (originalCardBtn) {
-                    // Replace the button with an anchor tag pointing to the cart
                     originalCardBtn.outerHTML = `<a href="${buildPath('shopping-cart.html')}" class="cdlv-dashboard__btn">Renew Plan</a>`;
                 }
             }, 1000);
