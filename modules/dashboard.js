@@ -284,4 +284,4 @@ export const init = (node, customConfig = {}) => {
             }
         }
     });
-};
+}; 
