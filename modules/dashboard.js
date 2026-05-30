@@ -369,6 +369,21 @@ export const init = (node, customConfig = {}) => {
         </div>
     `;
 
+    // NEW: Handle Deep Linking via URL Hashes
+    if (window.location.hash) {
+        const hash = window.location.hash.substring(1); // Strip the '#'
+        const targetView = node.querySelector(`.cdlv-dashboard__sub-view[data-view="${hash}"]`);
+        const currentActiveView = node.querySelector('.cdlv-dashboard__sub-view.is-active');
+
+        // If the targeted view exists inside the currently loaded tab, switch to it
+        if (targetView && currentActiveView && targetView !== currentActiveView) {
+            requestAnimationFrame(() => {
+                currentActiveView.classList.remove('is-active');
+                targetView.classList.add('is-active');
+            });
+        }
+    }
+
     // Track Form Changes
     node.addEventListener('input', (e) => {
         const form = e.target.closest('.cdlv-dashboard__form');

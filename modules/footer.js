@@ -35,8 +35,8 @@ const footerConfig = {
       links: [
         { label: 'My Account', url: buildPath('account/index.html') },
         { label: 'Orders', url: buildPath('account/orders.html') },
-        { label: 'Wishlist', url: buildPath('account/wishlist.html') },
-        { label: 'Subscriptions', url: buildPath('account/subscriptions.html') }
+        { label: 'Wishlist', url: buildPath('account/index.html#wishlist.html') },
+        { label: 'Subscriptions', url: buildPath('account/index.html#subscriptions.html') }
       ]
     },
     {
