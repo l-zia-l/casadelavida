@@ -33,9 +33,7 @@ const getTimestamp = () => {
 const svgs = {
     chat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
     close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
-    minimize: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-    thumbUp: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`,
-    thumbDown: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>`
+    minimize: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`
 };
 
 /**
@@ -419,7 +417,7 @@ export const init = (node) => {
 
     // --- NEW: Quality Pipeline ---
     const runQualityPipeline = () => {
-        askWithOptions("I am so sorry to hear your experience wasn't perfectly calming. Please let me know what happened so we can make it right.", [
+        askWithOptions("We are so sorry to hear your experience wasn't perfectly calming. Please let us know what happened so we can make it right.", [
             { label: 'Product quality', value: 'quality' },
             { label: 'My order was damaged', value: 'damaged' },
             { label: 'Product doesn\'t look like the photo', value: 'photo' },
@@ -447,16 +445,8 @@ export const init = (node) => {
             } else if (issue === 'quality' || issue === 'damaged') {
                 requestOrderIdAndImage();
             } else if (issue === 'photo') {
-                askWithOptions("Because our herbs and botanicals are 100% natural and hand-sourced, slight variations in color and texture are perfectly normal and celebrate the authenticity of our ingredients.<br><br>Was this helpful?", [
-                    { label: 'Yes, thank you', value: 'yes' },
-                    { label: 'No, I need more help', value: 'no' }
-                ], (feedback) => {
-                    if (feedback === 'yes') {
-                        triggerGlobalEnd();
-                    } else {
-                        requestOrderIdAndImage();
-                    }
-                });
+                const prText = "Because our herbs and botanicals are 100% natural and hand-sourced, slight variations in color and texture are perfectly normal and celebrate the authenticity of our ingredients.";
+                appendStepsWithFeedback(prText);
             }
         });
     };
