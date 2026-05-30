@@ -4682,6 +4682,119 @@ h3.cdlv-product-page__item-title {
     border-color: #d32f2f;
 }
 
+/* Active Subscription Card (Overview Tab) */
+.cdlv-dashboard__card {
+    border: 1px solid rgba(26, 26, 26, 0.1);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    background-color: rgba(26, 26, 26, 0.02);
+}
+
+@media (min-width: 768px) {
+    .cdlv-dashboard__card {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.cdlv-dashboard__card-content h3 {
+    font-size: var(--font-size-small);
+    font-family: var(--font-family-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin: 0 0 4px 0;
+    color: var(--color-text-dark);
+}
+
+.cdlv-dashboard__card-content p {
+    font-size: var(--font-size-body);
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* Enhanced Billing Controls */
+.cdlv-dashboard__actions {
+    margin-top: var(--spacing-md);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Enhanced Preferences */
+.cdlv-dashboard__pref-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.cdlv-dashboard__pref-desc {
+    display: block;
+    font-size: var(--font-size-small);
+    opacity: 0.7;
+    margin-left: calc(var(--spacing-xs) + 13px);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* Toggle Switch (2FA) */
+.cdlv-dashboard__toggle-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-top: 1px solid rgba(26, 26, 26, 0.1);
+    margin-top: var(--spacing-md);
+}
+
+.cdlv-dashboard__toggle-label {
+    font-size: var(--font-size-body);
+    font-weight: 600;
+}
+
+.cdlv-dashboard__toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.cdlv-dashboard__toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.cdlv-dashboard__toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(26, 26, 26, 0.2);
+    transition: var(--transition-base);
+    border-radius: 24px;
+}
+
+.cdlv-dashboard__toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--color-primary);
+    transition: var(--transition-base);
+    border-radius: 50%;
+}
+
+.cdlv-dashboard__toggle input:checked + .cdlv-dashboard__toggle-slider {
+    background-color: var(--color-accent);
+}
+
+.cdlv-dashboard__toggle input:checked + .cdlv-dashboard__toggle-slider:before {
+    transform: translateX(20px);
+}
+
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
