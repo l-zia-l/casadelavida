@@ -102,10 +102,13 @@ export const init = (node, customConfig = {}) => {
     const activeTabId = node.getAttribute('data-account-tab') || 'overview';
     let activePanelHTML = '';
 
+    /* Replace the switch statement inside init() with the following: */
+
     switch (activeTabId) {
-        case 'overview':
+        case 'overview': {
             activePanelHTML = `
                 <div class="cdlv-dashboard__panel">
+                    <!-- Default View -->
                     <div class="cdlv-dashboard__sub-view is-active" data-view="default">
                         <div class="cdlv-dashboard__card">
                             <div class="cdlv-dashboard__card-content">
@@ -129,6 +132,7 @@ export const init = (node, customConfig = {}) => {
                         `)}
                     </div>
 
+                    <!-- Wishlist Sub-View -->
                     <div class="cdlv-dashboard__sub-view" data-view="wishlist">
                         <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="default">← Back to Overview</button>
                         <div class="cdlv-dashboard__panel-header">
@@ -137,6 +141,7 @@ export const init = (node, customConfig = {}) => {
                         ${generateItemGrid(data.wishlist, 'wishlist')}
                     </div>
 
+                    <!-- Subscriptions Sub-View -->
                     <div class="cdlv-dashboard__sub-view" data-view="subscriptions">
                         <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="default">← Back to Overview</button>
                         <div class="cdlv-dashboard__panel-header">
@@ -147,8 +152,23 @@ export const init = (node, customConfig = {}) => {
                 </div>
             `;
             break;
+        }
 
-        case 'billing':
+        case 'orders': {
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
+                    ${generateTable(['Order ID', 'Date', 'Status', 'Total'], data.orders, r => `
+                        <td><a href="${buildPath(r.link)}" class="cdlv-dashboard__link">${sanitizeText(r.orderId)}</a></td>
+                        <td>${sanitizeText(r.date)}</td>
+                        <td>${sanitizeText(r.status)}</td>
+                        <td>${sanitizeText(r.total)}</td>
+                    `)}
+                </div>
+            `;
+            break;
+        }
+
+        case 'billing': {
             activePanelHTML = `
                 <div class="cdlv-dashboard__panel">
                     <div class="cdlv-dashboard__sub-view is-active" data-view="default">
@@ -217,9 +237,59 @@ export const init = (node, customConfig = {}) => {
                 </div>
             `;
             break;
-        // ... (orders, settings, security, preferences remain the same as previous)
-    }
+        }
 
+        case 'settings': {
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
+                    ${generateEditablePanel('settings', 'Personal Info', data.personalInfo)}
+                </div>
+            `;
+            break;
+        }
+
+        case 'security': {
+            const twoFactorHTML = `
+                <div class="cdlv-dashboard__toggle-wrapper">
+                    <span class="cdlv-dashboard__toggle-label">Two-Factor Authentication</span>
+                    <label class="cdlv-dashboard__toggle">
+                        <input type="checkbox" ${data.security.twoFactor ? 'checked' : ''}>
+                        <span class="cdlv-dashboard__toggle-slider"></span>
+                    </label>
+                </div>
+            `;
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
+                    ${generateEditablePanel('security', 'Security & Passwords', data.security.viewFields, data.security.editFields, twoFactorHTML)}
+                </div>
+            `;
+            break;
+        }
+
+        case 'preferences': {
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
+                    <div class="cdlv-dashboard__panel-header">
+                        <h2 class="cdlv-dashboard__panel-title">Preferences</h2>
+                    </div>
+                    <form class="cdlv-dashboard__form">
+                        ${data.preferences.map(p => `
+                            <div class="cdlv-dashboard__pref-group">
+                                <label class="cdlv-dashboard__checkbox-label">
+                                    <input type="checkbox" id="${sanitizeText(p.id)}" name="${sanitizeText(p.id)}" ${p.checked ? 'checked' : ''}>
+                                    ${sanitizeText(p.label)}
+                                </label>
+                                <span class="cdlv-dashboard__pref-desc">${sanitizeText(p.description)}</span>
+                            </div>
+                        `).join('')}
+                        <button type="submit" class="cdlv-dashboard__btn">Save Preferences</button>
+                    </form>
+                </div>
+            `;
+            break;
+        }
+    }
+    
     // Modal DOM Injector
     const modalHTML = `
         <div class="cdlv-dashboard__modal" id="cdlv-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">

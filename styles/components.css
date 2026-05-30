@@ -4904,8 +4904,15 @@ h3.cdlv-product-page__item-title {
 /* Card Grids (Wishlist & Subscriptions) */
 .cdlv-dashboard__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+    gap: var(--spacing-xs);
+}
+
+@media (min-width: 768px) {
+    .cdlv-dashboard__grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--spacing-md);
+    }
 }
 
 .cdlv-dashboard__item-card {
@@ -4914,6 +4921,11 @@ h3.cdlv-product-page__item-title {
     flex-direction: column;
     background-color: var(--color-primary);
     transition: transform var(--transition-base);
+    
+    /* Safely restrict to a single viewheight without breaking grid width */
+    max-height: var(--vh-fallback);
+    max-height: var(--vh-modern);
+    overflow: hidden;
 }
 
 .cdlv-dashboard__item-card:hover {
@@ -4926,6 +4938,7 @@ h3.cdlv-product-page__item-title {
     overflow: hidden;
     position: relative;
     border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+    flex-shrink: 0; /* Prevents image from squishing if text wraps heavily */
 }
 
 .cdlv-dashboard__item-img-wrapper img {
@@ -4940,6 +4953,11 @@ h3.cdlv-product-page__item-title {
     flex-direction: column;
     flex-grow: 1;
     gap: var(--spacing-xs);
+    overflow-y: auto; /* Allows scrolling inside the card if text is too long */
+    scrollbar-width: none;
+}
+.cdlv-dashboard__item-details::-webkit-scrollbar {
+    display: none;
 }
 
 .cdlv-dashboard__item-title {
