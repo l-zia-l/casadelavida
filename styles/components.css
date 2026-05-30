@@ -4649,12 +4649,52 @@ h3.cdlv-product-page__item-title {
     border-color: var(--color-accent);
 }
 
+/* Custom Checkbox Styling */
 .cdlv-dashboard__checkbox-label {
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* Aligns text with the top of the larger checkbox */
     gap: var(--spacing-xs);
     font-size: var(--font-size-body);
+    font-weight: 600;
     cursor: pointer;
+}
+
+.cdlv-dashboard__checkbox-label input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0; /* Prevents shrinking on smaller screens */
+    border: 2px solid rgba(26, 26, 26, 0.4);
+    border-radius: var(--radius-strict);
+    background-color: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: all var(--transition-fast);
+    margin: 0;
+}
+
+.cdlv-dashboard__checkbox-label input[type="checkbox"]:checked {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* Custom Checkmark */
+.cdlv-dashboard__checkbox-label input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 7px;
+    width: 6px;
+    height: 12px;
+    border: solid var(--color-text-light); /* White checkmark */
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.cdlv-dashboard__checkbox-label input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
 }
 
 .cdlv-dashboard__btn {
@@ -4793,6 +4833,39 @@ h3.cdlv-product-page__item-title {
 
 .cdlv-dashboard__toggle input:checked + .cdlv-dashboard__toggle-slider:before {
     transform: translateX(20px);
+}
+
+.cdlv-dashboard__input-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.cdlv-dashboard__pwd-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    color: var(--color-accent);
+    cursor: pointer;
+    padding: 0;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    z-index: 2;
+}
+
+.cdlv-dashboard__pwd-toggle:hover {
+    opacity: 0.8;
+}
+
+/* Ensure password input leaves room for the toggle button */
+.cdlv-dashboard__input-wrapper .cdlv-dashboard__input {
+    padding-right: 70px; 
 }
 
 /* ==========================================================================

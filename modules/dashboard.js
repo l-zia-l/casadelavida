@@ -49,8 +49,11 @@ const defaultConfig = {
             { id: 'address', label: 'Primary Shipping Address', value: '12 Independence Ave, Accra, Ghana', type: 'text' }
         ],
         security: {
-            fields: [
-                { id: 'current_pwd', label: 'Current Password', value: '********', type: 'password' },
+            viewFields: [
+                { label: 'Current Password', value: '********' }
+            ],
+            editFields: [
+                { id: 'current_pwd', label: 'Current Password', value: '', type: 'password' },
                 { id: 'new_pwd', label: 'New Password', value: '', type: 'password' },
                 { id: 'confirm_pwd', label: 'Confirm New Password', value: '', type: 'password' }
             ],
@@ -92,14 +95,15 @@ const generateTable = (headers, rows, mapRow) => `
     </div>
 `;
 
-const generateEditablePanel = (id, title, fields, customHTML = '') => `
+// Updated generator to handle separate View/Edit fields and password toggles
+const generateEditablePanel = (id, title, viewFields, editFields = viewFields, customHTML = '') => `
     <div class="cdlv-dashboard__panel-header">
         <h2 class="cdlv-dashboard__panel-title">${sanitizeText(title)}</h2>
         <button class="cdlv-dashboard__edit-btn" data-action="edit" data-target="${id}">EDIT</button>
     </div>
     <div class="cdlv-dashboard__content-wrapper" id="wrapper-${id}">
         <div class="cdlv-dashboard__view-state">
-            ${fields.map(f => `
+            ${viewFields.map(f => `
                 <div class="cdlv-dashboard__field-group">
                     <span class="cdlv-dashboard__label">${sanitizeText(f.label)}</span>
                     <span class="cdlv-dashboard__value">${sanitizeText(f.value) || '—'}</span>
@@ -108,10 +112,17 @@ const generateEditablePanel = (id, title, fields, customHTML = '') => `
             ${customHTML}
         </div>
         <form class="cdlv-dashboard__edit-state cdlv-dashboard__form" novalidate>
-            ${fields.map(f => `
+            ${editFields.map(f => `
                 <div class="cdlv-dashboard__field-group">
                     <label class="cdlv-dashboard__label" for="${sanitizeText(f.id)}">${sanitizeText(f.label)}</label>
-                    <input class="cdlv-dashboard__input" type="${sanitizeText(f.type)}" id="${sanitizeText(f.id)}" name="${sanitizeText(f.id)}" value="${sanitizeText(f.value)}" required>
+                    ${f.type === 'password' ? `
+                        <div class="cdlv-dashboard__input-wrapper">
+                            <input class="cdlv-dashboard__input" type="password" id="${sanitizeText(f.id)}" name="${sanitizeText(f.id)}" value="${sanitizeText(f.value)}" required>
+                            <button type="button" class="cdlv-dashboard__pwd-toggle" aria-label="Toggle password visibility">SHOW</button>
+                        </div>
+                    ` : `
+                        <input class="cdlv-dashboard__input" type="${sanitizeText(f.type)}" id="${sanitizeText(f.id)}" name="${sanitizeText(f.id)}" value="${sanitizeText(f.value)}" required>
+                    `}
                     <div class="cdlv-dashboard__error-msg">This field is required.</div>
                 </div>
             `).join('')}
@@ -140,7 +151,6 @@ export const init = (node, customConfig = {}) => {
             ${generateNav(tabs)}
             <div class="cdlv-dashboard__panels">
                 
-                <!-- Overview Panel -->
                 <div class="cdlv-dashboard__panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
                     <div class="cdlv-dashboard__card">
                         <div class="cdlv-dashboard__card-content">
@@ -158,7 +168,6 @@ export const init = (node, customConfig = {}) => {
                     `)}
                 </div>
 
-                <!-- Orders Panel -->
                 <div class="cdlv-dashboard__panel" id="panel-orders" role="tabpanel" aria-labelledby="tab-orders" hidden>
                     ${generateTable(['Order ID', 'Date', 'Status', 'Total'], data.orders, r => `
                         <td><a href="${buildPath(r.link)}" class="cdlv-dashboard__link">${sanitizeText(r.orderId)}</a></td>
@@ -168,7 +177,6 @@ export const init = (node, customConfig = {}) => {
                     `)}
                 </div>
 
-                <!-- Billing Panel -->
                 <div class="cdlv-dashboard__panel" id="panel-billing" role="tabpanel" aria-labelledby="tab-billing" hidden>
                      ${generateTable(['Method', 'Expires', 'Status'], data.billing, r => `
                         <td>${sanitizeText(r.method)}</td>
@@ -180,17 +188,14 @@ export const init = (node, customConfig = {}) => {
                     </div>
                 </div>
 
-                <!-- Personal Info Panel -->
                 <div class="cdlv-dashboard__panel" id="panel-personal-info" role="tabpanel" aria-labelledby="tab-personal-info" hidden>
                     ${generateEditablePanel('personal-info', 'Personal Info', data.personalInfo)}
                 </div>
 
-                <!-- Security Panel -->
                 <div class="cdlv-dashboard__panel" id="panel-security" role="tabpanel" aria-labelledby="tab-security" hidden>
-                    ${generateEditablePanel('security', 'Security & Passwords', data.security.fields, twoFactorHTML)}
+                    ${generateEditablePanel('security', 'Security & Passwords', data.security.viewFields, data.security.editFields, twoFactorHTML)}
                 </div>
 
-                <!-- Preferences Panel -->
                 <div class="cdlv-dashboard__panel" id="panel-preferences" role="tabpanel" aria-labelledby="tab-preferences" hidden>
                     <div class="cdlv-dashboard__panel-header">
                         <h2 class="cdlv-dashboard__panel-title">Preferences</h2>
@@ -253,6 +258,23 @@ export const init = (node, customConfig = {}) => {
         }
     });
 
+    // Delegate password visibility toggling
+    node.addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('.cdlv-dashboard__pwd-toggle');
+        if (toggleBtn) {
+            const inputField = toggleBtn.previousElementSibling;
+            if (inputField && inputField.tagName === 'INPUT') {
+                if (inputField.type === 'password') {
+                    inputField.type = 'text';
+                    toggleBtn.textContent = 'HIDE';
+                } else {
+                    inputField.type = 'password';
+                    toggleBtn.textContent = 'SHOW';
+                }
+            }
+        }
+    });
+
     // Form submission validation
     node.addEventListener('submit', (e) => {
         if (e.target.matches('.cdlv-dashboard__form')) {
@@ -261,27 +283,26 @@ export const init = (node, customConfig = {}) => {
             let isValid = true;
 
             inputs.forEach(input => {
-                const errorMsg = input.nextElementSibling;
+                const errorMsg = input.nextElementSibling && input.nextElementSibling.classList.contains('cdlv-dashboard__error-msg') 
+                                 ? input.nextElementSibling 
+                                 : input.parentElement.querySelector('.cdlv-dashboard__error-msg'); // Adjusted for wrapped inputs
+                
                 if (!input.value.trim()) {
                     isValid = false;
                     input.classList.add('is-invalid');
-                    if(errorMsg && errorMsg.classList.contains('cdlv-dashboard__error-msg')) {
-                        errorMsg.style.display = 'block';
-                    }
+                    if(errorMsg) errorMsg.style.display = 'block';
                 } else {
                     input.classList.remove('is-invalid');
-                    if(errorMsg && errorMsg.classList.contains('cdlv-dashboard__error-msg')) {
-                        errorMsg.style.display = 'none';
-                    }
+                    if(errorMsg) errorMsg.style.display = 'none';
                 }
             });
 
             if (isValid) {
                 const submitBtn = e.target.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'SAVED';
+                submitBtn.textContent = 'SAVED ✓';
                 setTimeout(() => submitBtn.textContent = originalText, 2000);
             }
         }
     });
-}; 
+};
