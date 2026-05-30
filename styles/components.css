@@ -5350,6 +5350,12 @@ h3.cdlv-product-page__item-title {
     transition: all var(--transition-fast);
 }
 
+.cdlv-support-chat__pill.is-selected {
+    background-color: var(--color-accent) !important;
+    color: var(--color-text-light) !important;
+    border-color: var(--color-accent) !important;
+}
+
 .cdlv-support-chat__pill:hover {
     background-color: var(--color-accent);
     color: var(--color-text-light);
@@ -5399,6 +5405,18 @@ h3.cdlv-product-page__item-title {
     font-family: var(--font-family-body);
     font-size: var(--font-size-small);
     color: var(--color-text-dark);
+}
+
+select.cdlv-support-chat__input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+    cursor: pointer;
 }
 
 .cdlv-support-chat__submit {

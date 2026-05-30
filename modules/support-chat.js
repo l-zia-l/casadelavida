@@ -65,8 +65,8 @@ export const init = (node) => {
                     <h3>End Chat Session?</h3>
                     <p>Closing the chat will reset your current progress.</p>
                     <div class="cdlv-support-chat__modal-actions">
+                        <button class="cdlv-support-chat__pill" id="cdlv-modal-confirm" style="background: var(--color-accent); color: var(--color-text-light); border-color: var(--color-accent);">End Session</button>
                         <button class="cdlv-support-chat__pill" id="cdlv-modal-cancel">Keep Chatting</button>
-                        <button class="cdlv-support-chat__pill" id="cdlv-modal-confirm" style="background: var(--color-text-dark); color: var(--color-text-light); border-color: var(--color-text-dark);">End Session</button>
                     </div>
                 </div>
             </div>
@@ -122,7 +122,7 @@ export const init = (node) => {
     const appendOptions = (options, callback) => {
         const row = document.createElement('div');
         row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-        row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))'; // offset by avatar
+        row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))'; 
         
         const pillsContainer = document.createElement('div');
         pillsContainer.className = 'cdlv-support-chat__pills';
@@ -133,7 +133,16 @@ export const init = (node) => {
             btn.textContent = opt.label;
             btn.onclick = () => {
                 pillsContainer.style.pointerEvents = 'none'; // Prevent double clicking
-                pillsContainer.style.opacity = '0.5';
+                
+                // Highlight selected, dim others
+                Array.from(pillsContainer.children).forEach(child => {
+                    if (child === btn) {
+                        child.classList.add('is-selected');
+                    } else {
+                        child.style.opacity = '0.5';
+                    }
+                });
+
                 appendUserMessage(opt.label);
                 setTimeout(() => callback(opt.value), 300);
             };
@@ -156,12 +165,25 @@ export const init = (node) => {
         fields.forEach(f => {
             const group = document.createElement('div');
             group.className = 'cdlv-support-chat__form-group';
+            
+            // Build input based on type
+            let inputHTML = '';
+            if (f.type === 'textarea') {
+                inputHTML = `<textarea class="cdlv-support-chat__textarea" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}></textarea>`;
+            } else if (f.type === 'select') {
+                inputHTML = `
+                    <select class="cdlv-support-chat__input" name="${f.name}" ${f.required ? 'required' : ''}>
+                        <option value="" disabled selected>Select an option...</option>
+                        ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                    </select>
+                `;
+            } else {
+                inputHTML = `<input class="cdlv-support-chat__input" type="${f.type}" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}>`;
+            }
+
             group.innerHTML = `
                 <label class="cdlv-support-chat__label">${f.label} ${f.required ? '*' : ''}</label>
-                ${f.type === 'textarea' 
-                    ? `<textarea class="cdlv-support-chat__textarea" name="${f.name}" ${f.required ? 'required' : ''}></textarea>`
-                    : `<input class="cdlv-support-chat__input" type="${f.type}" name="${f.name}" ${f.required ? 'required' : ''}>`
-                }
+                ${inputHTML}
             `;
             form.appendChild(group);
         });
@@ -246,20 +268,27 @@ export const init = (node) => {
     };
 
     const runTrackOrderPipeline = () => {
-        appendBotMessage("Please share your Order ID and the billing ZIP code so we can pull up your natural self-care rituals.");
+        appendBotMessage("Please share your Order ID and delivery region so we can pull up your natural self-care rituals.");
+        
+        const ghanaRegions = ['Ahafo', 'Ashanti', 'Bono', 'Bono East', 'Central', 'Eastern', 'Greater Accra', 'North East', 'Northern', 'Oti', 'Savannah', 'Upper East', 'Upper West', 'Western', 'Western North'];
+
         appendForm([
-            { label: 'Order ID', name: 'orderId', type: 'text', required: true },
-            { label: 'Billing ZIP code', name: 'zip', type: 'text', required: true }
+            { label: 'Order ID', name: 'orderId', type: 'text', placeholder: 'e.g. CDLV-12345', required: true },
+            { label: 'Region', name: 'region', type: 'select', options: ghanaRegions, required: true }
         ], 'Track Order', (data) => {
-            // Mock Validation Logic
             appendBotMessage("Searching for your rituals...");
+            
             setTimeout(() => {
-                if (data.orderId.length > 3) {
+                if (data.orderId.length > 3) { // Mock Success Condition
                     appendBotMessage(`<strong>Order: ${sanitizeText(data.orderId)}</strong><br>Status: Processing<br>Expected delivery: 2-3 Business Days.`);
-                } else {
-                    appendBotMessage("It looks like those details don't match our records. Let's head back and try again.");
+                    triggerGlobalEnd();
+                } else { // Mock Failure Condition
+                    appendBotMessage("It looks like those details don't match our records. Let's try again.");
+                    // Loop back to main menu after a short delay
+                    setTimeout(() => {
+                        showMainMenu();
+                    }, 1200); 
                 }
-                triggerGlobalEnd();
             }, 1000);
         });
     };
@@ -340,7 +369,9 @@ export const init = (node) => {
     // 5. Event Listeners for State Management
     elements.launcher.addEventListener('click', () => {
         elements.window.classList.add('is-open');
-        if (elements.stream.children.length === 0) startFlow();
+        if (elements.stream.children.length === 0) {
+            setTimeout(() => startFlow(), 600); 
+        }
     });
 
     elements.btnMin.addEventListener('click', () => {
