@@ -205,10 +205,10 @@ export const init = (node) => {
                         <div class="cdlv-support-chat__feedback-actions">
                             <span>Was this helpful?</span>
                             <button type="button" class="cdlv-support-chat__feedback-btn cdlv-btn-like">
-                                <img src="${likeIconPath}" alt="Like">
+                                <img src="${likeIconPath}" alt="Like" loading="eager">
                             </button>
                             <button type="button" class="cdlv-support-chat__feedback-btn cdlv-btn-dislike">
-                                <img src="${dislikeIconPath}" alt="Dislike">
+                                <img src="${dislikeIconPath}" alt="Dislike" loading="eager">
                             </button>
                         </div>
                     </div>
@@ -306,9 +306,10 @@ export const init = (node) => {
                 if (f.type === 'textarea') {
                     inputHTML = `<textarea class="cdlv-support-chat__textarea" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}></textarea>`;
                 } else if (f.type === 'select') {
+                    // Optional selects don't need 'disabled' on the placeholder so they can be bypassed
                     inputHTML = `
                         <select class="cdlv-support-chat__input" name="${f.name}" ${f.required ? 'required' : ''}>
-                            <option value="" disabled selected>Select an option...</option>
+                            <option value="" ${f.required ? 'disabled selected' : 'selected'}>Select an option...</option>
                             ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                         </select>
                     `;
@@ -381,6 +382,77 @@ export const init = (node) => {
         });
     };
 
+    // --- NEW: Shop Slider Integration Helper ---
+    const askWithSlider = (text, products, followUpOptions, callback) => {
+        enqueueBotAction(() => {
+            const row = document.createElement('div');
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">`;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper u-w-100';
+            
+            // Build Product Cards using global CSS tokens but constraining width for the chat UI
+            const cardsHTML = products.map((product, index) => {
+                const loadingStrategy = index < 2 ? 'loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
+                return `
+                    <article class="cdlv-catalog-slider__card" style="flex: 0 0 140px; min-width: 140px;">
+                        <a href="${buildPath(product.link)}" target="_blank" class="cdlv-catalog-slider__image-box img-hover-scale" style="display:block; aspect-ratio:1/1; overflow:hidden; border-radius:var(--radius-strict); margin-bottom:var(--spacing-xs);">
+                            <img src="${buildPath(product.image)}" alt="${sanitizeText(product.title)}" style="width:100%; height:100%; object-fit:cover;" ${loadingStrategy}>
+                        </a>
+                        <div class="cdlv-catalog-slider__info">
+                            <h3 class="cdlv-catalog-slider__product-title" style="font-size: 0.8rem; line-height: 1.2; margin: 0;">
+                                <a href="${buildPath(product.link)}" target="_blank" style="text-decoration:none; color:inherit;">${sanitizeText(product.title)}</a>
+                            </h3>
+                            <p style="font-size: 0.75rem; color: #666; margin: 0; font-weight: bold;">GH₵ ${product.price}</p>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+
+            wrapper.innerHTML = `
+                <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
+                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+                
+                <section class="cdlv-catalog-slider animate-enter u-mt-xs" style="padding-block: 0; padding-inline: 0; margin-inline: 0; border: 1px solid var(--color-text-dark); background: var(--color-primary); border-radius: var(--radius-strict); padding: var(--spacing-xs);">
+                    <div class="cdlv-catalog-slider__carousel-wrapper" style="margin-inline: 0; padding-inline: 0;">
+                        <div class="cdlv-catalog-slider__track" style="gap: var(--spacing-sm); padding-bottom: 0;">
+                            ${cardsHTML}
+                        </div>
+                    </div>
+                </section>
+            `;
+
+            const pillsContainer = document.createElement('div');
+            pillsContainer.className = 'cdlv-support-chat__pills u-mt-xs';
+
+            followUpOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'cdlv-support-chat__pill';
+                btn.textContent = opt.label;
+                btn.addEventListener('click', () => {
+                    pillsContainer.style.pointerEvents = 'none'; 
+                    Array.from(pillsContainer.children).forEach(child => {
+                        if (child === btn) child.classList.add('is-selected');
+                        else child.style.opacity = '0.5';
+                    });
+                    appendUserMessage(opt.label);
+                    setTimeout(() => callback(opt.value), 300);
+                });
+                pillsContainer.appendChild(btn);
+            });
+
+            wrapper.appendChild(pillsContainer);
+            row.innerHTML = avatarHTML;
+            row.appendChild(wrapper);
+            
+            elements.stream.appendChild(row);
+            attachAvatarFallbacks();
+            scrollToBottom();
+        });
+    };
+
 
     // 4. Chat Flow Logic (Pipelines)
     
@@ -415,7 +487,6 @@ export const init = (node) => {
         });
     };
 
-    // --- NEW: Quality Pipeline ---
     const runQualityPipeline = () => {
         askWithOptions("We are so sorry to hear your experience wasn't perfectly calming. Please let us know what happened so we can make it right.", [
             { label: 'Product quality', value: 'quality' },
@@ -604,31 +675,75 @@ export const init = (node) => {
         });
     };
 
+    // --- NEW: Shop Pipeline Integration ---
+    const runShopPipeline = () => {
+        askWithForm("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.", [
+            { label: 'Category Preference', name: 'cat', type: 'select', options: ['Tea', 'Honey', 'Oils', 'Accessories', 'Packages'], required: false },
+            { label: 'Quantity', name: 'qty', type: 'number', required: false },
+            { label: 'Budget (Max GH₵)', name: 'budget', type: 'number', required: false },
+            { label: 'Delivery Date', name: 'date', type: 'date', required: false }
+        ], 'Find Products', (data) => {
+            
+            // Check if user submitted at least one preference
+            if (!data.cat && !data.qty && !data.budget && !data.date) {
+                appendBotMessage("Oops! Please provide at least one preference so I can tailor the selection.");
+                setTimeout(() => runShopPipeline(), 1200); // Loop back
+                return;
+            }
+
+            // Raw Catalog Data mapping
+            const catalogData = [
+                { title: "Premium Herbal Infusion", image: "assets/images/products/item_2.2.1.webp", link: "shop/products/premium-herbal-infusion.html", price: 100, category: "Tea" },
+                { title: "Honey Infused Tumeric", image: "assets/images/products/item_1.webp", link: "shop/products/honey-infused-tumeric.html", price: 100, category: "Honey" },
+                { title: "Saffron Infused Honey", image: "assets/images/products/item_4.webp", link: "shop/products/saffron-infused-honey.html", price: 80, category: "Honey" },
+                { title: "Blackseed Infused Honey", image: "assets/images/products/item_4.2.webp", link: "shop/products/blackseed-infused-honey.html", price: 80, category: "Honey" },
+                { title: "Calming Fertility Package", image: "assets/images/products/box_3.webp", link: "shop/packages/fertility-wellness-box.html", price: 600, category: "Packages" },
+                { title: "Tea Infuser", image: "assets/images/products/item_7.webp", link: "shop/accessories/tea-infuser.html", price: 90, category: "Accessories" },
+                { title: "Vanilla Candle", image: "assets/images/products/item_6.3.webp", link: "shop/accessories/vanilla-candle.html", price: 100, category: "Accessories" }
+            ];
+
+            // Filter Engine
+            let filteredProducts = catalogData;
+            
+            if (data.cat && data.cat !== 'Any') {
+                filteredProducts = filteredProducts.filter(item => item.category.toLowerCase() === data.cat.toLowerCase());
+            }
+            if (data.budget) {
+                filteredProducts = filteredProducts.filter(item => item.price <= parseInt(data.budget));
+            }
+            
+            // Fallback if filters yield no results
+            if (filteredProducts.length === 0) {
+                filteredProducts = catalogData; 
+            }
+
+            const postSliderOptions = [
+                {label: 'I want to explore more', value: 'more'},
+                {label: 'I want a personalized consultation', value: 'consult'},
+                {label: 'I\'m done looking', value: 'done'}
+            ];
+
+            // Inject the integrated Slider UI 
+            askWithSlider("Based on your preferences, check out this curated selection:", filteredProducts, postSliderOptions, (res) => {
+                if (res === 'more') {
+                    runShopPipeline(); // Recurse
+                } else if (res === 'consult') {
+                    askWithCard("Book your consultation here:", "Wellness Consultation", "assets/images/backgrounds/stock_1.webp", "Speak with our experts to personalize your routine.", "appointments.html", "Book Now");
+                    triggerGlobalEnd();
+                } else {
+                    triggerGlobalEnd();
+                }
+            });
+        });
+    };
+
     const handleTopicSelection = (topic) => {
         if (topic === 'order') runOrderPipeline();
         else if (topic === 'subscriptions') runSubscriptionsPipeline();
         else if (topic === 'quality') runQualityPipeline();
+        else if (topic === 'shop') runShopPipeline();
         else if (topic === 'tech') {
             askWithForm("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.", [{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
-        }
-        else if (topic === 'shop') {
-            askWithForm("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.", [
-                { label: 'Category Preference', name: 'cat', type: 'text', required: false },
-                { label: 'Budget', name: 'budget', type: 'text', required: false }
-            ], 'Find Products', () => {
-                askWithCard("Based on your vibes, check out our catalog:", "Curated Wellness", "assets/images/products/item_1.webp", "Discover holistic products tailored to your routine.", "shop.html", "Explore Catalog");
-                
-                askWithOptions("Would you like to explore further, or speak with an expert?", [
-                    {label: 'I want to explore more', value: 'more'},
-                    {label: 'I want a consultation', value: 'consult'},
-                    {label: 'I\'m done looking', value: 'done'}
-                ], (res) => {
-                    if(res === 'consult') {
-                        askWithCard("Book your consultation here:", "Wellness Consultation", "assets/images/backgrounds/stock_1.webp", "Speak with our experts to personalize your routine.", "appointments.html", "Book Now");
-                    }
-                    triggerGlobalEnd();
-                });
-            });
         }
         else {
             triggerHumanPipeline();
