@@ -337,7 +337,7 @@ export const init = (node) => {
                 const data = Object.fromEntries(formData.entries());
                 
                 Array.from(form.elements).forEach(el => el.disabled = true);
-                submitBtn.textContent = 'Submitted ✓';
+                submitBtn.textContent = 'Submitted';
                 submitBtn.style.backgroundColor = 'var(--color-text-dark)';
                 
                 callback(data);
