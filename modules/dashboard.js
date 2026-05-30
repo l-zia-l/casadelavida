@@ -371,7 +371,8 @@ export const init = (node, customConfig = {}) => {
 
     // Track Form Changes
     node.addEventListener('input', (e) => {
-        if (e.target.closest('.cdlv-dashboard__form')) {
+        const form = e.target.closest('.cdlv-dashboard__form');
+        if (form && form.offsetParent !== null) {
             isFormDirty = true;
         }
     });
@@ -505,7 +506,7 @@ export const init = (node, customConfig = {}) => {
                 isFormDirty = false; 
                 const submitBtn = e.target.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'SAVED ✓';
+                submitBtn.textContent = 'SAVED';
                 setTimeout(() => submitBtn.textContent = originalText, 2000);
             }
         }
