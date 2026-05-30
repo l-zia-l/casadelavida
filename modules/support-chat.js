@@ -64,9 +64,9 @@ export const init = (node) => {
                 <div class="cdlv-support-chat__modal">
                     <h3>End Chat Session?</h3>
                     <p>Closing the chat will reset your current progress.</p>
-                    <div class="cdlv-support-chat__pills" style="justify-content: center; margin-top: 1rem;">
+                    <div class="cdlv-support-chat__modal-actions">
                         <button class="cdlv-support-chat__pill" id="cdlv-modal-cancel">Keep Chatting</button>
-                        <button class="cdlv-support-chat__pill" id="cdlv-modal-confirm" style="background: var(--color-text-dark); color: white;">End Session</button>
+                        <button class="cdlv-support-chat__pill" id="cdlv-modal-confirm" style="background: var(--color-text-dark); color: var(--color-text-light); border-color: var(--color-text-dark);">End Session</button>
                     </div>
                 </div>
             </div>

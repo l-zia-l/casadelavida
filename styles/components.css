@@ -5223,8 +5223,8 @@ h3.cdlv-product-page__item-title {
 
 /* --- Chat Header --- */
 .cdlv-support-chat__header {
-    background-color: var(--color-primary);
-    border-bottom: 1px solid var(--color-text-dark);
+    background-color: var(--color-accent);
+    border-bottom: 1px solid var(--color-accent);
     padding: var(--spacing-sm) var(--layout-gutter);
     display: flex;
     justify-content: space-between;
@@ -5235,7 +5235,7 @@ h3.cdlv-product-page__item-title {
 .cdlv-support-chat__header-title {
     font-family: var(--font-family-heading);
     font-size: var(--font-size-h4);
-    color: var(--color-accent);
+    color: var(--color-text-light);
     margin: 0;
 }
 
@@ -5247,7 +5247,7 @@ h3.cdlv-product-page__item-title {
 .cdlv-support-chat__btn-icon {
     background: transparent;
     border: 1px solid transparent;
-    color: var(--color-text-dark);
+    color: var(--color-text-light);
     width: 2.5rem;
     height: 2.5rem;
     display: flex;
@@ -5259,7 +5259,7 @@ h3.cdlv-product-page__item-title {
 }
 
 .cdlv-support-chat__btn-icon:hover {
-    border-color: var(--color-text-dark);
+    border-color: var(--color-text-light);
 }
 
 /* --- Chat Stream (Message Area) --- */
@@ -5425,18 +5425,53 @@ h3.cdlv-product-page__item-title {
     align-items: center;
     justify-content: center;
     z-index: 1010;
-    opacity: 0; pointer-events: none;
+    opacity: 0; 
+    pointer-events: none;
     transition: opacity var(--transition-base);
 }
+
 .cdlv-support-chat__modal-overlay.is-active {
-    opacity: 1; pointer-events: all;
+    opacity: 1; 
+    pointer-events: all;
 }
+
 .cdlv-support-chat__modal {
     background: var(--color-primary);
     padding: var(--spacing-md);
     border: 1px solid var(--color-text-dark);
     text-align: center;
+    width: 90%;
     max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.cdlv-support-chat__modal h3 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-h2);
+    color: var(--color-accent);
+    line-height: 1.1;
+    margin: 0;
+}
+
+.cdlv-support-chat__modal p {
+    margin: 0;
+    font-size: var(--font-size-small);
+}
+
+.cdlv-support-chat__modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    width: 100%;
+    margin-top: var(--spacing-xs);
+}
+
+.cdlv-support-chat__modal-actions .cdlv-support-chat__pill {
+    width: 100%;
+    justify-content: center;
 }
 
 /* ==========================================================================
