@@ -112,7 +112,6 @@ export const init = (node) => {
         
         const nextAction = messageQueue.shift();
         
-        // Inject typing indicator
         const typingRow = document.createElement('div');
         typingRow.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
         typingRow.id = 'cdlv-chat-typing-indicator';
@@ -126,7 +125,6 @@ export const init = (node) => {
         elements.stream.appendChild(typingRow);
         scrollToBottom();
 
-        // Wait 1.2 seconds, remove indicator, execute next message safely
         setTimeout(() => {
             const indicator = document.getElementById('cdlv-chat-typing-indicator');
             if (indicator) indicator.remove();
@@ -264,13 +262,29 @@ export const init = (node) => {
         });
     };
 
+    // Card Builder specifically for external links opening in a new tab
+    const appendCardMessage = (title, imagePath, description, linkUrl, linkText) => {
+        enqueueBotAction(() => {
+            const row = document.createElement('div');
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
+            
+            row.innerHTML = `
+                <div class="cdlv-support-chat__card">
+                    <h3 class="cdlv-support-chat__card-title">${title}</h3>
+                    <img src="${buildPath(imagePath)}" alt="${title}" class="cdlv-support-chat__card-img">
+                    <p style="font-size: var(--font-size-small); margin-bottom: 0.5rem;">${description}</p>
+                    <a href="${buildPath(linkUrl)}" target="_blank" rel="noopener noreferrer" class="cdlv-support-chat__pill" style="width: 100%; display: block; text-align: center; box-sizing: border-box; text-decoration: none;">${linkText}</a>
+                </div>
+            `;
+            elements.stream.appendChild(row);
+            scrollToBottom();
+        });
+    };
+
     // 4. Chat Flow Logic (Pipelines)
     
     const triggerGlobalEnd = () => {
-        // 1. Add the conversational bridge question
-        appendBotMessage("Is there anything else I can help you with?");
-        
-        // 2. Build and display the options
         const endOptions = [
             { label: 'Nope, all set', value: 'end' },
             { label: 'Another Question', value: 'menu' }
@@ -280,17 +294,60 @@ export const init = (node) => {
             endOptions.push({ label: 'Need to Speak With Someone', value: 'human' });
         }
 
-        appendOptions(endOptions, (choice) => {
-            if (choice === 'end') {
-                appendBotMessage("Thank you for chatting with me today. Wishing you a beautiful, balanced day!");
-                appendOptions([{label: 'End Session', value: 'close_chat'}], (val) => {
-                    if (val === 'close_chat') closeAndResetChat();
-                });
-            } else if (choice === 'menu') {
-                showMainMenu();
-            } else {
-                triggerHumanPipeline();
-            }
+        enqueueBotAction(() => {
+            const row = document.createElement('div');
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4='">`;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
+            wrapper.style.width = '100%';
+            
+            wrapper.innerHTML = `
+                <div class="cdlv-support-chat__bubble">Is there anything else I can help you with?</div>
+                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+            `;
+
+            const pillsContainer = document.createElement('div');
+            pillsContainer.className = 'cdlv-support-chat__pills';
+            pillsContainer.style.marginTop = 'var(--spacing-xs)';
+
+            endOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'cdlv-support-chat__pill';
+                btn.textContent = opt.label;
+                btn.onclick = () => {
+                    pillsContainer.style.pointerEvents = 'none'; 
+                    Array.from(pillsContainer.children).forEach(child => {
+                        if (child === btn) child.classList.add('is-selected');
+                        else child.style.opacity = '0.5';
+                    });
+                    
+                    appendUserMessage(opt.label);
+                    
+                    setTimeout(() => {
+                        if (opt.value === 'end') {
+                            appendBotMessage("Thank you for chatting with me today. Wishing you a beautiful, balanced day!");
+                            appendOptions([{label: 'End Session', value: 'close_chat'}], (val) => {
+                                if (val === 'close_chat') closeAndResetChat();
+                            });
+                        } else if (opt.value === 'menu') {
+                            showMainMenu();
+                        } else {
+                            triggerHumanPipeline();
+                        }
+                    }, 300);
+                };
+                pillsContainer.appendChild(btn);
+            });
+
+            wrapper.appendChild(pillsContainer);
+            row.innerHTML = avatarHTML;
+            row.appendChild(wrapper);
+            
+            elements.stream.appendChild(row);
+            scrollToBottom();
         });
     };
 
@@ -302,7 +359,7 @@ export const init = (node) => {
             appendBotMessage(`Thank you. A team member will reach out to ${sanitizeText(data.email)} shortly.`);
             
             setTimeout(() => {
-                triggerGlobalEnd(); // <-- FIXED: Now routes to Global End instead of showMainMenu
+                triggerGlobalEnd();
             }, 1200);
         });
     };
@@ -321,16 +378,26 @@ export const init = (node) => {
             ];
             
             appendOptions(orderOpts, (action) => {
+                if (action === 'track') {
+                    runTrackOrderPipeline();
+                    return;
+                }
+
                 if (accountStatus === 'guest') {
-                    triggerHumanPipeline();
+                    if (action === 'cancel') {
+                        appendBotMessage("Canceling orders is not possible once they have been shipped. Please restart the chat to check the order status if you have your Order ID.");
+                        triggerGlobalEnd();
+                    } else {
+                        triggerHumanPipeline();
+                    }
                 } else {
                     if (action === 'place') {
-                        appendBotMessage(`Ready to step into the soft life? You can explore our artisanal collections and place a new order right here: <a href="${buildPath('shop.html')}" style="text-decoration:underline;">Shop</a>`);
+                        appendBotMessage("Ready to step into the soft life? You can explore our artisanal collections and place a new order right here:");
+                        appendCardMessage("Shop Casa De La Vida", "assets/images/products/item_2.2.1.webp", "Explore our artisanal collections and wellness boxes.", "shop.html", "Shop Now");
                         triggerGlobalEnd();
-                    } else if (action === 'track') {
-                        runTrackOrderPipeline();
                     } else {
-                        appendBotMessage(`To ensure your rituals arrive quickly, we process orders immediately. Once placed, an order cannot be modified. However, if your order has not yet shipped, you can cancel it directly in your account dashboard <a href="${buildPath('account/orders.html')}" style="text-decoration:underline;">here</a> and place a new one.`);
+                        appendBotMessage("To ensure your rituals arrive quickly, we process orders immediately. Once placed, an order cannot be modified. However, if your order has not yet shipped, you can cancel it directly in your account dashboard and place a new one.");
+                        appendCardMessage("Account Dashboard", "assets/images/backgrounds/stock_3.webp", "Manage your orders, subscriptions, and settings.", "account/orders.html", "View Orders");
                         triggerGlobalEnd();
                     }
                 }
@@ -375,13 +442,18 @@ export const init = (node) => {
                 { label: 'Category Preference', name: 'cat', type: 'text', required: false },
                 { label: 'Budget', name: 'budget', type: 'text', required: false }
             ], 'Find Products', () => {
-                appendBotMessage(`Based on your vibes, check out our catalog <a href="${buildPath('shop.html')}" style="text-decoration:underline;">here</a>.`);
+                appendBotMessage("Based on your vibes, check out our catalog:");
+                appendCardMessage("Curated Wellness", "assets/images/products/item_1.webp", "Discover holistic products tailored to your routine.", "shop.html", "Explore Catalog");
+                
                 appendOptions([
                     {label: 'I want to explore more', value: 'more'},
                     {label: 'I want a consultation', value: 'consult'},
                     {label: 'I\'m done looking', value: 'done'}
                 ], (res) => {
-                    if(res === 'consult') appendBotMessage(`Book here: <a href="${buildPath('appointments.html')}">Consultations</a>`);
+                    if(res === 'consult') {
+                        appendBotMessage("Book your consultation here:");
+                        appendCardMessage("Wellness Consultation", "assets/images/backgrounds/stock_1.webp", "Speak with our experts to personalize your routine.", "appointments.html", "Book Now");
+                    }
                     triggerGlobalEnd();
                 });
             });
