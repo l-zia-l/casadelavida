@@ -251,25 +251,6 @@ export const init = (node) => {
         });
     };
 
-        const submitBtn = document.createElement('button');
-        submitBtn.type = 'submit';
-        submitBtn.className = 'cdlv-support-chat__submit';
-        submitBtn.textContent = submitLabel;
-        form.appendChild(submitBtn);
-
-        form.onsubmit = (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            form.innerHTML = '<p style="color: var(--color-accent); font-weight: bold;">Form Submitted ✓</p>';
-            callback(data);
-        };
-
-        row.appendChild(form);
-        elements.stream.appendChild(row);
-        scrollToBottom();
-    };
-
     // 4. Chat Flow Logic (Pipelines)
     
     const triggerGlobalEnd = () => {
