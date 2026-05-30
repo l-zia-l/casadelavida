@@ -134,7 +134,7 @@ export const init = (node) => {
             nextAction(); 
             isTyping = false;
             processQueue(); 
-        }, 2000);
+        }, 1200);
     };
 
     const enqueueBotAction = (actionFn) => {
@@ -262,29 +262,31 @@ export const init = (node) => {
     // 4. Chat Flow Logic (Pipelines)
     
     const triggerGlobalEnd = () => {
-        setTimeout(() => {
-            const endOptions = [
-                { label: 'Nope, all set', value: 'end' },
-                { label: 'Another Question', value: 'menu' }
-            ];
-            
-            if (!humanContacted) {
-                endOptions.push({ label: 'Need to Speak With Someone', value: 'human' });
-            }
+        // 1. Add the conversational bridge question
+        appendBotMessage("Is there anything else I can help you with?");
+        
+        // 2. Build and display the options
+        const endOptions = [
+            { label: 'Nope, all set', value: 'end' },
+            { label: 'Another Question', value: 'menu' }
+        ];
+        
+        if (!humanContacted) {
+            endOptions.push({ label: 'Need to Speak With Someone', value: 'human' });
+        }
 
-            appendOptions(endOptions, (choice) => {
-                if (choice === 'end') {
-                    appendBotMessage("Thank you for chatting with me today. Wishing you a beautiful, balanced day!");
-                    appendOptions([{label: 'End Session', value: 'close_chat'}], (val) => {
-                        if (val === 'close_chat') closeAndResetChat();
-                    });
-                } else if (choice === 'menu') {
-                    showMainMenu();
-                } else {
-                    triggerHumanPipeline();
-                }
-            });
-        }, 500);
+        appendOptions(endOptions, (choice) => {
+            if (choice === 'end') {
+                appendBotMessage("Thank you for chatting with me today. Wishing you a beautiful, balanced day!");
+                appendOptions([{label: 'End Session', value: 'close_chat'}], (val) => {
+                    if (val === 'close_chat') closeAndResetChat();
+                });
+            } else if (choice === 'menu') {
+                showMainMenu();
+            } else {
+                triggerHumanPipeline();
+            }
+        });
     };
 
     const triggerHumanPipeline = () => {
