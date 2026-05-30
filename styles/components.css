@@ -4506,9 +4506,8 @@ h3.cdlv-product-page__item-title {
     display: none; /* Chrome/Safari */
 }
 
-.cdlv-dashboard__tab-btn {
-    background: none;
-    border: none;
+.cdlv-dashboard__tab-link {
+    display: inline-block;
     padding: var(--spacing-xs) 0;
     font-family: var(--font-family-body);
     font-size: var(--font-size-small);
@@ -4517,23 +4516,24 @@ h3.cdlv-product-page__item-title {
     opacity: 0.6;
     text-transform: uppercase;
     letter-spacing: var(--letter-spacing-wide);
-    cursor: pointer;
+    text-decoration: none;
     border-bottom: 2px solid transparent;
     white-space: nowrap;
+    transition: all var(--transition-fast);
 }
 
-.cdlv-dashboard__tab-btn:hover {
+.cdlv-dashboard__tab-link:hover {
     opacity: 1;
 }
 
-.cdlv-dashboard__tab-btn.is-active {
+.cdlv-dashboard__tab-link.is-active {
     opacity: 1;
     border-bottom-color: var(--color-accent);
+    pointer-events: none; /* Prevent clicking the active tab */
 }
 
-/* Content Panels */
+/* Removed the .is-active toggle classes for panels since only one panel renders per page */
 .cdlv-dashboard__panel {
-    display: none;
     animation: fade-in-up var(--transition-fast) forwards;
 }
 

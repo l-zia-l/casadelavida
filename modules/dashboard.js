@@ -1,6 +1,8 @@
 /* ==========================================================================
    MODULE: DASHBOARD (modules/dashboard.js)
-   Architecture: Exportable ES Module. 
+   Architecture: Exportable ES Module. Multi-page router implementation.
+   Reads 'data-account-tab' to dynamically render the corresponding panel 
+   and semantic <a> tag navigation.
    Security: DOMPurify-style sanitization applied.
    ========================================================================== */
 
@@ -13,14 +15,15 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
+// Updated config with href routes matching your directory structure
 const defaultConfig = {
     tabs: [
-        { id: 'overview', label: 'Overview' },
-        { id: 'orders', label: 'Orders' },
-        { id: 'billing', label: 'Billing' },
-        { id: 'personal-info', label: 'Personal Info' },
-        { id: 'security', label: 'Security' },
-        { id: 'preferences', label: 'Preferences' }
+        { id: 'overview', label: 'Overview', href: 'account/index.html' },
+        { id: 'orders', label: 'Orders', href: 'account/orders.html' },
+        { id: 'billing', label: 'Billing', href: 'account/billing.html' },
+        { id: 'settings', label: 'Personal Info', href: 'account/settings.html' },
+        { id: 'security', label: 'Security', href: 'account/security.html' },
+        { id: 'preferences', label: 'Preferences', href: 'account/preferences.html' }
     ],
     data: {
         activeSubscription: {
@@ -32,7 +35,7 @@ const defaultConfig = {
         overview: [
             { date: 'May 28, 2026', activity: 'Purchased The Sleep Routine Box', link: 'account/orders.html' },
             { date: 'May 25, 2026', activity: 'Read: The Science of Raw Honey', link: 'blog/post_1.html' },
-            { date: 'May 10, 2026', activity: 'Updated Shipping Address', link: 'account/index.html' }
+            { date: 'May 10, 2026', activity: 'Updated Shipping Address', link: 'account/settings.html' }
         ],
         orders: [
             { orderId: '#CDLV-1092', date: 'May 28, 2026', status: 'Processing', total: '₵ 450.00', link: 'account/orders.html' },
@@ -66,17 +69,15 @@ const defaultConfig = {
     }
 };
 
-const generateNav = (tabs) => `
+const generateNav = (tabs, activeTabId) => `
     <div class="cdlv-dashboard__nav-wrapper">
-        <nav class="cdlv-dashboard__nav" role="tablist">
-            ${tabs.map((tab, index) => `
-                <button class="cdlv-dashboard__tab-btn ${index === 0 ? 'is-active' : ''}" 
-                        role="tab" 
-                        aria-selected="${index === 0 ? 'true' : 'false'}" 
-                        aria-controls="panel-${tab.id}" 
-                        id="tab-${tab.id}">
+        <nav class="cdlv-dashboard__nav" aria-label="Account Navigation">
+            ${tabs.map(tab => `
+                <a href="${buildPath(tab.href)}" 
+                   class="cdlv-dashboard__tab-link ${tab.id === activeTabId ? 'is-active' : ''}" 
+                   ${tab.id === activeTabId ? 'aria-current="page"' : ''}>
                     ${sanitizeText(tab.label)}
-                </button>
+                </a>
             `).join('')}
         </nav>
     </div>
@@ -95,7 +96,6 @@ const generateTable = (headers, rows, mapRow) => `
     </div>
 `;
 
-// Updated generator to handle separate View/Edit fields and password toggles
 const generateEditablePanel = (id, title, viewFields, editFields = viewFields, customHTML = '') => `
     <div class="cdlv-dashboard__panel-header">
         <h2 class="cdlv-dashboard__panel-title">${sanitizeText(title)}</h2>
@@ -136,22 +136,16 @@ export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     const { tabs, data } = config;
 
-    const twoFactorHTML = `
-        <div class="cdlv-dashboard__toggle-wrapper">
-            <span class="cdlv-dashboard__toggle-label">Two-Factor Authentication</span>
-            <label class="cdlv-dashboard__toggle">
-                <input type="checkbox" ${data.security.twoFactor ? 'checked' : ''}>
-                <span class="cdlv-dashboard__toggle-slider"></span>
-            </label>
-        </div>
-    `;
+    // Retrieve the active tab from the HTML data attribute (default to overview)
+    const activeTabId = node.getAttribute('data-account-tab') || 'overview';
 
-    const html = `
-        <div class="cdlv-dashboard">
-            ${generateNav(tabs)}
-            <div class="cdlv-dashboard__panels">
-                
-                <div class="cdlv-dashboard__panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+    let activePanelHTML = '';
+
+    // Route logic: Assemble only the DOM fragment for the active page
+    switch (activeTabId) {
+        case 'overview':
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
                     <div class="cdlv-dashboard__card">
                         <div class="cdlv-dashboard__card-content">
                             <h3>Active Subscription</h3>
@@ -167,8 +161,12 @@ export const init = (node, customConfig = {}) => {
                         <td><a href="${buildPath(r.link)}" class="cdlv-dashboard__link">${sanitizeText(r.activity)}</a></td>
                     `)}
                 </div>
+            `;
+            break;
 
-                <div class="cdlv-dashboard__panel" id="panel-orders" role="tabpanel" aria-labelledby="tab-orders" hidden>
+        case 'orders':
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
                     ${generateTable(['Order ID', 'Date', 'Status', 'Total'], data.orders, r => `
                         <td><a href="${buildPath(r.link)}" class="cdlv-dashboard__link">${sanitizeText(r.orderId)}</a></td>
                         <td>${sanitizeText(r.date)}</td>
@@ -176,8 +174,12 @@ export const init = (node, customConfig = {}) => {
                         <td>${sanitizeText(r.total)}</td>
                     `)}
                 </div>
+            `;
+            break;
 
-                <div class="cdlv-dashboard__panel" id="panel-billing" role="tabpanel" aria-labelledby="tab-billing" hidden>
+        case 'billing':
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
                      ${generateTable(['Method', 'Expires', 'Status'], data.billing, r => `
                         <td>${sanitizeText(r.method)}</td>
                         <td>${sanitizeText(r.expires)}</td>
@@ -187,16 +189,37 @@ export const init = (node, customConfig = {}) => {
                         <button class="cdlv-dashboard__btn">Manage Payment Methods</button>
                     </div>
                 </div>
+            `;
+            break;
 
-                <div class="cdlv-dashboard__panel" id="panel-personal-info" role="tabpanel" aria-labelledby="tab-personal-info" hidden>
-                    ${generateEditablePanel('personal-info', 'Personal Info', data.personalInfo)}
+        case 'settings':
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
+                    ${generateEditablePanel('settings', 'Personal Info', data.personalInfo)}
                 </div>
+            `;
+            break;
 
-                <div class="cdlv-dashboard__panel" id="panel-security" role="tabpanel" aria-labelledby="tab-security" hidden>
+        case 'security':
+            const twoFactorHTML = `
+                <div class="cdlv-dashboard__toggle-wrapper">
+                    <span class="cdlv-dashboard__toggle-label">Two-Factor Authentication</span>
+                    <label class="cdlv-dashboard__toggle">
+                        <input type="checkbox" ${data.security.twoFactor ? 'checked' : ''}>
+                        <span class="cdlv-dashboard__toggle-slider"></span>
+                    </label>
+                </div>
+            `;
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
                     ${generateEditablePanel('security', 'Security & Passwords', data.security.viewFields, data.security.editFields, twoFactorHTML)}
                 </div>
+            `;
+            break;
 
-                <div class="cdlv-dashboard__panel" id="panel-preferences" role="tabpanel" aria-labelledby="tab-preferences" hidden>
+        case 'preferences':
+            activePanelHTML = `
+                <div class="cdlv-dashboard__panel">
                     <div class="cdlv-dashboard__panel-header">
                         <h2 class="cdlv-dashboard__panel-title">Preferences</h2>
                     </div>
@@ -213,35 +236,20 @@ export const init = (node, customConfig = {}) => {
                         <button type="submit" class="cdlv-dashboard__btn">Save Preferences</button>
                     </form>
                 </div>
+            `;
+            break;
+    }
 
+    const html = `
+        <div class="cdlv-dashboard">
+            ${generateNav(tabs, activeTabId)}
+            <div class="cdlv-dashboard__panels">
+                ${activePanelHTML}
             </div>
         </div>
     `;
 
     node.innerHTML = html;
-
-    // Delegate tab switching logic
-    node.addEventListener('click', (e) => {
-        const tabBtn = e.target.closest('.cdlv-dashboard__tab-btn');
-        if (tabBtn) {
-            node.querySelectorAll('.cdlv-dashboard__tab-btn').forEach(btn => {
-                btn.classList.remove('is-active');
-                btn.setAttribute('aria-selected', 'false');
-            });
-            node.querySelectorAll('.cdlv-dashboard__panel').forEach(panel => {
-                panel.classList.remove('is-active');
-                panel.setAttribute('hidden', 'true');
-            });
-
-            tabBtn.classList.add('is-active');
-            tabBtn.setAttribute('aria-selected', 'true');
-            const targetPanel = node.querySelector(`#${tabBtn.getAttribute('aria-controls')}`);
-            if(targetPanel) {
-                targetPanel.classList.add('is-active');
-                targetPanel.removeAttribute('hidden');
-            }
-        }
-    });
 
     // Delegate edit toggling
     node.addEventListener('click', (e) => {
@@ -285,7 +293,7 @@ export const init = (node, customConfig = {}) => {
             inputs.forEach(input => {
                 const errorMsg = input.nextElementSibling && input.nextElementSibling.classList.contains('cdlv-dashboard__error-msg') 
                                  ? input.nextElementSibling 
-                                 : input.parentElement.querySelector('.cdlv-dashboard__error-msg'); // Adjusted for wrapped inputs
+                                 : input.parentElement.querySelector('.cdlv-dashboard__error-msg');
                 
                 if (!input.value.trim()) {
                     isValid = false;
