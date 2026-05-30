@@ -5474,6 +5474,42 @@ h3.cdlv-product-page__item-title {
     justify-content: center;
 }
 
+.cdlv-support-chat-window p,
+.cdlv-support-chat-window input,
+.cdlv-support-chat-window textarea,
+.cdlv-support-chat-window .cdlv-support-chat__bubble,
+.cdlv-support-chat-window .cdlv-support-chat__pill,
+.cdlv-support-chat-window .cdlv-support-chat__label,
+.cdlv-support-chat-window .cdlv-support-chat__submit {
+    font-size: var(--font-size-small);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/* Specifically target and lock down the fluid headings inside the chat window */
+.cdlv-support-chat-window .cdlv-support-chat__modal h3 {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    line-height: 1.2;
+    margin: 0;
+    overflow-wrap: break-word;
+}
+
+.cdlv-support-chat-window .cdlv-support-chat__card-title {
+    font-size: clamp(1.1rem, 2vw, 1.25rem);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    overflow-wrap: break-word;
+}
+
+.cdlv-support-chat-window .cdlv-support-chat__header-title {
+    font-size: clamp(1.1rem, 2vw, 1.25rem);
+    color: var(--color-text-light);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */

@@ -40,7 +40,7 @@ const svgs = {
  */
 export const init = (node) => {
     let userData = { firstName: '', lastName: '', email: '' };
-    const botAvatarPath = buildPath('assets/images/bot-avatar.webp'); // Teacup placeholder
+    const botAvatarPath = buildPath('assets/images/backgrounds/stock_2.webp'); 
     
     // 1. Build Base HTML Structure
     const markup = `
@@ -50,7 +50,7 @@ export const init = (node) => {
 
         <section class="cdlv-support-chat-window" id="cdlv-chat-window" aria-hidden="true">
             <header class="cdlv-support-chat__header">
-                <h2 class="cdlv-support-chat__header-title">Casa De La Vida - How can I help?</h2>
+                <h2 class="cdlv-support-chat__header-title">How can I help?</h2>
                 <div class="cdlv-support-chat__header-actions">
                     <button class="cdlv-support-chat__btn-icon" id="cdlv-chat-min" aria-label="Minimize Chat">${svgs.minimize}</button>
                     <button class="cdlv-support-chat__btn-icon" id="cdlv-chat-close" aria-label="Close and Restart Chat">${svgs.close}</button>
@@ -96,7 +96,7 @@ export const init = (node) => {
         const row = document.createElement('div');
         row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
         row.innerHTML = `
-            <img src="${botAvatarPath}" alt="Flora - Virtual Assistant" class="cdlv-support-chat__avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4='">
+            <img src="${botAvatarPath}" alt="Vie - Virtual Assistant" class="cdlv-support-chat__avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4='">
             <div class="cdlv-support-chat__bubble-wrapper">
                 <div class="cdlv-support-chat__bubble">${text}</div>
                 <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
