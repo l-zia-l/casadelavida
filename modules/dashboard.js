@@ -24,7 +24,7 @@ const defaultConfig = {
         { id: 'preferences', label: 'Preferences', href: 'account/preferences.html' }
     ],
     data: {
-        activeSubscription: { plan: 'The Sleep Routine Box', renewal: 'June 28, 2026' },
+        activeSubscription: { plan: 'The Sleep Routine Box', renewal: 'June 28, 2026', link: 'account/index.html' },
         overview: [
             { date: 'May 28, 2026', activity: 'Purchased The Sleep Routine Box', link: 'account/orders.html' },
             { date: 'May 10, 2026', activity: 'Updated Shipping Address', link: 'account/settings.html' }
@@ -32,7 +32,6 @@ const defaultConfig = {
         orders: [
             { orderId: '#CDLV-1092', date: 'May 28, 2026', status: 'Processing', total: '₵ 450.00', link: 'account/orders.html' }
         ],
-        // New Data Arrays for Sub-Views
         wishlist: [
             { id: 'w1', title: 'Raw Savannah Honey', price: '₵ 85.00', img: 'assets/images/honey.jpg', link: 'shop/individual-wellness-products.html' },
             { id: 'w2', title: 'Ceramic Matcha Bowl', price: '₵ 120.00', img: 'assets/images/bowl.jpg', link: 'shop/all-accessories.html' }
@@ -43,6 +42,28 @@ const defaultConfig = {
         paymentMethods: [
             { id: 'pm1', type: 'Visa', last4: '4242', exp: '12/28', name: 'Ama Mensah', isDefault: true },
             { id: 'pm2', type: 'Mastercard', last4: '8811', exp: '09/25', name: 'Ama Mensah', isDefault: false }
+        ],
+        personalInfo: [
+            { id: 'fname', label: 'First Name', value: 'Ama', type: 'text' },
+            { id: 'lname', label: 'Last Name', value: 'Mensah', type: 'text' },
+            { id: 'email', label: 'Email Address', value: 'ama.mensah@example.com', type: 'email' },
+            { id: 'phone', label: 'Phone Number', value: '+233 20 123 4567', type: 'tel' },
+            { id: 'address', label: 'Primary Shipping Address', value: '12 Independence Ave, Accra, Ghana', type: 'text' }
+        ],
+        security: {
+            viewFields: [
+                { label: 'Current Password', value: '********' }
+            ],
+            editFields: [
+                { id: 'current_pwd', label: 'Current Password', value: '', type: 'password' },
+                { id: 'new_pwd', label: 'New Password', value: '', type: 'password' },
+                { id: 'confirm_pwd', label: 'Confirm New Password', value: '', type: 'password' }
+            ],
+            twoFactor: true
+        },
+        preferences: [
+            { id: 'pref_newsletter', label: 'Join the Ritual', description: 'Receive monthly wellness tips and exclusive member-only early access to new tea arrivals.', checked: true },
+            { id: 'pref_sms', label: 'SMS Delivery Updates', description: 'Get real-time text notifications about your order status and delivery times.', checked: false }
         ]
     }
 };
@@ -70,7 +91,6 @@ const generateTable = (headers, rows, mapRow) => `
     </div>
 `;
 
-// Generates the Grid for Wishlist and Subscriptions
 const generateItemGrid = (items, type) => `
     <div class="cdlv-dashboard__grid" data-image-sync>
         ${items.map(item => `
@@ -96,19 +116,52 @@ const generateItemGrid = (items, type) => `
     </div>
 `;
 
+const generateEditablePanel = (id, title, viewFields, editFields = viewFields, customHTML = '') => `
+    <div class="cdlv-dashboard__panel-header">
+        <h2 class="cdlv-dashboard__panel-title">${sanitizeText(title)}</h2>
+        <button class="cdlv-dashboard__edit-btn" data-action="edit" data-target="${id}">EDIT</button>
+    </div>
+    <div class="cdlv-dashboard__content-wrapper" id="wrapper-${id}">
+        <div class="cdlv-dashboard__view-state">
+            ${viewFields.map(f => `
+                <div class="cdlv-dashboard__field-group">
+                    <span class="cdlv-dashboard__label">${sanitizeText(f.label)}</span>
+                    <span class="cdlv-dashboard__value">${sanitizeText(f.value) || '—'}</span>
+                </div>
+            `).join('')}
+            ${customHTML}
+        </div>
+        <form class="cdlv-dashboard__edit-state cdlv-dashboard__form" novalidate>
+            ${editFields.map(f => `
+                <div class="cdlv-dashboard__field-group">
+                    <label class="cdlv-dashboard__label" for="${sanitizeText(f.id)}">${sanitizeText(f.label)}</label>
+                    ${f.type === 'password' ? `
+                        <div class="cdlv-dashboard__input-wrapper">
+                            <input class="cdlv-dashboard__input" type="password" id="${sanitizeText(f.id)}" name="${sanitizeText(f.id)}" value="${sanitizeText(f.value)}" required>
+                            <button type="button" class="cdlv-dashboard__pwd-toggle" aria-label="Toggle password visibility">SHOW</button>
+                        </div>
+                    ` : `
+                        <input class="cdlv-dashboard__input" type="${sanitizeText(f.type)}" id="${sanitizeText(f.id)}" name="${sanitizeText(f.id)}" value="${sanitizeText(f.value)}" required>
+                    `}
+                    <div class="cdlv-dashboard__error-msg">This field is required.</div>
+                </div>
+            `).join('')}
+            ${customHTML}
+            <button type="submit" class="cdlv-dashboard__btn">Update</button>
+        </form>
+    </div>
+`;
+
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
     const { tabs, data } = config;
     const activeTabId = node.getAttribute('data-account-tab') || 'overview';
     let activePanelHTML = '';
 
-    /* Replace the switch statement inside init() with the following: */
-
     switch (activeTabId) {
         case 'overview': {
             activePanelHTML = `
                 <div class="cdlv-dashboard__panel">
-                    <!-- Default View -->
                     <div class="cdlv-dashboard__sub-view is-active" data-view="default">
                         <div class="cdlv-dashboard__card">
                             <div class="cdlv-dashboard__card-content">
@@ -117,12 +170,10 @@ export const init = (node, customConfig = {}) => {
                             </div>
                             <button class="cdlv-dashboard__btn" data-action="switch-view" data-target="subscriptions">Manage Subscriptions</button>
                         </div>
-                        
                         <div class="cdlv-dashboard__panel-header" style="margin-top: 2rem;">
                             <h2 class="cdlv-dashboard__panel-title">Your Wishlist</h2>
                             <button class="cdlv-dashboard__edit-btn" data-action="switch-view" data-target="wishlist">VIEW ALL</button>
                         </div>
-                        
                         <div class="cdlv-dashboard__panel-header" style="margin-top: 2rem;">
                             <h2 class="cdlv-dashboard__panel-title">Recent Activity</h2>
                         </div>
@@ -131,8 +182,6 @@ export const init = (node, customConfig = {}) => {
                             <td><a href="${buildPath(r.link)}" class="cdlv-dashboard__link">${sanitizeText(r.activity)}</a></td>
                         `)}
                     </div>
-
-                    <!-- Wishlist Sub-View -->
                     <div class="cdlv-dashboard__sub-view" data-view="wishlist">
                         <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="default">← Back to Overview</button>
                         <div class="cdlv-dashboard__panel-header">
@@ -140,8 +189,6 @@ export const init = (node, customConfig = {}) => {
                         </div>
                         ${generateItemGrid(data.wishlist, 'wishlist')}
                     </div>
-
-                    <!-- Subscriptions Sub-View -->
                     <div class="cdlv-dashboard__sub-view" data-view="subscriptions">
                         <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="default">← Back to Overview</button>
                         <div class="cdlv-dashboard__panel-header">
@@ -184,7 +231,6 @@ export const init = (node, customConfig = {}) => {
                             <button class="cdlv-dashboard__btn" data-action="switch-view" data-target="payment-methods">Manage Payment Methods</button>
                         </div>
                     </div>
-
                     <div class="cdlv-dashboard__sub-view" data-view="payment-methods">
                         <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="default">← Back to Billing</button>
                         <div class="cdlv-dashboard__panel-header">
@@ -206,7 +252,6 @@ export const init = (node, customConfig = {}) => {
                         </div>
                         <button class="cdlv-dashboard__btn cdlv-dashboard__btn--outline" style="margin-top: 1rem;">+ Add New Method</button>
                     </div>
-
                     ${data.paymentMethods.map(pm => `
                         <div class="cdlv-dashboard__sub-view" data-view="edit-payment-${pm.id}">
                             <button class="cdlv-dashboard__back-btn" data-action="switch-view" data-target="payment-methods">← Back to Payment Methods</button>
@@ -289,8 +334,7 @@ export const init = (node, customConfig = {}) => {
             break;
         }
     }
-    
-    // Modal DOM Injector
+
     const modalHTML = `
         <div class="cdlv-dashboard__modal" id="cdlv-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
             <div class="cdlv-dashboard__modal-content">
@@ -315,41 +359,119 @@ export const init = (node, customConfig = {}) => {
         </div>
     `;
 
-    // Event Delegation for Sub-View Switching
+    // Event Delegation
     node.addEventListener('click', (e) => {
+        // Sub-View Switching
         const switchBtn = e.target.closest('[data-action="switch-view"]');
         if (switchBtn) {
-            const targetViewId = switchBtn.getAttribute('data-target');
             const currentActiveView = node.querySelector('.cdlv-dashboard__sub-view.is-active');
-            const targetView = node.querySelector(`.cdlv-dashboard__sub-view[data-view="${targetViewId}"]`);
-            
+            const targetView = node.querySelector(`.cdlv-dashboard__sub-view[data-view="${switchBtn.getAttribute('data-target')}"]`);
             if (currentActiveView && targetView) {
                 currentActiveView.classList.remove('is-active');
                 targetView.classList.add('is-active');
             }
         }
-    });
 
-    // Event Delegation for Modal Operations
-    const modal = node.querySelector('#cdlv-cancel-modal');
-    
-    node.addEventListener('click', (e) => {
-        // Open Modal
-        if (e.target.closest('[data-action="cancel-sub"]')) {
-            if (modal) modal.classList.add('is-open');
+        // Edit Toggling
+        const editBtn = e.target.closest('.cdlv-dashboard__edit-btn[data-action="edit"]');
+        if (editBtn) {
+            const wrapper = node.querySelector(`#wrapper-${editBtn.getAttribute('data-target')}`);
+            if (wrapper) {
+                if (wrapper.classList.contains('is-editing')) {
+                    wrapper.classList.remove('is-editing');
+                    editBtn.textContent = 'EDIT';
+                } else {
+                    wrapper.classList.add('is-editing');
+                    editBtn.textContent = 'CANCEL';
+                }
+            }
         }
-        // Close Modal
+
+        // Password Toggling
+        const pwdToggleBtn = e.target.closest('.cdlv-dashboard__pwd-toggle');
+        if (pwdToggleBtn) {
+            const inputField = pwdToggleBtn.previousElementSibling;
+            if (inputField && inputField.tagName === 'INPUT') {
+                if (inputField.type === 'password') {
+                    inputField.type = 'text';
+                    pwdToggleBtn.textContent = 'HIDE';
+                } else {
+                    inputField.type = 'password';
+                    pwdToggleBtn.textContent = 'SHOW';
+                }
+            }
+        }
+
+        // Modal Operations
+        const modal = node.querySelector('#cdlv-cancel-modal');
+        
+        // 1. Open Modal & Pass ID
+        const openModalBtn = e.target.closest('[data-action="cancel-sub"]');
+        if (openModalBtn) {
+            if (modal) {
+                modal.classList.add('is-open');
+                const confirmBtn = modal.querySelector('[data-action="confirm-cancel"]');
+                if (confirmBtn) {
+                    // Pass the subscription ID to the confirm button
+                    confirmBtn.setAttribute('data-target-id', openModalBtn.getAttribute('data-id'));
+                    // Reset button text just in case it was used previously
+                    confirmBtn.textContent = 'Confirm Cancellation';
+                }
+            }
+        }
+
+        // 2. Close Modal
         if (e.target.closest('[data-action="close-modal"]') || (e.target === modal)) {
             if (modal) modal.classList.remove('is-open');
         }
-        // Confirm Cancel
-        if (e.target.closest('[data-action="confirm-cancel"]')) {
-            const btn = e.target.closest('[data-action="confirm-cancel"]');
-            btn.textContent = 'CANCELED';
-            setTimeout(() => {
-                if (modal) modal.classList.remove('is-open');
-                // In a real app, trigger state update here
+
+        // 3. Confirm Cancel & Transform Button
+        const confirmCancelBtn = e.target.closest('[data-action="confirm-cancel"]');
+        if (confirmCancelBtn) {
+            confirmCancelBtn.textContent = 'CANCELED';
+            const targetId = confirmCancelBtn.getAttribute('data-target-id');
+            
+            setTimeout(() => { 
+                if (modal) modal.classList.remove('is-open'); 
+                
+                // Find the original cancel button on the card using the passed ID
+                const originalCardBtn = node.querySelector(`[data-action="cancel-sub"][data-id="${targetId}"]`);
+                
+                if (originalCardBtn) {
+                    // Replace the button with an anchor tag pointing to the cart
+                    originalCardBtn.outerHTML = `<a href="${buildPath('shopping-cart.html')}" class="cdlv-dashboard__btn">Renew Plan</a>`;
+                }
             }, 1000);
+        }
+    });
+
+    node.addEventListener('submit', (e) => {
+        if (e.target.matches('.cdlv-dashboard__form')) {
+            e.preventDefault();
+            const inputs = e.target.querySelectorAll('input[required]');
+            let isValid = true;
+
+            inputs.forEach(input => {
+                const errorMsg = input.nextElementSibling && input.nextElementSibling.classList.contains('cdlv-dashboard__error-msg') 
+                                 ? input.nextElementSibling 
+                                 : input.parentElement.querySelector('.cdlv-dashboard__error-msg');
+                
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.classList.add('is-invalid');
+                    if(errorMsg) errorMsg.style.display = 'block';
+                } else {
+                    input.classList.remove('is-invalid');
+                    if(errorMsg) errorMsg.style.display = 'none';
+                }
+            });
+
+            if (isValid) {
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'SAVED ✓';
+                setTimeout(() => submitBtn.textContent = originalText, 2000);
+            }
         }
     });
 };

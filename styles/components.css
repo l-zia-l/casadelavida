@@ -5084,10 +5084,18 @@ h3.cdlv-product-page__item-title {
 }
 
 .cdlv-dashboard__modal-actions {
-    display: flex;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Forces equal, fluid widths */
     gap: var(--spacing-sm);
     margin-top: var(--spacing-md);
+}
+
+.cdlv-dashboard__modal-actions .cdlv-dashboard__btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 /* ==========================================================================
