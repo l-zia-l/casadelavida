@@ -160,7 +160,6 @@ export const init = (node) => {
 
     // --- Unified Rendering Helpers ---
 
-    // Standard standalone message
     const appendBotMessage = (text) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
@@ -177,7 +176,6 @@ export const init = (node) => {
         });
     };
 
-    // Message combined with Option Pills
     const askWithOptions = (text, options, callback) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
@@ -223,7 +221,6 @@ export const init = (node) => {
         });
     };
 
-    // Message combined with a Form
     const askWithForm = (text, fields, submitLabel, callback) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
@@ -295,7 +292,6 @@ export const init = (node) => {
         });
     };
 
-    // Message combined with a visual Card Link
     const askWithCard = (text, title, imagePath, description, linkUrl, linkText) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
@@ -356,6 +352,108 @@ export const init = (node) => {
             humanContacted = true; 
             appendBotMessage(`Thank you. A team member will reach out to ${sanitizeText(data.email)} shortly.`);
             setTimeout(() => triggerGlobalEnd(), 1200);
+        });
+    };
+
+    // --- NEW: Subscriptions Pipeline ---
+    const runSubscriptionsPipeline = () => {
+        askWithOptions("Are you looking for general information about our wellness subscriptions, or do you need help managing an existing one?", [
+            { label: 'General Information', value: 'general' },
+            { label: 'Existing Subscription', value: 'existing' }
+        ], (choice) => {
+            if (choice === 'general') {
+                askWithCard(
+                    "Our wellness subscriptions are designed to keep your self-care routine uninterrupted. By subscribing, you secure a recurring delivery of your favorite blends and save 10% on every order.", 
+                    "Wellness Subscriptions", 
+                    "assets/images/products/box_1.webp", 
+                    "Keep your routine consistent and save on every delivery.", 
+                    "subscriptions.html", 
+                    "View Subscriptions"
+                );
+                triggerGlobalEnd();
+            } else {
+                askWithOptions("What do you need help with regarding your existing subscription?", [
+                    { label: 'Reinstate a skipped delivery', value: 'reinstate' },
+                    { label: 'Update subscription settings', value: 'settings' },
+                    { label: 'Update an order', value: 'update_order' },
+                    { label: 'It\'s something else', value: 'else' }
+                ], (action) => {
+                    if (action === 'reinstate' || action === 'settings') {
+                        const instructions = `
+                            Here is how to manage your subscription preferences:
+                            <br><br>
+                            1. Log in to your account.<br>
+                            2. Go to "Manage My Deliveries" under "My Subscriptions".<br>
+                            3. Select the delivery you'd like to adjust.<br>
+                            4. Toggle your preferences or skip settings.<br>
+                            5. Click "Save Changes" at the bottom.
+                        `;
+                        askWithOptions(instructions + "<br><br>Was this helpful?", [
+                            { label: '👍 Yes, thank you', value: 'yes' },
+                            { label: '👎 No, I need more help', value: 'no' }
+                        ], (feedback) => {
+                            if (feedback === 'yes') {
+                                triggerGlobalEnd();
+                            } else {
+                                triggerHumanPipeline();
+                            }
+                        });
+                    } else if (action === 'else') {
+                        triggerHumanPipeline();
+                    } else if (action === 'update_order') {
+                        askWithOptions("To help you update your subscription order, how is your account setup?", [
+                            { label: 'Guest Checkout', value: 'guest' },
+                            { label: 'Logged into my account', value: 'logged' },
+                            { label: 'Have a subscription', value: 'sub' }
+                        ], (accountType) => {
+                            const orderOptions = [
+                                { label: 'View', value: 'view' },
+                                { label: 'Cancel', value: 'cancel' },
+                                { label: 'Track', value: 'track' },
+                                { label: 'Change', value: 'change' },
+                                { label: 'Order', value: 'order' },
+                                { label: 'Order issues', value: 'issues' },
+                                { label: 'Late order', value: 'late' }
+                            ];
+                            
+                            askWithOptions("What would you like to do with your subscription order?", orderOptions, (orderAction) => {
+                                if (accountType === 'guest' || accountType === 'sub') {
+                                    triggerHumanPipeline();
+                                } else {
+                                    if (orderAction === 'issues' || orderAction === 'late') {
+                                        triggerHumanPipeline();
+                                    } else {
+                                        const ghanaRegions = ['Ahafo', 'Ashanti', 'Bono', 'Bono East', 'Central', 'Eastern', 'Greater Accra', 'North East', 'Northern', 'Oti', 'Savannah', 'Upper East', 'Upper West', 'Western', 'Western North'];
+                                        askWithForm("Please share your Order ID and delivery region to locate your order.", [
+                                            { label: 'Order ID', name: 'orderId', type: 'text', placeholder: 'e.g. CDLV-12345', required: true },
+                                            { label: 'Region', name: 'region', type: 'select', options: ghanaRegions, required: true }
+                                        ], 'Find Order', (data) => {
+                                            appendBotMessage("Searching for your order...");
+                                            setTimeout(() => {
+                                                if (data.orderId.length > 3) {
+                                                    const steps = `
+                                                        <strong>Order Found!</strong><br><br>
+                                                        To ${sanitizeText(orderAction)} this order:<br>
+                                                        1. Go to your Account Dashboard.<br>
+                                                        2. Navigate to "My Orders".<br>
+                                                        3. Select Order ${sanitizeText(data.orderId)}.<br>
+                                                        4. Click the "${sanitizeText(orderAction)}" button to proceed.
+                                                    `;
+                                                    appendBotMessage(steps);
+                                                    triggerGlobalEnd();
+                                                } else {
+                                                    appendBotMessage("It looks like those details don't match our records.");
+                                                    triggerHumanPipeline();
+                                                }
+                                            }, 1000);
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    }
+                });
+            }
         });
     };
 
@@ -423,6 +521,7 @@ export const init = (node) => {
 
     const handleTopicSelection = (topic) => {
         if (topic === 'order') runOrderPipeline();
+        else if (topic === 'subscriptions') runSubscriptionsPipeline();
         else if (topic === 'tech') {
             askWithForm("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.", [{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
         }
