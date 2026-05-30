@@ -4904,13 +4904,14 @@ h3.cdlv-product-page__item-title {
 /* Card Grids (Wishlist & Subscriptions) */
 .cdlv-dashboard__grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
-    gap: var(--spacing-xs);
+    grid-template-columns: 1fr; /* Single column on mobile for better proportions */
+    gap: var(--spacing-sm);
 }
 
 @media (min-width: 768px) {
     .cdlv-dashboard__grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        /* Wider base for desktop to accommodate horizontal cards */
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
         gap: var(--spacing-md);
     }
 }
@@ -4921,11 +4922,15 @@ h3.cdlv-product-page__item-title {
     flex-direction: column;
     background-color: var(--color-primary);
     transition: transform var(--transition-base);
-    
-    /* Safely restrict to a single viewheight without breaking grid width */
-    max-height: var(--vh-fallback);
-    max-height: var(--vh-modern);
     overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .cdlv-dashboard__item-card {
+        flex-direction: row; /* Switch to horizontal on desktop for a compact look */
+        align-items: stretch;
+        max-height: 200px; /* Lock in the compact height */
+    }
 }
 
 .cdlv-dashboard__item-card:hover {
@@ -4934,11 +4939,20 @@ h3.cdlv-product-page__item-title {
 
 .cdlv-dashboard__item-img-wrapper {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 16 / 9; /* More compact on mobile */
     overflow: hidden;
     position: relative;
     border-bottom: 1px solid rgba(26, 26, 26, 0.1);
-    flex-shrink: 0; /* Prevents image from squishing if text wraps heavily */
+    flex-shrink: 0; 
+}
+
+@media (min-width: 768px) {
+    .cdlv-dashboard__item-img-wrapper {
+        width: 35%; /* Restrict image width on desktop */
+        aspect-ratio: auto; /* Let the height dictate the image size */
+        border-bottom: none;
+        border-right: 1px solid rgba(26, 26, 26, 0.1);
+    }
 }
 
 .cdlv-dashboard__item-img-wrapper img {
@@ -5058,7 +5072,7 @@ h3.cdlv-product-page__item-title {
 
 .cdlv-dashboard__modal-content {
     background: var(--color-primary);
-    width: min(90vw, 500px);
+    width: min(90vw, 640px); /* Increased from 500px to accommodate fluid padding */
     padding: var(--spacing-md);
     transform: translateY(20px);
     transition: transform var(--transition-base);
@@ -5102,8 +5116,10 @@ h3.cdlv-product-page__item-title {
     justify-content: center;
     align-items: center;
     text-align: center;
-    flex: 1; /* Distributes space equally on desktop */
-    white-space: nowrap; /* Prevents text from wrapping to a second line */
+    flex: 1; 
+    white-space: normal; /* Changed from nowrap to prevent aggressive overflowing */
+    line-height: 1.2;
+    padding-inline: var(--spacing-sm); /* Ensure text doesn't touch the button edges */
 }
 
 /* ==========================================================================
