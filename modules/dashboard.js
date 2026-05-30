@@ -158,6 +158,9 @@ export const init = (node, customConfig = {}) => {
     const { tabs, data } = config;
     const activeTabId = node.getAttribute('data-account-tab') || 'overview';
     let activePanelHTML = '';
+    
+    // NEW: State tracker for unsaved changes
+    let isFormDirty = false;
 
     switch (activeTabId) {
         case 'overview': {
@@ -360,11 +363,24 @@ export const init = (node, customConfig = {}) => {
         </div>
     `;
 
+    node.addEventListener('input', (e) => {
+        if (e.target.closest('.cdlv-dashboard__form')) {
+            isFormDirty = true;
+        }
+    });
+
     // Event Delegation
     node.addEventListener('click', (e) => {
-        // Sub-View Switching
+        // Sub-View Switching (UPDATED)
         const switchBtn = e.target.closest('[data-action="switch-view"]');
         if (switchBtn) {
+            // Check for unsaved changes before allowing the sub-view swap
+            if (isFormDirty) {
+                const proceed = window.confirm("You have unsaved changes. Are you sure you want to discard them?");
+                if (!proceed) return; // Stop the switch if they cancel
+                isFormDirty = false; // Reset the flag if they choose to proceed
+            }
+
             const currentActiveView = node.querySelector('.cdlv-dashboard__sub-view.is-active');
             const targetView = node.querySelector(`.cdlv-dashboard__sub-view[data-view="${switchBtn.getAttribute('data-target')}"]`);
             if (currentActiveView && targetView) {
@@ -463,11 +479,23 @@ export const init = (node, customConfig = {}) => {
             });
 
             if (isValid) {
+                // NEW: Clear the dirty flag upon successful save
+                isFormDirty = false; 
+
                 const submitBtn = e.target.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
                 submitBtn.textContent = 'SAVED ✓';
                 setTimeout(() => submitBtn.textContent = originalText, 2000);
             }
+        } // <-- You were missing this closing bracket for the if statement
+    }); // <-- And this closing bracket for the submit listener
+
+    // NEW: Intercept actual page departures (placed securely at the top level of init)
+    window.addEventListener('beforeunload', (e) => {
+        if (isFormDirty) {
+            // This triggers the browser's native "Leave site? Changes you made may not be saved" dialog
+            e.preventDefault(); 
+            e.returnValue = ''; 
         }
     });
-};
+}; // <-- End of the init function
