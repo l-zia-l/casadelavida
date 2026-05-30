@@ -2,7 +2,8 @@
    MODULE: SUPPORT CHAT (modules/support-chat.js)
    Architecture: Exportable ES Module. Single Page Application (SPA) logic 
                  contained within a dynamically injected fragment.
-   Security: DOMPurify-style text sanitization for user inputs to prevent XSS.
+   Security: STRICT CSP COMPLIANT. No inline styles or inline event handlers.
+             DOMPurify-style text sanitization for user inputs to prevent XSS.
    Performance: Hardware-accelerated CSS animations. DocumentFragment used
                 for heavy DOM insertions.
    ========================================================================== */
@@ -43,9 +44,10 @@ export const init = (node) => {
     let humanContacted = false;
     const botAvatarPath = buildPath('assets/images/backgrounds/stock_2.webp'); 
     
-    // 1. Build Base HTML Structure
+    // 1. Build Base HTML Structure (CSP Compliant)
     const markup = `
         <button class="cdlv-support-chat-launcher" aria-label="Open Support Chat" id="cdlv-chat-launcher">
+            <span class="cdlv-support-chat-launcher__text">Chat</span>
             ${svgs.chat}
         </button>
 
@@ -66,7 +68,7 @@ export const init = (node) => {
                     <h3>End Chat Session?</h3>
                     <p>Closing the chat will reset your current progress.</p>
                     <div class="cdlv-support-chat__modal-actions">
-                        <button class="cdlv-support-chat__pill" id="cdlv-modal-confirm" style="background: var(--color-accent); color: var(--color-text-light); border-color: var(--color-accent);">End Session</button>
+                        <button class="cdlv-support-chat__pill cdlv-support-chat__pill--primary" id="cdlv-modal-confirm">End Session</button>
                         <button class="cdlv-support-chat__pill" id="cdlv-modal-cancel">Keep Chatting</button>
                     </div>
                 </div>
@@ -102,6 +104,15 @@ export const init = (node) => {
         humanContacted = false;
     };
 
+    // CSP Compliant Image Error Handler
+    const attachAvatarFallbacks = () => {
+        const avatars = elements.stream.querySelectorAll('.cdlv-support-chat__avatar:not(.is-tracked)');
+        avatars.forEach(img => {
+            img.classList.add('is-tracked');
+            img.addEventListener('error', () => { img.style.display = 'none'; });
+        });
+    };
+
     // --- 3.5 Message Queuing System ---
     let isTyping = false;
     const messageQueue = [];
@@ -116,13 +127,14 @@ export const init = (node) => {
         typingRow.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
         typingRow.id = 'cdlv-chat-typing-indicator';
         typingRow.innerHTML = `
-            <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">
+            <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">
             <div class="cdlv-support-chat__typing">
                 <div class="cdlv-support-chat__gem"></div>
                 <span class="cdlv-support-chat__typing-text">typing...</span>
             </div>
         `;
         elements.stream.appendChild(typingRow);
+        attachAvatarFallbacks();
         scrollToBottom();
 
         setTimeout(() => {
@@ -158,20 +170,21 @@ export const init = (node) => {
         scrollToBottom();
     };
 
-    // --- Unified Rendering Helpers ---
+    // --- Unified Rendering Helpers (CSP Compliant) ---
 
     const appendBotMessage = (text) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
             row.innerHTML = `
-                <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4='">
+                <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">
                 <div class="cdlv-support-chat__bubble-wrapper">
                     <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
                     <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
                 </div>
             `;
             elements.stream.appendChild(row);
+            attachAvatarFallbacks();
             scrollToBottom();
         });
     };
@@ -181,21 +194,21 @@ export const init = (node) => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
             
-            const likeIconPath = buildPath('assets/icons/like.svg');
-            const dislikeIconPath = buildPath('assets/icons/dislike.svg');
+            const likeIconPath = buildPath('assets/images/icons/like.svg');
+            const dislikeIconPath = buildPath('assets/images/icons/dislike.svg');
 
             row.innerHTML = `
-                <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">
-                <div class="cdlv-support-chat__bubble-wrapper" style="width: 100%;">
+                <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">
+                <div class="cdlv-support-chat__bubble-wrapper u-w-100">
                     <div class="cdlv-support-chat__bubble">${stepsText}</div>
-                    <div style="display: flex; align-items: center; margin-top: 0.25rem;">
+                    <div class="cdlv-support-chat__feedback-row">
                         <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
-                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #666;">
+                        <div class="cdlv-support-chat__feedback-actions">
                             <span>Was this helpful?</span>
-                            <button type="button" class="cdlv-support-chat__feedback-btn" onclick="this.classList.add('is-selected'); this.nextElementSibling.classList.remove('is-selected'); this.nextElementSibling.style.opacity='0.5'; this.style.opacity='1';">
+                            <button type="button" class="cdlv-support-chat__feedback-btn cdlv-btn-like">
                                 <img src="${likeIconPath}" alt="Like">
                             </button>
-                            <button type="button" class="cdlv-support-chat__feedback-btn" onclick="this.classList.add('is-selected'); this.previousElementSibling.classList.remove('is-selected'); this.previousElementSibling.style.opacity='0.5'; this.style.opacity='1';">
+                            <button type="button" class="cdlv-support-chat__feedback-btn cdlv-btn-dislike">
                                 <img src="${dislikeIconPath}" alt="Dislike">
                             </button>
                         </div>
@@ -203,8 +216,24 @@ export const init = (node) => {
                 </div>
             `;
             elements.stream.appendChild(row);
-            scrollToBottom();
             
+            // Bind CSP Compliant Event Listeners for feedback
+            const likeBtn = row.querySelector('.cdlv-btn-like');
+            const dislikeBtn = row.querySelector('.cdlv-btn-dislike');
+            
+            if(likeBtn && dislikeBtn) {
+                likeBtn.addEventListener('click', () => {
+                    likeBtn.classList.add('is-selected');
+                    dislikeBtn.classList.remove('is-selected');
+                });
+                dislikeBtn.addEventListener('click', () => {
+                    dislikeBtn.classList.add('is-selected');
+                    likeBtn.classList.remove('is-selected');
+                });
+            }
+
+            attachAvatarFallbacks();
+            scrollToBottom();
             triggerGlobalEnd();
         });
     };
@@ -214,11 +243,10 @@ export const init = (node) => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
             
-            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">`;
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">`;
             
             const wrapper = document.createElement('div');
-            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
-            wrapper.style.width = '100%';
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper u-w-100';
             
             wrapper.innerHTML = `
                 <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
@@ -226,14 +254,13 @@ export const init = (node) => {
             `;
 
             const pillsContainer = document.createElement('div');
-            pillsContainer.className = 'cdlv-support-chat__pills';
-            pillsContainer.style.marginTop = 'var(--spacing-xs)';
+            pillsContainer.className = 'cdlv-support-chat__pills u-mt-xs';
 
             options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'cdlv-support-chat__pill';
                 btn.textContent = opt.label;
-                btn.onclick = () => {
+                btn.addEventListener('click', () => {
                     pillsContainer.style.pointerEvents = 'none'; 
                     Array.from(pillsContainer.children).forEach(child => {
                         if (child === btn) child.classList.add('is-selected');
@@ -241,7 +268,7 @@ export const init = (node) => {
                     });
                     appendUserMessage(opt.label);
                     setTimeout(() => callback(opt.value), 300);
-                };
+                });
                 pillsContainer.appendChild(btn);
             });
 
@@ -250,6 +277,7 @@ export const init = (node) => {
             row.appendChild(wrapper);
             
             elements.stream.appendChild(row);
+            attachAvatarFallbacks();
             scrollToBottom();
         });
     };
@@ -259,11 +287,10 @@ export const init = (node) => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
             
-            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">`;
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">`;
             
             const wrapper = document.createElement('div');
-            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
-            wrapper.style.width = '100%';
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper u-w-100';
             
             wrapper.innerHTML = `
                 <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
@@ -271,9 +298,7 @@ export const init = (node) => {
             `;
 
             const form = document.createElement('form');
-            form.className = 'cdlv-support-chat__form';
-            form.style.marginTop = 'var(--spacing-xs)';
-            form.style.maxWidth = '300px'; 
+            form.className = 'cdlv-support-chat__form u-mt-xs';
             
             fields.forEach(f => {
                 const group = document.createElement('div');
@@ -306,7 +331,7 @@ export const init = (node) => {
             submitBtn.textContent = submitLabel;
             form.appendChild(submitBtn);
 
-            form.onsubmit = (e) => {
+            form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData.entries());
@@ -316,12 +341,14 @@ export const init = (node) => {
                 submitBtn.style.backgroundColor = 'var(--color-text-dark)';
                 
                 callback(data);
-            };
+            });
 
             wrapper.appendChild(form);
             row.innerHTML = avatarHTML;
             row.appendChild(wrapper);
+            
             elements.stream.appendChild(row);
+            attachAvatarFallbacks();
             scrollToBottom();
         });
     };
@@ -331,26 +358,27 @@ export const init = (node) => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
             
-            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">`;
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">`;
             
             const wrapper = document.createElement('div');
-            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
-            wrapper.style.width = '100%';
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper u-w-100';
             
             wrapper.innerHTML = `
                 <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
                 <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
-                <div class="cdlv-support-chat__card" style="margin-top: var(--spacing-xs);">
+                <div class="cdlv-support-chat__card u-mt-xs">
                     <h3 class="cdlv-support-chat__card-title">${title}</h3>
                     <img src="${buildPath(imagePath)}" alt="${title}" class="cdlv-support-chat__card-img">
                     <p style="font-size: var(--font-size-small); margin-bottom: 0.5rem;">${description}</p>
-                    <a href="${buildPath(linkUrl)}" target="_blank" rel="noopener noreferrer" class="cdlv-support-chat__pill" style="width: 100%; display: block; text-align: center; box-sizing: border-box; text-decoration: none;">${linkText}</a>
+                    <a href="${buildPath(linkUrl)}" target="_blank" rel="noopener noreferrer" class="cdlv-support-chat__pill cdlv-support-chat__card-link">${linkText}</a>
                 </div>
             `;
 
             row.innerHTML = avatarHTML;
             row.appendChild(wrapper);
+            
             elements.stream.appendChild(row);
+            attachAvatarFallbacks();
             scrollToBottom();
         });
     };
@@ -370,7 +398,7 @@ export const init = (node) => {
 
         askWithOptions("Is there anything else I can help you with?", endOptions, (choice) => {
             if (choice === 'end') {
-                askWithOptions("Thank you for chatting with me today. Wishing you a beautiful, balanced day!\n\nYou can safely close this session below whenever you are ready.", [{label: 'End Session', value: 'close_chat'}], (val) => {
+                askWithOptions("Thank you for chatting with me today. Wishing you a beautiful, balanced day!<br><br>You can safely close this session below whenever you are ready.", [{label: 'End Session', value: 'close_chat'}], (val) => {
                     if (val === 'close_chat') closeAndResetChat();
                 });
             } else if (choice === 'menu') {
@@ -576,11 +604,10 @@ export const init = (node) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">`;
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">`;
             
             const wrapper = document.createElement('div');
-            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
-            wrapper.style.width = '100%';
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper u-w-100';
             
             wrapper.innerHTML = `
                 <div class="cdlv-support-chat__bubble">Thank you, ${sanitizeText(userData.firstName)}! How can I help you today? 🫖</div>
@@ -594,7 +621,7 @@ export const init = (node) => {
                     <h3 class="cdlv-support-chat__card-title">Where is my order?</h3>
                     <img src="${buildPath('assets/images/products/box_1.webp')}" alt="Casa De La Vida Box" class="cdlv-support-chat__card-img">
                     <p style="font-size: var(--font-size-small); margin-bottom: 0.5rem;">Need to know when your Casa De La Vida product will be arriving?</p>
-                    <button class="cdlv-support-chat__pill" id="${uniqueTrackId}" style="width: 100%;">Track Now!</button>
+                    <button class="cdlv-support-chat__pill u-w-100" id="${uniqueTrackId}">Track Now!</button>
                 </div>
             `;
 
@@ -614,7 +641,7 @@ export const init = (node) => {
                 const btn = document.createElement('button');
                 btn.className = 'cdlv-support-chat__pill';
                 btn.textContent = opt.label;
-                btn.onclick = () => {
+                btn.addEventListener('click', () => {
                     pillsContainer.style.pointerEvents = 'none'; 
                     Array.from(pillsContainer.children).forEach(child => {
                         if (child === btn) child.classList.add('is-selected');
@@ -629,15 +656,12 @@ export const init = (node) => {
 
                     appendUserMessage(opt.label);
                     setTimeout(() => handleTopicSelection(opt.value), 300);
-                };
+                });
                 pillsContainer.appendChild(btn);
             });
 
             const comboContainer = document.createElement('div');
-            comboContainer.style.marginTop = 'var(--spacing-xs)';
-            comboContainer.style.display = 'flex';
-            comboContainer.style.flexDirection = 'column';
-            comboContainer.style.gap = 'var(--spacing-sm)';
+            comboContainer.className = 'u-flex-col u-mt-xs';
             
             comboContainer.innerHTML = cardHTML;
             comboContainer.appendChild(pillsContainer);
@@ -659,7 +683,9 @@ export const init = (node) => {
 
             row.innerHTML = avatarHTML;
             row.appendChild(wrapper);
+            
             elements.stream.appendChild(row);
+            attachAvatarFallbacks();
             scrollToBottom();
         });
     };

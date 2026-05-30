@@ -279,6 +279,12 @@ body.u-chat-open {
     overflow: hidden !important; 
 }
 
+/* --- CSP Compliant Layout Utility Classes --- */
+.u-w-100 { width: 100%; }
+.u-mt-xs { margin-top: var(--spacing-xs); }
+.u-mt-sm { margin-top: var(--spacing-sm); }
+.u-flex-col { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+
 /* ULTRA-WIDE SCREEN ADJUSTMENTS */
 @media (min-width: 1600px) { html { font-size: 110%; } }
 @media (min-width: 2000px) { html { font-size: 125%; } }
