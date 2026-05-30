@@ -40,6 +40,7 @@ const svgs = {
  */
 export const init = (node) => {
     let userData = { firstName: '', lastName: '', email: '' };
+    let humanContacted = false;
     const botAvatarPath = buildPath('assets/images/backgrounds/stock_2.webp'); 
     
     // 1. Build Base HTML Structure
@@ -90,6 +91,15 @@ export const init = (node) => {
     // 3. UI Helper Functions
     const scrollToBottom = () => {
         setTimeout(() => { elements.stream.scrollTop = elements.stream.scrollHeight; }, 50);
+    };
+
+    const closeAndResetChat = () => {
+        elements.window.classList.remove('is-open');
+        document.body.classList.remove('u-chat-open'); 
+        elements.stream.innerHTML = ''; 
+        messageQueue.length = 0; 
+        isTyping = false;
+        humanContacted = false; // Hard reset the human pipeline state
     };
 
     // --- 3.5 Message Queuing System ---
@@ -255,14 +265,23 @@ export const init = (node) => {
     
     const triggerGlobalEnd = () => {
         setTimeout(() => {
-            appendOptions([
+            // Dynamically build end options based on session history
+            const endOptions = [
                 { label: 'Nope, all set', value: 'end' },
-                { label: 'Another Question', value: 'menu' },
-                { label: 'Need to Speak With Someone', value: 'human' }
-            ], (choice) => {
+                { label: 'Another Question', value: 'menu' }
+            ];
+            
+            if (!humanContacted) {
+                endOptions.push({ label: 'Need to Speak With Someone', value: 'human' });
+            }
+
+            appendOptions(endOptions, (choice) => {
                 if (choice === 'end') {
-                    appendBotMessage("Thank you for visiting your sanctuary. Wishing you a beautiful, balanced day.");
-                    appendOptions([{label: 'Start New Chat', value: 'restart'}], () => startFlow());
+                    appendBotMessage("Thank you for chatting with me today. Wishing you a beautiful, balanced day!");
+                    // Terminal pill that closes the chat completely
+                    appendOptions([{label: 'End Session', value: 'close_chat'}], (val) => {
+                        if (val === 'close_chat') closeAndResetChat();
+                    });
                 } else if (choice === 'menu') {
                     showMainMenu();
                 } else {
@@ -274,136 +293,128 @@ export const init = (node) => {
 
     const triggerHumanPipeline = () => {
         appendBotMessage("I'll connect you with our wellness team to look into this personally. They will email you within minutes. Please confirm your email address below.");
-        appendForm([{ label: 'Email Address', name: 'email', type: 'email', required: true }], 'Confirm Email', (data) => {
-            appendBotMessage(`Thank you. A team member will reach out to ${sanitizeText(data.email)} shortly.`);
-            triggerGlobalEnd();
-        });
-    };
-
-    const runOrderPipeline = () => {
-        appendBotMessage("To best assist you with your order, could you let me know if you checked out as a guest or if you are logged into your account?");
-        appendOptions([
-            { label: 'Guest Checkout', value: 'guest' },
-            { label: 'Logged into my account', value: 'logged' }
-        ], (accountStatus) => {
-            const orderOpts = [
-                { label: 'Cancel order', value: 'cancel' },
-                { label: 'Place order', value: 'place' },
-                { label: 'Track order', value: 'track' },
-                { label: 'Change order', value: 'change' }
-            ];
-            
-            appendOptions(orderOpts, (action) => {
-                if (accountStatus === 'guest') {
-                    triggerHumanPipeline();
-                } else {
-                    if (action === 'place') {
-                        appendBotMessage(`Ready to step into the soft life? You can explore our artisanal collections and place a new order right here: <a href="${buildPath('shop.html')}" style="text-decoration:underline;">Shop</a>`);
-                        triggerGlobalEnd();
-                    } else if (action === 'track') {
-                        runTrackOrderPipeline();
-                    } else {
-                        appendBotMessage(`To ensure your rituals arrive quickly, we process orders immediately. Once placed, an order cannot be modified. However, if your order has not yet shipped, you can cancel it directly in your account dashboard <a href="${buildPath('account/orders.html')}" style="text-decoration:underline;">here</a> and place a new one.`);
-                        triggerGlobalEnd();
-                    }
-                }
-            });
-        });
-    };
-
-    const runTrackOrderPipeline = () => {
-        appendBotMessage("Please share your Order ID and delivery region so we can pull up your natural self-care rituals.");
         
-        const ghanaRegions = ['Ahafo', 'Ashanti', 'Bono', 'Bono East', 'Central', 'Eastern', 'Greater Accra', 'North East', 'Northern', 'Oti', 'Savannah', 'Upper East', 'Upper West', 'Western', 'Western North'];
-
-        appendForm([
-            { label: 'Order ID', name: 'orderId', type: 'text', placeholder: 'e.g. CDLV-12345', required: true },
-            { label: 'Region', name: 'region', type: 'select', options: ghanaRegions, required: true }
-        ], 'Track Order', (data) => {
-            appendBotMessage("Searching for your rituals...");
+        appendForm([{ label: 'Email Address', name: 'email', type: 'email', required: true }], 'Confirm Email', (data) => {
+            humanContacted = true; // Lock out this option for the rest of the session
+            appendBotMessage(`Thank you. A team member will reach out to ${sanitizeText(data.email)} shortly.`);
             
+            // Immediately loop back to the main menu without triggering the global end
             setTimeout(() => {
-                if (data.orderId.length > 3) { // Mock Success Condition
-                    appendBotMessage(`<strong>Order: ${sanitizeText(data.orderId)}</strong><br>Status: Processing<br>Expected delivery: 2-3 Business Days.`);
-                    triggerGlobalEnd();
-                } else { // Mock Failure Condition
-                    appendBotMessage("It looks like those details don't match our records. Let's try again.");
-                    // Loop back to main menu after a short delay
-                    setTimeout(() => {
-                        showMainMenu();
-                    }, 1200); 
-                }
-            }, 1000);
+                showMainMenu();
+            }, 1200);
         });
     };
 
     const showMainMenu = () => {
         appendBotMessage(`Thank you, ${sanitizeText(userData.firstName)}! How can I help you today? 🫖`);
         
-        // Inject Tracking Card
+        // Combine Card and Pills into ONE unified queue action
         enqueueBotAction(() => {
-            const cardRow = document.createElement('div');
-            cardRow.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-            cardRow.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
-            cardRow.innerHTML = `
+            const wrapper = document.createElement('div');
+            wrapper.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            wrapper.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
+            wrapper.style.flexDirection = 'column'; // Stack the card and pills
+            wrapper.style.gap = 'var(--spacing-sm)';
+            
+            // Generate a unique ID so the track button works on multiple loops
+            const uniqueTrackId = 'cdlv-track-btn-' + Math.random().toString(36).substr(2, 9);
+
+            const cardHTML = `
                 <div class="cdlv-support-chat__card">
                     <h3 class="cdlv-support-chat__card-title">Where is my order?</h3>
                     <img src="${buildPath('assets/images/products/box_1.webp')}" alt="Casa De La Vida Box" class="cdlv-support-chat__card-img">
                     <p style="font-size: var(--font-size-small); margin-bottom: 0.5rem;">Need to know when your Casa De La Vida product will be arriving?</p>
-                    <button class="cdlv-support-chat__pill" id="cdlv-chat-track-btn" style="width: 100%;">Track Now!</button>
+                    <button class="cdlv-support-chat__pill" id="${uniqueTrackId}" style="width: 100%;">Track Now!</button>
                 </div>
             `;
-            elements.stream.appendChild(cardRow);
+
+            const topics = [
+                { label: 'Order', value: 'order' },
+                { label: 'Subscriptions', value: 'subscriptions' },
+                { label: 'Quality', value: 'quality' },
+                { label: 'Shop', value: 'shop' },
+                { label: 'Care Tips', value: 'care' },
+                { label: 'Technical Issues', value: 'tech' }
+            ];
+            
+            const pillsContainer = document.createElement('div');
+            pillsContainer.className = 'cdlv-support-chat__pills';
+            
+            topics.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'cdlv-support-chat__pill';
+                btn.textContent = opt.label;
+                btn.onclick = () => {
+                    pillsContainer.style.pointerEvents = 'none'; 
+                    Array.from(pillsContainer.children).forEach(child => {
+                        if (child === btn) child.classList.add('is-selected');
+                        else child.style.opacity = '0.5';
+                    });
+                    
+                    // Dim the track card button if a pill is selected
+                    const trackBtn = document.getElementById(uniqueTrackId);
+                    if(trackBtn) { 
+                        trackBtn.style.pointerEvents = 'none'; 
+                        trackBtn.style.opacity = '0.5'; 
+                    }
+
+                    appendUserMessage(opt.label);
+                    setTimeout(() => handleTopicSelection(opt.value), 300);
+                };
+                pillsContainer.appendChild(btn);
+            });
+
+            wrapper.innerHTML = cardHTML;
+            wrapper.appendChild(pillsContainer);
+            elements.stream.appendChild(wrapper);
             scrollToBottom();
 
-            // Bind Card Button
+            // Bind the unique Card Button
             setTimeout(() => {
-                const trackBtn = document.getElementById('cdlv-chat-track-btn');
-                trackBtn.onclick = (e) => {
-                    e.target.classList.add('is-selected');
-                    e.target.disabled = true;
-                    appendUserMessage("Track Now!");
-                    runTrackOrderPipeline();
-                };
+                const trackBtn = document.getElementById(uniqueTrackId);
+                if(trackBtn) {
+                    trackBtn.onclick = (e) => {
+                        e.target.classList.add('is-selected');
+                        e.target.disabled = true;
+                        // Dim the topic pills if the track button is selected
+                        pillsContainer.style.pointerEvents = 'none';
+                        pillsContainer.style.opacity = '0.5';
+                        
+                        appendUserMessage("Track Now!");
+                        runTrackOrderPipeline();
+                    };
+                }
             }, 50);
         });
+    };
 
-        // Inject Topic Pills
-        appendOptions([
-            { label: 'Order', value: 'order' },
-            { label: 'Subscriptions', value: 'subscriptions' },
-            { label: 'Quality', value: 'quality' },
-            { label: 'Shop', value: 'shop' },
-            { label: 'Care Tips', value: 'care' },
-            { label: 'Technical Issues', value: 'tech' }
-        ], (topic) => {
-            if (topic === 'order') runOrderPipeline();
-            else if (topic === 'tech') {
-                appendBotMessage("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.");
-                appendForm([{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
-            }
-            else if (topic === 'shop') {
-                appendBotMessage("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.");
-                appendForm([
-                    { label: 'Category Preference', name: 'cat', type: 'text', required: false },
-                    { label: 'Budget', name: 'budget', type: 'text', required: false }
-                ], 'Find Products', () => {
-                    appendBotMessage(`Based on your vibes, check out our catalog <a href="${buildPath('shop.html')}" style="text-decoration:underline;">here</a>.`);
-                    appendOptions([
-                        {label: 'I want to explore more', value: 'more'},
-                        {label: 'I want a consultation', value: 'consult'},
-                        {label: 'I\'m done looking', value: 'done'}
-                    ], (res) => {
-                        if(res === 'consult') appendBotMessage(`Book here: <a href="${buildPath('appointments.html')}">Consultations</a>`);
-                        triggerGlobalEnd();
-                    });
+    // Extracted topic routing logic for cleaner code
+    const handleTopicSelection = (topic) => {
+        if (topic === 'order') runOrderPipeline();
+        else if (topic === 'tech') {
+            appendBotMessage("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.");
+            appendForm([{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
+        }
+        else if (topic === 'shop') {
+            appendBotMessage("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.");
+            appendForm([
+                { label: 'Category Preference', name: 'cat', type: 'text', required: false },
+                { label: 'Budget', name: 'budget', type: 'text', required: false }
+            ], 'Find Products', () => {
+                appendBotMessage(`Based on your vibes, check out our catalog <a href="${buildPath('shop.html')}" style="text-decoration:underline;">here</a>.`);
+                appendOptions([
+                    {label: 'I want to explore more', value: 'more'},
+                    {label: 'I want a consultation', value: 'consult'},
+                    {label: 'I\'m done looking', value: 'done'}
+                ], (res) => {
+                    if(res === 'consult') appendBotMessage(`Book here: <a href="${buildPath('appointments.html')}">Consultations</a>`);
+                    triggerGlobalEnd();
                 });
-            }
-            else {
-                // For brevity in this module framework, unhandled specific deep pipelines fall back to human.
-                triggerHumanPipeline();
-            }
-        });
+            });
+        }
+        else {
+            triggerHumanPipeline();
+        }
     };
 
     const startFlow = () => {
@@ -444,6 +455,7 @@ export const init = (node) => {
 
     elements.btnModalConfirm.addEventListener('click', () => {
         elements.modal.classList.remove('is-active');
+        closeAndResetChat();
         elements.window.classList.remove('is-open');
         document.body.classList.remove('u-chat-open'); // Unlock scroll
         elements.stream.innerHTML = ''; 
