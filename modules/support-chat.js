@@ -92,21 +92,64 @@ export const init = (node) => {
         setTimeout(() => { elements.stream.scrollTop = elements.stream.scrollHeight; }, 50);
     };
 
-    const appendBotMessage = (text) => {
-        const row = document.createElement('div');
-        row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-        row.innerHTML = `
-            <img src="${botAvatarPath}" alt="Vie - Virtual Assistant" class="cdlv-support-chat__avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4='">
-            <div class="cdlv-support-chat__bubble-wrapper">
-                <div class="cdlv-support-chat__bubble">${text}</div>
-                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+    // --- 3.5 Message Queuing System ---
+    let isTyping = false;
+    const messageQueue = [];
+
+    const processQueue = () => {
+        if (isTyping || messageQueue.length === 0) return;
+        isTyping = true;
+        
+        const nextAction = messageQueue.shift();
+        
+        // Inject typing indicator
+        const typingRow = document.createElement('div');
+        typingRow.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+        typingRow.id = 'cdlv-chat-typing-indicator';
+        typingRow.innerHTML = `
+            <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">
+            <div class="cdlv-support-chat__typing">
+                <div class="cdlv-support-chat__gem"></div>
+                <span class="cdlv-support-chat__typing-text">typing...</span>
             </div>
         `;
-        elements.stream.appendChild(row);
+        elements.stream.appendChild(typingRow);
         scrollToBottom();
+
+        // Wait 2 seconds, remove indicator, execute next message
+        setTimeout(() => {
+            const indicator = document.getElementById('cdlv-chat-typing-indicator');
+            if (indicator) indicator.remove();
+            
+            nextAction(); // Inject the actual message/form
+            isTyping = false;
+            processQueue(); // Loop to the next item in the queue
+        }, 2000);
+    };
+
+    const enqueueBotAction = (actionFn) => {
+        messageQueue.push(actionFn);
+        processQueue();
+    };
+
+    const appendBotMessage = (text) => {
+        enqueueBotAction(() => {
+            const row = document.createElement('div');
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            row.innerHTML = `
+                <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4='">
+                <div class="cdlv-support-chat__bubble-wrapper">
+                    <div class="cdlv-support-chat__bubble">${text}</div>
+                    <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+                </div>
+            `;
+            elements.stream.appendChild(row);
+            scrollToBottom();
+        });
     };
 
     const appendUserMessage = (text) => {
+        // User messages bypass the queue and appear instantly
         const row = document.createElement('div');
         row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--user';
         row.innerHTML = `
@@ -120,73 +163,93 @@ export const init = (node) => {
     };
 
     const appendOptions = (options, callback) => {
-        const row = document.createElement('div');
-        row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-        row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))'; 
-        
-        const pillsContainer = document.createElement('div');
-        pillsContainer.className = 'cdlv-support-chat__pills';
-        
-        options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'cdlv-support-chat__pill';
-            btn.textContent = opt.label;
-            btn.onclick = () => {
-                pillsContainer.style.pointerEvents = 'none'; // Prevent double clicking
-                
-                // Highlight selected, dim others
-                Array.from(pillsContainer.children).forEach(child => {
-                    if (child === btn) {
-                        child.classList.add('is-selected');
-                    } else {
-                        child.style.opacity = '0.5';
-                    }
-                });
-
-                appendUserMessage(opt.label);
-                setTimeout(() => callback(opt.value), 300);
-            };
-            pillsContainer.appendChild(btn);
+        enqueueBotAction(() => {
+            const row = document.createElement('div');
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))'; 
+            
+            const pillsContainer = document.createElement('div');
+            pillsContainer.className = 'cdlv-support-chat__pills';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'cdlv-support-chat__pill';
+                btn.textContent = opt.label;
+                btn.onclick = () => {
+                    pillsContainer.style.pointerEvents = 'none'; 
+                    Array.from(pillsContainer.children).forEach(child => {
+                        if (child === btn) child.classList.add('is-selected');
+                        else child.style.opacity = '0.5';
+                    });
+                    appendUserMessage(opt.label);
+                    setTimeout(() => callback(opt.value), 300);
+                };
+                pillsContainer.appendChild(btn);
+            });
+            row.appendChild(pillsContainer);
+            elements.stream.appendChild(row);
+            scrollToBottom();
         });
-        
-        row.appendChild(pillsContainer);
-        elements.stream.appendChild(row);
-        scrollToBottom();
     };
 
     const appendForm = (fields, submitLabel, callback) => {
-        const row = document.createElement('div');
-        row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-        row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
-        
-        const form = document.createElement('form');
-        form.className = 'cdlv-support-chat__form';
-        
-        fields.forEach(f => {
-            const group = document.createElement('div');
-            group.className = 'cdlv-support-chat__form-group';
+        enqueueBotAction(() => {
+            const row = document.createElement('div');
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
             
-            // Build input based on type
-            let inputHTML = '';
-            if (f.type === 'textarea') {
-                inputHTML = `<textarea class="cdlv-support-chat__textarea" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}></textarea>`;
-            } else if (f.type === 'select') {
-                inputHTML = `
-                    <select class="cdlv-support-chat__input" name="${f.name}" ${f.required ? 'required' : ''}>
-                        <option value="" disabled selected>Select an option...</option>
-                        ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                    </select>
-                `;
-            } else {
-                inputHTML = `<input class="cdlv-support-chat__input" type="${f.type}" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}>`;
-            }
+            const form = document.createElement('form');
+            form.className = 'cdlv-support-chat__form';
+            
+            fields.forEach(f => {
+                const group = document.createElement('div');
+                group.className = 'cdlv-support-chat__form-group';
+                
+                let inputHTML = '';
+                if (f.type === 'textarea') {
+                    inputHTML = `<textarea class="cdlv-support-chat__textarea" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}></textarea>`;
+                } else if (f.type === 'select') {
+                    inputHTML = `
+                        <select class="cdlv-support-chat__input" name="${f.name}" ${f.required ? 'required' : ''}>
+                            <option value="" disabled selected>Select an option...</option>
+                            ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select>
+                    `;
+                } else {
+                    inputHTML = `<input class="cdlv-support-chat__input" type="${f.type}" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}>`;
+                }
 
-            group.innerHTML = `
-                <label class="cdlv-support-chat__label">${f.label} ${f.required ? '*' : ''}</label>
-                ${inputHTML}
-            `;
-            form.appendChild(group);
+                group.innerHTML = `
+                    <label class="cdlv-support-chat__label">${f.label} ${f.required ? '*' : ''}</label>
+                    ${inputHTML}
+                `;
+                form.appendChild(group);
+            });
+
+            const submitBtn = document.createElement('button');
+            submitBtn.type = 'submit';
+            submitBtn.className = 'cdlv-support-chat__submit';
+            submitBtn.textContent = submitLabel;
+            form.appendChild(submitBtn);
+
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                
+                // Keep data visible, but disabled
+                Array.from(form.elements).forEach(el => el.disabled = true);
+                submitBtn.textContent = 'Submitted ✓';
+                submitBtn.style.backgroundColor = 'var(--color-text-dark)';
+                
+                callback(data);
+            };
+
+            row.appendChild(form);
+            elements.stream.appendChild(row);
+            scrollToBottom();
         });
+    };
 
         const submitBtn = document.createElement('button');
         submitBtn.type = 'submit';
@@ -297,22 +360,32 @@ export const init = (node) => {
         appendBotMessage(`Thank you, ${sanitizeText(userData.firstName)}! How can I help you today? 🫖`);
         
         // Inject Tracking Card
-        const cardRow = document.createElement('div');
-        cardRow.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-        cardRow.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
-        cardRow.innerHTML = `
-            <div class="cdlv-support-chat__card">
-                <h3 class="cdlv-support-chat__card-title">Where is my order?</h3>
-                <p style="font-size: var(--font-size-small); margin-bottom: 1rem;">Need to know when your Casa De La Vida product will be arriving?</p>
-                <button class="cdlv-support-chat__pill" id="cdlv-chat-track-btn" style="width: 100%;">Track Now!</button>
-            </div>
-        `;
-        elements.stream.appendChild(cardRow);
-        
-        // Bind Card Button
-        setTimeout(() => {
-            document.getElementById('cdlv-chat-track-btn').onclick = () => runTrackOrderPipeline();
-        }, 50);
+        enqueueBotAction(() => {
+            const cardRow = document.createElement('div');
+            cardRow.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            cardRow.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
+            cardRow.innerHTML = `
+                <div class="cdlv-support-chat__card">
+                    <h3 class="cdlv-support-chat__card-title">Where is my order?</h3>
+                    <img src="${buildPath('assets/images/products/box_1.webp')}" alt="Casa De La Vida Box" class="cdlv-support-chat__card-img">
+                    <p style="font-size: var(--font-size-small); margin-bottom: 0.5rem;">Need to know when your Casa De La Vida product will be arriving?</p>
+                    <button class="cdlv-support-chat__pill" id="cdlv-chat-track-btn" style="width: 100%;">Track Now!</button>
+                </div>
+            `;
+            elements.stream.appendChild(cardRow);
+            scrollToBottom();
+
+            // Bind Card Button
+            setTimeout(() => {
+                const trackBtn = document.getElementById('cdlv-chat-track-btn');
+                trackBtn.onclick = (e) => {
+                    e.target.classList.add('is-selected');
+                    e.target.disabled = true;
+                    appendUserMessage("Track Now!");
+                    runTrackOrderPipeline();
+                };
+            }, 50);
+        });
 
         // Inject Topic Pills
         appendOptions([
@@ -369,6 +442,7 @@ export const init = (node) => {
     // 5. Event Listeners for State Management
     elements.launcher.addEventListener('click', () => {
         elements.window.classList.add('is-open');
+        document.body.classList.add('u-chat-open'); // Lock scroll
         if (elements.stream.children.length === 0) {
             setTimeout(() => startFlow(), 600); 
         }
@@ -376,6 +450,7 @@ export const init = (node) => {
 
     elements.btnMin.addEventListener('click', () => {
         elements.window.classList.remove('is-open');
+        document.body.classList.remove('u-chat-open'); // Unlock scroll
     });
 
     elements.btnClose.addEventListener('click', () => {
@@ -389,6 +464,9 @@ export const init = (node) => {
     elements.btnModalConfirm.addEventListener('click', () => {
         elements.modal.classList.remove('is-active');
         elements.window.classList.remove('is-open');
-        elements.stream.innerHTML = ''; // Hard reset session
+        document.body.classList.remove('u-chat-open'); // Unlock scroll
+        elements.stream.innerHTML = ''; 
+        messageQueue.length = 0; // Clear queue if restarting
+        isTyping = false;
     });
 };

@@ -274,6 +274,11 @@ img, video {
   pointer-events: none;
 }
 
+/* Body Scroll Lock */
+body.u-chat-open { 
+    overflow: hidden !important; 
+}
+
 /* ULTRA-WIDE SCREEN ADJUSTMENTS */
 @media (min-width: 1600px) { html { font-size: 110%; } }
 @media (min-width: 2000px) { html { font-size: 125%; } }
