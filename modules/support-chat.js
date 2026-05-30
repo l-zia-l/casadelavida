@@ -32,7 +32,9 @@ const getTimestamp = () => {
 const svgs = {
     chat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
     close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
-    minimize: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`
+    minimize: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+    thumbUp: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`,
+    thumbDown: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>`
 };
 
 /**
@@ -167,12 +169,42 @@ export const init = (node) => {
             row.innerHTML = `
                 <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4='">
                 <div class="cdlv-support-chat__bubble-wrapper">
-                    <div class="cdlv-support-chat__bubble">${text}</div>
+                    <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
                     <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
                 </div>
             `;
             elements.stream.appendChild(row);
             scrollToBottom();
+        });
+    };
+
+    const appendStepsWithFeedback = (stepsText) => {
+        enqueueBotAction(() => {
+            const row = document.createElement('div');
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            row.innerHTML = `
+                <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">
+                <div class="cdlv-support-chat__bubble-wrapper" style="width: 100%;">
+                    <div class="cdlv-support-chat__bubble">${stepsText.replace(/\n/g, '<br>')}</div>
+                    <div style="display: flex; align-items: center; margin-top: 0.25rem;">
+                        <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+                        <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #666;">
+                            <span>Was this helpful?</span>
+                            <button type="button" style="background:none; border:none; cursor:pointer; opacity: 0.5; transition: opacity 0.2s;" onclick="this.style.opacity=1; this.nextElementSibling.style.opacity=0.5;">
+                                ${svgs.thumbUp}
+                            </button>
+                            <button type="button" style="background:none; border:none; cursor:pointer; opacity: 0.5; transition: opacity 0.2s;" onclick="this.style.opacity=1; this.previousElementSibling.style.opacity=0.5;">
+                                ${svgs.thumbDown}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            elements.stream.appendChild(row);
+            scrollToBottom();
+            
+            // Immediately queue the end options loop
+            triggerGlobalEnd();
         });
     };
 
@@ -239,7 +271,9 @@ export const init = (node) => {
 
             const form = document.createElement('form');
             form.className = 'cdlv-support-chat__form';
+            // FIXED: Constrain form width so it doesn't stretch based on long paragraph text
             form.style.marginTop = 'var(--spacing-xs)';
+            form.style.maxWidth = '300px'; 
             
             fields.forEach(f => {
                 const group = document.createElement('div');
@@ -355,7 +389,6 @@ export const init = (node) => {
         });
     };
 
-    // --- NEW: Subscriptions Pipeline ---
     const runSubscriptionsPipeline = () => {
         askWithOptions("Are you looking for general information about our wellness subscriptions, or do you need help managing an existing one?", [
             { label: 'General Information', value: 'general' },
@@ -379,32 +412,23 @@ export const init = (node) => {
                     { label: 'It\'s something else', value: 'else' }
                 ], (action) => {
                     if (action === 'reinstate' || action === 'settings') {
+                        appendBotMessage("Follow these quick steps to update your delivery preferences.");
+                        
                         const instructions = `
-                            Here is how to manage your subscription preferences:
-                            <br><br>
                             1. Log in to your account.<br>
                             2. Go to "Manage My Deliveries" under "My Subscriptions".<br>
                             3. Select the delivery you'd like to adjust.<br>
                             4. Toggle your preferences or skip settings.<br>
                             5. Click "Save Changes" at the bottom.
                         `;
-                        askWithOptions(instructions + "<br><br>Was this helpful?", [
-                            { label: '👍 Yes, thank you', value: 'yes' },
-                            { label: '👎 No, I need more help', value: 'no' }
-                        ], (feedback) => {
-                            if (feedback === 'yes') {
-                                triggerGlobalEnd();
-                            } else {
-                                triggerHumanPipeline();
-                            }
-                        });
+                        // This appends the steps, adds feedback UI, and automatically queues GlobalEnd
+                        appendStepsWithFeedback(instructions);
                     } else if (action === 'else') {
                         triggerHumanPipeline();
                     } else if (action === 'update_order') {
                         askWithOptions("To help you update your subscription order, how is your account setup?", [
                             { label: 'Guest Checkout', value: 'guest' },
-                            { label: 'Logged into my account', value: 'logged' },
-                            { label: 'Have a subscription', value: 'sub' }
+                            { label: 'Logged into my account', value: 'logged' }
                         ], (accountType) => {
                             const orderOptions = [
                                 { label: 'View', value: 'view' },
@@ -417,10 +441,13 @@ export const init = (node) => {
                             ];
                             
                             askWithOptions("What would you like to do with your subscription order?", orderOptions, (orderAction) => {
-                                if (accountType === 'guest' || accountType === 'sub') {
+                                if (orderAction === 'order') {
+                                    askWithCard("Ready to step into the soft life? You can explore our artisanal collections and place a new order right here:", "Shop Casa De La Vida", "assets/images/products/item_2.2.1.webp", "Explore our artisanal collections and wellness boxes.", "shop.html", "Shop Now");
+                                    triggerGlobalEnd();
+                                } else if (orderAction === 'issues' || orderAction === 'late') {
                                     triggerHumanPipeline();
                                 } else {
-                                    if (orderAction === 'issues' || orderAction === 'late') {
+                                    if (accountType === 'guest') {
                                         triggerHumanPipeline();
                                     } else {
                                         const ghanaRegions = ['Ahafo', 'Ashanti', 'Bono', 'Bono East', 'Central', 'Eastern', 'Greater Accra', 'North East', 'Northern', 'Oti', 'Savannah', 'Upper East', 'Upper West', 'Western', 'Western North'];
@@ -431,6 +458,7 @@ export const init = (node) => {
                                             appendBotMessage("Searching for your order...");
                                             setTimeout(() => {
                                                 if (data.orderId.length > 3) {
+                                                    appendBotMessage("Follow these quick steps to update your delivery.");
                                                     const steps = `
                                                         <strong>Order Found!</strong><br><br>
                                                         To ${sanitizeText(orderAction)} this order:<br>
@@ -439,8 +467,7 @@ export const init = (node) => {
                                                         3. Select Order ${sanitizeText(data.orderId)}.<br>
                                                         4. Click the "${sanitizeText(orderAction)}" button to proceed.
                                                     `;
-                                                    appendBotMessage(steps);
-                                                    triggerGlobalEnd();
+                                                    appendStepsWithFeedback(steps);
                                                 } else {
                                                     appendBotMessage("It looks like those details don't match our records.");
                                                     triggerHumanPipeline();
@@ -467,7 +494,9 @@ export const init = (node) => {
                 { label: 'Cancel order', value: 'cancel' },
                 { label: 'Place order', value: 'place' },
                 { label: 'Track order', value: 'track' },
-                { label: 'Change order', value: 'change' }
+                { label: 'Change order', value: 'change' },
+                { label: 'Order issues', value: 'issues' },
+                { label: 'Late order', value: 'late' }
             ];
             
             askWithOptions("Understood. What specific action would you like to take regarding your order?", orderOpts, (action) => {
@@ -476,9 +505,17 @@ export const init = (node) => {
                     return;
                 }
 
+                if (action === 'issues' || action === 'late') {
+                    triggerHumanPipeline();
+                    return;
+                }
+
                 if (accountStatus === 'guest') {
                     if (action === 'cancel') {
                         appendBotMessage("Canceling orders is not possible once they have been shipped. Please restart the chat to check the order status if you have your Order ID.");
+                        triggerGlobalEnd();
+                    } else if (action === 'place') {
+                        askWithCard("Ready to step into the soft life? You can explore our artisanal collections and place a new order right here:", "Shop Casa De La Vida", "assets/images/products/item_2.2.1.webp", "Explore our artisanal collections and wellness boxes.", "shop.html", "Shop Now");
                         triggerGlobalEnd();
                     } else {
                         triggerHumanPipeline();
