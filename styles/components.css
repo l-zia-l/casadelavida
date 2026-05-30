@@ -4868,6 +4868,210 @@ h3.cdlv-product-page__item-title {
     padding-right: 70px; 
 }
 
+/* Sub-View Container Switching */
+.cdlv-dashboard__sub-view {
+    display: none;
+    animation: fade-in-up var(--transition-fast) forwards;
+}
+
+.cdlv-dashboard__sub-view.is-active {
+    display: block;
+}
+
+/* Back Button for Sub-Views */
+.cdlv-dashboard__back-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-dark);
+    font-family: var(--font-family-body);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--spacing-xs) / 2);
+    margin-bottom: var(--spacing-md);
+    opacity: 0.6;
+    transition: opacity var(--transition-fast);
+}
+
+.cdlv-dashboard__back-btn:hover {
+    opacity: 1;
+}
+
+/* Card Grids (Wishlist & Subscriptions) */
+.cdlv-dashboard__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.cdlv-dashboard__item-card {
+    border: 1px solid rgba(26, 26, 26, 0.1);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-primary);
+    transition: transform var(--transition-base);
+}
+
+.cdlv-dashboard__item-card:hover {
+    transform: translateY(-4px);
+}
+
+.cdlv-dashboard__item-img-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.cdlv-dashboard__item-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cdlv-dashboard__item-details {
+    padding: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: var(--spacing-xs);
+}
+
+.cdlv-dashboard__item-title {
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin: 0;
+}
+
+.cdlv-dashboard__item-meta {
+    font-size: var(--font-size-body);
+    opacity: 0.8;
+    margin: 0;
+}
+
+.cdlv-dashboard__item-actions {
+    margin-top: auto;
+    display: flex;
+    gap: var(--spacing-xs);
+    padding-top: var(--spacing-xs);
+}
+
+.cdlv-dashboard__btn--outline {
+    background: transparent;
+    color: var(--color-text-dark);
+    border: 1px solid rgba(26, 26, 26, 0.2);
+}
+
+.cdlv-dashboard__btn--outline:hover {
+    border-color: var(--color-text-dark);
+}
+
+.cdlv-dashboard__btn--danger {
+    background-color: transparent;
+    color: #d32f2f;
+    border: 1px solid #d32f2f;
+}
+
+.cdlv-dashboard__btn--danger:hover {
+    background-color: #d32f2f;
+    color: var(--color-text-light);
+}
+
+/* Payment Method Cards */
+.cdlv-dashboard__payment-card {
+    border: 1px solid rgba(26, 26, 26, 0.2);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cdlv-dashboard__payment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cdlv-dashboard__payment-title {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    font-size: var(--font-size-small);
+}
+
+.cdlv-dashboard__payment-badge {
+    display: inline-block;
+    background: rgba(26, 26, 26, 0.1);
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+/* Modal System */
+.cdlv-dashboard__modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+}
+
+.cdlv-dashboard__modal.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.cdlv-dashboard__modal-content {
+    background: var(--color-primary);
+    width: min(90vw, 500px);
+    padding: var(--spacing-md);
+    transform: translateY(20px);
+    transition: transform var(--transition-base);
+    border: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.cdlv-dashboard__modal.is-open .cdlv-dashboard__modal-content {
+    transform: translateY(0);
+}
+
+.cdlv-dashboard__modal-title {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-h4);
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-xs);
+}
+
+.cdlv-dashboard__modal-text {
+    font-size: var(--font-size-small);
+    opacity: 0.8;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.6;
+}
+
+.cdlv-dashboard__modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */
