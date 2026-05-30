@@ -329,6 +329,10 @@ export const init = (node) => {
                     setTimeout(() => {
                         if (opt.value === 'end') {
                             appendBotMessage("Thank you for chatting with me today. Wishing you a beautiful, balanced day!");
+                            
+                            // Conversational bridge before the final End Session button
+                            appendBotMessage("You can safely close this session below whenever you are ready.");
+                            
                             appendOptions([{label: 'End Session', value: 'close_chat'}], (val) => {
                                 if (val === 'close_chat') closeAndResetChat();
                             });
@@ -370,6 +374,10 @@ export const init = (node) => {
             { label: 'Guest Checkout', value: 'guest' },
             { label: 'Logged into my account', value: 'logged' }
         ], (accountStatus) => {
+            
+            // Conversational bridge before sub-options
+            appendBotMessage("Understood. What specific action would you like to take regarding your order?");
+            
             const orderOpts = [
                 { label: 'Cancel order', value: 'cancel' },
                 { label: 'Place order', value: 'place' },
@@ -444,6 +452,9 @@ export const init = (node) => {
             ], 'Find Products', () => {
                 appendBotMessage("Based on your vibes, check out our catalog:");
                 appendCardMessage("Curated Wellness", "assets/images/products/item_1.webp", "Discover holistic products tailored to your routine.", "shop.html", "Explore Catalog");
+                
+                // Conversational bridge before options
+                appendBotMessage("Would you like to explore further, or speak with an expert?");
                 
                 appendOptions([
                     {label: 'I want to explore more', value: 'more'},
