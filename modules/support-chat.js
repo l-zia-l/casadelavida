@@ -302,7 +302,7 @@ export const init = (node) => {
             appendBotMessage(`Thank you. A team member will reach out to ${sanitizeText(data.email)} shortly.`);
             
             setTimeout(() => {
-                showMainMenu();
+                triggerGlobalEnd(); // <-- FIXED: Now routes to Global End instead of showMainMenu
             }, 1200);
         });
     };
@@ -450,7 +450,6 @@ export const init = (node) => {
             wrapper.innerHTML = cardHTML;
             wrapper.appendChild(pillsContainer);
             
-            // Bind the track button directly to the wrapper before appending to DOM
             const trackBtn = wrapper.querySelector(`#${uniqueTrackId}`);
             if(trackBtn) {
                 trackBtn.addEventListener('click', (e) => {
