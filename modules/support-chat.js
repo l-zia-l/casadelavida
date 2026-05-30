@@ -126,14 +126,19 @@ export const init = (node) => {
         elements.stream.appendChild(typingRow);
         scrollToBottom();
 
-        // Wait 2 seconds, remove indicator, execute next message
+        // Wait 1.2 seconds, remove indicator, execute next message safely
         setTimeout(() => {
             const indicator = document.getElementById('cdlv-chat-typing-indicator');
             if (indicator) indicator.remove();
             
-            nextAction(); 
-            isTyping = false;
-            processQueue(); 
+            try {
+                nextAction(); 
+            } catch (error) {
+                console.error("Support Chat Engine Error:", error);
+            } finally {
+                isTyping = false;
+                processQueue(); 
+            }
         }, 1200);
     };
 
@@ -396,7 +401,6 @@ export const init = (node) => {
             wrapper.style.flexDirection = 'column'; 
             wrapper.style.gap = 'var(--spacing-sm)';
             
-            // Unique ID per render to prevent click-binding collision on loops
             const uniqueTrackId = 'cdlv-track-btn-' + Math.random().toString(36).substr(2, 9);
 
             const cardHTML = `
@@ -431,7 +435,7 @@ export const init = (node) => {
                         else child.style.opacity = '0.5';
                     });
                     
-                    const trackBtn = document.getElementById(uniqueTrackId);
+                    const trackBtn = wrapper.querySelector(`#${uniqueTrackId}`);
                     if(trackBtn) { 
                         trackBtn.style.pointerEvents = 'none'; 
                         trackBtn.style.opacity = '0.5'; 
@@ -445,24 +449,24 @@ export const init = (node) => {
 
             wrapper.innerHTML = cardHTML;
             wrapper.appendChild(pillsContainer);
+            
+            // Bind the track button directly to the wrapper before appending to DOM
+            const trackBtn = wrapper.querySelector(`#${uniqueTrackId}`);
+            if(trackBtn) {
+                trackBtn.addEventListener('click', (e) => {
+                    e.target.classList.add('is-selected');
+                    e.target.disabled = true;
+                    
+                    pillsContainer.style.pointerEvents = 'none';
+                    pillsContainer.style.opacity = '0.5';
+                    
+                    appendUserMessage("Track Now!");
+                    runTrackOrderPipeline();
+                });
+            }
+
             elements.stream.appendChild(wrapper);
             scrollToBottom();
-
-            setTimeout(() => {
-                const trackBtn = document.getElementById(uniqueTrackId);
-                if(trackBtn) {
-                    trackBtn.onclick = (e) => {
-                        e.target.classList.add('is-selected');
-                        e.target.disabled = true;
-                        
-                        pillsContainer.style.pointerEvents = 'none';
-                        pillsContainer.style.opacity = '0.5';
-                        
-                        appendUserMessage("Track Now!");
-                        runTrackOrderPipeline();
-                    };
-                }
-            }, 50);
         });
     };
 
