@@ -306,7 +306,6 @@ export const init = (node) => {
                 if (f.type === 'textarea') {
                     inputHTML = `<textarea class="cdlv-support-chat__textarea" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}></textarea>`;
                 } else if (f.type === 'select') {
-                    // Optional selects don't need 'disabled' on the placeholder so they can be bypassed
                     inputHTML = `
                         <select class="cdlv-support-chat__input" name="${f.name}" ${f.required ? 'required' : ''}>
                             <option value="" ${f.required ? 'disabled selected' : 'selected'}>Select an option...</option>
@@ -382,8 +381,7 @@ export const init = (node) => {
         });
     };
 
-    // --- NEW: Shop Slider Integration Helper ---
-    const askWithSlider = (text, products, followUpOptions, callback) => {
+    const askWithSlider = (text, items, followUpOptions, callback) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
@@ -393,19 +391,22 @@ export const init = (node) => {
             const wrapper = document.createElement('div');
             wrapper.className = 'cdlv-support-chat__bubble-wrapper u-w-100';
             
-            // Build Product Cards using global CSS tokens but constraining width for the chat UI
-            const cardsHTML = products.map((product, index) => {
+            const cardsHTML = items.map((item, index) => {
                 const loadingStrategy = index < 2 ? 'loading="eager" decoding="sync"' : 'loading="lazy" decoding="async"';
+                
+                // Gracefully handles shop prices vs text labels (like "Video 1")
+                const displayPrice = isNaN(item.price) ? item.price : `GH₵ ${item.price}`;
+
                 return `
                     <article class="cdlv-catalog-slider__card" style="flex: 0 0 140px; min-width: 140px;">
-                        <a href="${buildPath(product.link)}" target="_blank" class="cdlv-catalog-slider__image-box img-hover-scale" style="display:block; aspect-ratio:1/1; overflow:hidden; border-radius:var(--radius-strict); margin-bottom:var(--spacing-xs);">
-                            <img src="${buildPath(product.image)}" alt="${sanitizeText(product.title)}" style="width:100%; height:100%; object-fit:cover;" ${loadingStrategy}>
+                        <a href="${buildPath(item.link || '#')}" target="_blank" class="cdlv-catalog-slider__image-box img-hover-scale" style="display:block; aspect-ratio:1/1; overflow:hidden; border-radius:var(--radius-strict); margin-bottom:var(--spacing-xs);">
+                            <img src="${buildPath(item.image)}" alt="${sanitizeText(item.title)}" style="width:100%; height:100%; object-fit:cover;" ${loadingStrategy}>
                         </a>
                         <div class="cdlv-catalog-slider__info">
-                            <h3 class="cdlv-catalog-slider__product-title" style="font-size: 0.8rem; line-height: 1.2; margin: 0;">
-                                <a href="${buildPath(product.link)}" target="_blank" style="text-decoration:none; color:inherit;">${sanitizeText(product.title)}</a>
+                            <h3 style="font-size: 0.8rem; line-height: 1.2; margin: 0;">
+                                <a href="${buildPath(item.link || '#')}" target="_blank" style="text-decoration:none; color:inherit;">${sanitizeText(item.title)}</a>
                             </h3>
-                            <p style="font-size: 0.75rem; color: #666; margin: 0; font-weight: bold;">GH₵ ${product.price}</p>
+                            <p style="font-size: 0.75rem; color: #666; margin: 0; font-weight: bold;">${sanitizeText(displayPrice)}</p>
                         </div>
                     </article>
                 `;
@@ -452,7 +453,6 @@ export const init = (node) => {
             scrollToBottom();
         });
     };
-
 
     // 4. Chat Flow Logic (Pipelines)
     
@@ -675,14 +675,12 @@ export const init = (node) => {
         });
     };
 
-    // --- NEW: Shop Pipeline Integration ---
     const runShopPipeline = () => {
         askWithForm("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.", [
             { label: 'Category Preference', name: 'cat', type: 'select', options: ['Tea', 'Honey', 'Oils', 'Accessories', 'Packages'], required: false },
             { label: 'Budget (Max GH₵)', name: 'budget', type: 'number', required: false }
         ], 'Find Products', (data) => {
             
-            // Raw Catalog Data mapping
             const catalogData = [
                 { title: "Premium Herbal Infusion", image: "assets/images/products/item_2.2.1.webp", link: "shop/products/premium-herbal-infusion.html", price: 100, category: "Tea" },
                 { title: "Honey Infused Tumeric", image: "assets/images/products/item_1.webp", link: "shop/products/honey-infused-tumeric.html", price: 100, category: "Honey" },
@@ -693,7 +691,6 @@ export const init = (node) => {
                 { title: "Vanilla Candle", image: "assets/images/products/item_6.3.webp", link: "shop/accessories/vanilla-candle.html", price: 100, category: "Accessories" }
             ];
 
-            // Filter Engine
             let filteredProducts = catalogData;
             let foundMatch = true;
             
@@ -704,11 +701,9 @@ export const init = (node) => {
                 filteredProducts = filteredProducts.filter(item => item.price <= parseInt(data.budget));
             }
             
-            // Fallback Logic
             if (filteredProducts.length === 0) {
                 foundMatch = false;
                 appendBotMessage("This item is not available at the moment, but here are other items you might be interested in:");
-                // Sort catalog: Category match first, then the rest
                 filteredProducts = catalogData.sort((a, b) => {
                     const matchA = data.cat && a.category.toLowerCase() === data.cat.toLowerCase();
                     return matchA ? -1 : 1;
@@ -734,11 +729,30 @@ export const init = (node) => {
         });
     };
 
+    // --- NEW: Care Tips Video Slider ---
+    const runCareTipsPipeline = () => {
+        askWithSlider(
+            "Embracing intentional self-care is a beautiful journey. Here are some gentle guides on how to properly brew and enjoy your Casa De La Vida products.",
+            [
+                { title: "Brewing Perfect Tea", image: "assets/images/backgrounds/stock_1.webp", link: "#", price: "Video" },
+                { title: "Honey Pairing Tips", image: "assets/images/backgrounds/stock_2.webp", link: "#", price: "Video" },
+                { title: "Storage Guide", image: "assets/images/backgrounds/stock_3.webp", link: "#", price: "Video" }
+            ],
+            [
+                { label: 'I\'m done, thank you', value: 'done' }
+            ],
+            (res) => {
+                triggerGlobalEnd();
+            }
+        );
+    };
+
     const handleTopicSelection = (topic) => {
         if (topic === 'order') runOrderPipeline();
         else if (topic === 'subscriptions') runSubscriptionsPipeline();
         else if (topic === 'quality') runQualityPipeline();
         else if (topic === 'shop') runShopPipeline();
+        else if (topic === 'care') runCareTipsPipeline();
         else if (topic === 'tech') {
             askWithForm("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.", [{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
         }
