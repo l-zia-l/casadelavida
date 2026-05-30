@@ -4904,74 +4904,70 @@ h3.cdlv-product-page__item-title {
 /* Card Grids (Wishlist & Subscriptions) */
 .cdlv-dashboard__grid {
     display: grid;
-    grid-template-columns: 1fr; /* Single column on mobile for better proportions */
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-sm);
 }
 
 @media (min-width: 768px) {
     .cdlv-dashboard__grid {
-        /* Wider base for desktop to accommodate horizontal cards */
-        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: var(--spacing-md);
     }
 }
 
+@media (min-width: 1024px) {
+    .cdlv-dashboard__grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
 .cdlv-dashboard__item-card {
-    border: 1px solid rgba(26, 26, 26, 0.1);
     display: flex;
     flex-direction: column;
     background-color: var(--color-primary);
-    transition: transform var(--transition-base);
+    border-radius: var(--radius-strict);
+    border: 1px solid rgba(26, 26, 26, 0.1);
     overflow: hidden;
-}
-
-@media (min-width: 768px) {
-    .cdlv-dashboard__item-card {
-        flex-direction: row; /* Switch to horizontal on desktop for a compact look */
-        align-items: stretch;
-        max-height: 200px; /* Lock in the compact height */
-    }
+    transition: transform var(--transition-base);
+    
+    /* HARDENING: Prevents infinite height expansion in WebKit engines */
+    height: 100%;
+    min-height: 0;
 }
 
 .cdlv-dashboard__item-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
 }
 
 .cdlv-dashboard__item-img-wrapper {
+    aspect-ratio: 4 / 5;
     width: 100%;
-    aspect-ratio: 16 / 9; /* More compact on mobile */
     overflow: hidden;
-    position: relative;
+    border-radius: var(--radius-strict);
     border-bottom: 1px solid rgba(26, 26, 26, 0.1);
-    flex-shrink: 0; 
-}
-
-@media (min-width: 768px) {
-    .cdlv-dashboard__item-img-wrapper {
-        width: 35%; /* Restrict image width on desktop */
-        aspect-ratio: auto; /* Let the height dictate the image size */
-        border-bottom: none;
-        border-right: 1px solid rgba(26, 26, 26, 0.1);
-    }
+    flex-shrink: 0;
 }
 
 .cdlv-dashboard__item-img-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: var(--radius-strict);
+    transition: transform var(--transition-slow);
+}
+
+.cdlv-dashboard__item-card:hover .cdlv-dashboard__item-img-wrapper img {
+    transform: scale(1.03);
 }
 
 .cdlv-dashboard__item-details {
     padding: var(--spacing-sm);
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
-    gap: var(--spacing-xs);
-    overflow-y: auto; /* Allows scrolling inside the card if text is too long */
-    scrollbar-width: none;
-}
-.cdlv-dashboard__item-details::-webkit-scrollbar {
-    display: none;
+    
+    /* HARDENING: Establishes a predictable, uncollapsible interior flexible container */
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .cdlv-dashboard__item-title {
@@ -4979,7 +4975,7 @@ h3.cdlv-product-page__item-title {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: var(--letter-spacing-wide);
-    margin: 0;
+    margin: 0 0 calc(var(--spacing-xs) / 2) 0;
 }
 
 .cdlv-dashboard__item-meta {
@@ -4989,10 +4985,16 @@ h3.cdlv-product-page__item-title {
 }
 
 .cdlv-dashboard__item-actions {
-    margin-top: auto;
+    margin-top: auto; /* Clean baseline alignment across rows */
     display: flex;
     gap: var(--spacing-xs);
-    padding-top: var(--spacing-xs);
+    padding-top: var(--spacing-md);
+    width: 100%;
+}
+
+.cdlv-dashboard__item-actions .cdlv-dashboard__btn {
+    width: 100%;
+    margin-top: 0; /* Overrides the default margin-top on dashboard buttons */
 }
 
 .cdlv-dashboard__btn--outline {
