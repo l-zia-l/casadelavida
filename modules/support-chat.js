@@ -145,6 +145,22 @@ export const init = (node) => {
         processQueue();
     };
 
+    const appendUserMessage = (text) => {
+        const row = document.createElement('div');
+        row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--user';
+        row.innerHTML = `
+            <div class="cdlv-support-chat__bubble-wrapper">
+                <div class="cdlv-support-chat__bubble">${sanitizeText(text)}</div>
+                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+            </div>
+        `;
+        elements.stream.appendChild(row);
+        scrollToBottom();
+    };
+
+    // --- Unified Rendering Helpers ---
+
+    // Standard standalone message
     const appendBotMessage = (text) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
@@ -161,28 +177,27 @@ export const init = (node) => {
         });
     };
 
-    const appendUserMessage = (text) => {
-        const row = document.createElement('div');
-        row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--user';
-        row.innerHTML = `
-            <div class="cdlv-support-chat__bubble-wrapper">
-                <div class="cdlv-support-chat__bubble">${sanitizeText(text)}</div>
-                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
-            </div>
-        `;
-        elements.stream.appendChild(row);
-        scrollToBottom();
-    };
-
-    const appendOptions = (options, callback) => {
+    // Message combined with Option Pills
+    const askWithOptions = (text, options, callback) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-            row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))'; 
             
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">`;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
+            wrapper.style.width = '100%';
+            
+            wrapper.innerHTML = `
+                <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
+                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+            `;
+
             const pillsContainer = document.createElement('div');
             pillsContainer.className = 'cdlv-support-chat__pills';
-            
+            pillsContainer.style.marginTop = 'var(--spacing-xs)';
+
             options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'cdlv-support-chat__pill';
@@ -198,20 +213,36 @@ export const init = (node) => {
                 };
                 pillsContainer.appendChild(btn);
             });
-            row.appendChild(pillsContainer);
+
+            wrapper.appendChild(pillsContainer);
+            row.innerHTML = avatarHTML;
+            row.appendChild(wrapper);
+            
             elements.stream.appendChild(row);
             scrollToBottom();
         });
     };
 
-    const appendForm = (fields, submitLabel, callback) => {
+    // Message combined with a Form
+    const askWithForm = (text, fields, submitLabel, callback) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-            row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
             
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">`;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
+            wrapper.style.width = '100%';
+            
+            wrapper.innerHTML = `
+                <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
+                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+            `;
+
             const form = document.createElement('form');
             form.className = 'cdlv-support-chat__form';
+            form.style.marginTop = 'var(--spacing-xs)';
             
             fields.forEach(f => {
                 const group = document.createElement('div');
@@ -256,31 +287,44 @@ export const init = (node) => {
                 callback(data);
             };
 
-            row.appendChild(form);
+            wrapper.appendChild(form);
+            row.innerHTML = avatarHTML;
+            row.appendChild(wrapper);
             elements.stream.appendChild(row);
             scrollToBottom();
         });
     };
 
-    // Card Builder specifically for external links opening in a new tab
-    const appendCardMessage = (title, imagePath, description, linkUrl, linkText) => {
+    // Message combined with a visual Card Link
+    const askWithCard = (text, title, imagePath, description, linkUrl, linkText) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-            row.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
             
-            row.innerHTML = `
-                <div class="cdlv-support-chat__card">
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">`;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
+            wrapper.style.width = '100%';
+            
+            wrapper.innerHTML = `
+                <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
+                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+                <div class="cdlv-support-chat__card" style="margin-top: var(--spacing-xs);">
                     <h3 class="cdlv-support-chat__card-title">${title}</h3>
                     <img src="${buildPath(imagePath)}" alt="${title}" class="cdlv-support-chat__card-img">
                     <p style="font-size: var(--font-size-small); margin-bottom: 0.5rem;">${description}</p>
                     <a href="${buildPath(linkUrl)}" target="_blank" rel="noopener noreferrer" class="cdlv-support-chat__pill" style="width: 100%; display: block; text-align: center; box-sizing: border-box; text-decoration: none;">${linkText}</a>
                 </div>
             `;
+
+            row.innerHTML = avatarHTML;
+            row.appendChild(wrapper);
             elements.stream.appendChild(row);
             scrollToBottom();
         });
     };
+
 
     // 4. Chat Flow Logic (Pipelines)
     
@@ -294,89 +338,32 @@ export const init = (node) => {
             endOptions.push({ label: 'Need to Speak With Someone', value: 'human' });
         }
 
-        enqueueBotAction(() => {
-            const row = document.createElement('div');
-            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-            
-            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4='">`;
-            
-            const wrapper = document.createElement('div');
-            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
-            wrapper.style.width = '100%';
-            
-            wrapper.innerHTML = `
-                <div class="cdlv-support-chat__bubble">Is there anything else I can help you with?</div>
-                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
-            `;
-
-            const pillsContainer = document.createElement('div');
-            pillsContainer.className = 'cdlv-support-chat__pills';
-            pillsContainer.style.marginTop = 'var(--spacing-xs)';
-
-            endOptions.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'cdlv-support-chat__pill';
-                btn.textContent = opt.label;
-                btn.onclick = () => {
-                    pillsContainer.style.pointerEvents = 'none'; 
-                    Array.from(pillsContainer.children).forEach(child => {
-                        if (child === btn) child.classList.add('is-selected');
-                        else child.style.opacity = '0.5';
-                    });
-                    
-                    appendUserMessage(opt.label);
-                    
-                    setTimeout(() => {
-                        if (opt.value === 'end') {
-                            appendBotMessage("Thank you for chatting with me today. Wishing you a beautiful, balanced day!");
-                            
-                            // Conversational bridge before the final End Session button
-                            appendBotMessage("You can safely close this session below whenever you are ready.");
-                            
-                            appendOptions([{label: 'End Session', value: 'close_chat'}], (val) => {
-                                if (val === 'close_chat') closeAndResetChat();
-                            });
-                        } else if (opt.value === 'menu') {
-                            showMainMenu();
-                        } else {
-                            triggerHumanPipeline();
-                        }
-                    }, 300);
-                };
-                pillsContainer.appendChild(btn);
-            });
-
-            wrapper.appendChild(pillsContainer);
-            row.innerHTML = avatarHTML;
-            row.appendChild(wrapper);
-            
-            elements.stream.appendChild(row);
-            scrollToBottom();
+        askWithOptions("Is there anything else I can help you with?", endOptions, (choice) => {
+            if (choice === 'end') {
+                askWithOptions("Thank you for chatting with me today. Wishing you a beautiful, balanced day!\n\nYou can safely close this session below whenever you are ready.", [{label: 'End Session', value: 'close_chat'}], (val) => {
+                    if (val === 'close_chat') closeAndResetChat();
+                });
+            } else if (choice === 'menu') {
+                showMainMenu();
+            } else {
+                triggerHumanPipeline();
+            }
         });
     };
 
     const triggerHumanPipeline = () => {
-        appendBotMessage("I'll connect you with our wellness team to look into this personally. They will email you within minutes. Please confirm your email address below.");
-        
-        appendForm([{ label: 'Email Address', name: 'email', type: 'email', required: true }], 'Confirm Email', (data) => {
+        askWithForm("I'll connect you with our wellness team to look into this personally. They will email you within minutes. Please confirm your email address below.", [{ label: 'Email Address', name: 'email', type: 'email', required: true }], 'Confirm Email', (data) => {
             humanContacted = true; 
             appendBotMessage(`Thank you. A team member will reach out to ${sanitizeText(data.email)} shortly.`);
-            
-            setTimeout(() => {
-                triggerGlobalEnd();
-            }, 1200);
+            setTimeout(() => triggerGlobalEnd(), 1200);
         });
     };
 
     const runOrderPipeline = () => {
-        appendBotMessage("To best assist you with your order, could you let me know if you checked out as a guest or if you are logged into your account?");
-        appendOptions([
+        askWithOptions("To best assist you with your order, could you let me know if you checked out as a guest or if you are logged into your account?", [
             { label: 'Guest Checkout', value: 'guest' },
             { label: 'Logged into my account', value: 'logged' }
         ], (accountStatus) => {
-            
-            // Conversational bridge before sub-options
-            appendBotMessage("Understood. What specific action would you like to take regarding your order?");
             
             const orderOpts = [
                 { label: 'Cancel order', value: 'cancel' },
@@ -385,7 +372,7 @@ export const init = (node) => {
                 { label: 'Change order', value: 'change' }
             ];
             
-            appendOptions(orderOpts, (action) => {
+            askWithOptions("Understood. What specific action would you like to take regarding your order?", orderOpts, (action) => {
                 if (action === 'track') {
                     runTrackOrderPipeline();
                     return;
@@ -400,12 +387,10 @@ export const init = (node) => {
                     }
                 } else {
                     if (action === 'place') {
-                        appendBotMessage("Ready to step into the soft life? You can explore our artisanal collections and place a new order right here:");
-                        appendCardMessage("Shop Casa De La Vida", "assets/images/products/item_2.2.1.webp", "Explore our artisanal collections and wellness boxes.", "shop.html", "Shop Now");
+                        askWithCard("Ready to step into the soft life? You can explore our artisanal collections and place a new order right here:", "Shop Casa De La Vida", "assets/images/products/item_2.2.1.webp", "Explore our artisanal collections and wellness boxes.", "shop.html", "Shop Now");
                         triggerGlobalEnd();
                     } else {
-                        appendBotMessage("To ensure your rituals arrive quickly, we process orders immediately. Once placed, an order cannot be modified. However, if your order has not yet shipped, you can cancel it directly in your account dashboard and place a new one.");
-                        appendCardMessage("Account Dashboard", "assets/images/backgrounds/stock_3.webp", "Manage your orders, subscriptions, and settings.", "account/orders.html", "View Orders");
+                        askWithCard("To ensure your rituals arrive quickly, we process orders immediately. Once placed, an order cannot be modified. However, if your order has not yet shipped, you can cancel it directly in your account dashboard and place a new one.", "Account Dashboard", "assets/images/backgrounds/stock_3.webp", "Manage your orders, subscriptions, and settings.", "account/orders.html", "View Orders");
                         triggerGlobalEnd();
                     }
                 }
@@ -414,11 +399,9 @@ export const init = (node) => {
     };
 
     const runTrackOrderPipeline = () => {
-        appendBotMessage("Please share your Order ID and delivery region so we can pull up your natural self-care rituals.");
-        
         const ghanaRegions = ['Ahafo', 'Ashanti', 'Bono', 'Bono East', 'Central', 'Eastern', 'Greater Accra', 'North East', 'Northern', 'Oti', 'Savannah', 'Upper East', 'Upper West', 'Western', 'Western North'];
 
-        appendForm([
+        askWithForm("Please share your Order ID and delivery region so we can pull up your natural self-care rituals.", [
             { label: 'Order ID', name: 'orderId', type: 'text', placeholder: 'e.g. CDLV-12345', required: true },
             { label: 'Region', name: 'region', type: 'select', options: ghanaRegions, required: true }
         ], 'Track Order', (data) => {
@@ -441,29 +424,22 @@ export const init = (node) => {
     const handleTopicSelection = (topic) => {
         if (topic === 'order') runOrderPipeline();
         else if (topic === 'tech') {
-            appendBotMessage("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.");
-            appendForm([{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
+            askWithForm("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.", [{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
         }
         else if (topic === 'shop') {
-            appendBotMessage("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.");
-            appendForm([
+            askWithForm("Let's find the perfect addition to your daily ritual. Tell me a bit about what you are looking for, and I will curate a selection just for you.", [
                 { label: 'Category Preference', name: 'cat', type: 'text', required: false },
                 { label: 'Budget', name: 'budget', type: 'text', required: false }
             ], 'Find Products', () => {
-                appendBotMessage("Based on your vibes, check out our catalog:");
-                appendCardMessage("Curated Wellness", "assets/images/products/item_1.webp", "Discover holistic products tailored to your routine.", "shop.html", "Explore Catalog");
+                askWithCard("Based on your vibes, check out our catalog:", "Curated Wellness", "assets/images/products/item_1.webp", "Discover holistic products tailored to your routine.", "shop.html", "Explore Catalog");
                 
-                // Conversational bridge before options
-                appendBotMessage("Would you like to explore further, or speak with an expert?");
-                
-                appendOptions([
+                askWithOptions("Would you like to explore further, or speak with an expert?", [
                     {label: 'I want to explore more', value: 'more'},
                     {label: 'I want a consultation', value: 'consult'},
                     {label: 'I\'m done looking', value: 'done'}
                 ], (res) => {
                     if(res === 'consult') {
-                        appendBotMessage("Book your consultation here:");
-                        appendCardMessage("Wellness Consultation", "assets/images/backgrounds/stock_1.webp", "Speak with our experts to personalize your routine.", "appointments.html", "Book Now");
+                        askWithCard("Book your consultation here:", "Wellness Consultation", "assets/images/backgrounds/stock_1.webp", "Speak with our experts to personalize your routine.", "appointments.html", "Book Now");
                     }
                     triggerGlobalEnd();
                 });
@@ -475,14 +451,19 @@ export const init = (node) => {
     };
 
     const showMainMenu = () => {
-        appendBotMessage(`Thank you, ${sanitizeText(userData.firstName)}! How can I help you today? 🫖`);
-        
         enqueueBotAction(() => {
+            const row = document.createElement('div');
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">`;
+            
             const wrapper = document.createElement('div');
-            wrapper.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
-            wrapper.style.marginLeft = 'calc(clamp(2.5rem, 4vw, 3.5rem) + var(--spacing-sm))';
-            wrapper.style.flexDirection = 'column'; 
-            wrapper.style.gap = 'var(--spacing-sm)';
+            wrapper.className = 'cdlv-support-chat__bubble-wrapper';
+            wrapper.style.width = '100%';
+            
+            wrapper.innerHTML = `
+                <div class="cdlv-support-chat__bubble">Thank you, ${sanitizeText(userData.firstName)}! How can I help you today? 🫖</div>
+                <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
+            `;
             
             const uniqueTrackId = 'cdlv-track-btn-' + Math.random().toString(36).substr(2, 9);
 
@@ -530,8 +511,15 @@ export const init = (node) => {
                 pillsContainer.appendChild(btn);
             });
 
-            wrapper.innerHTML = cardHTML;
-            wrapper.appendChild(pillsContainer);
+            const comboContainer = document.createElement('div');
+            comboContainer.style.marginTop = 'var(--spacing-xs)';
+            comboContainer.style.display = 'flex';
+            comboContainer.style.flexDirection = 'column';
+            comboContainer.style.gap = 'var(--spacing-sm)';
+            
+            comboContainer.innerHTML = cardHTML;
+            comboContainer.appendChild(pillsContainer);
+            wrapper.appendChild(comboContainer);
             
             const trackBtn = wrapper.querySelector(`#${uniqueTrackId}`);
             if(trackBtn) {
@@ -547,16 +535,16 @@ export const init = (node) => {
                 });
             }
 
-            elements.stream.appendChild(wrapper);
+            row.innerHTML = avatarHTML;
+            row.appendChild(wrapper);
+            elements.stream.appendChild(row);
             scrollToBottom();
         });
     };
 
     const startFlow = () => {
         elements.stream.innerHTML = ''; 
-        appendBotMessage("Welcome to Casa De La Vida. We are here to support your holistic wellness journey. Please tell us a little about yourself to get started.");
-        
-        appendForm([
+        askWithForm("Welcome to Casa De La Vida. We are here to support your holistic wellness journey. Please tell us a little about yourself to get started.", [
             { label: 'First Name', name: 'firstName', type: 'text', required: true },
             { label: 'Last Name', name: 'lastName', type: 'text', required: true },
             { label: 'Email Address', name: 'email', type: 'email', required: true }
