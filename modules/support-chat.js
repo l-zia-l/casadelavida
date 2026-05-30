@@ -32,9 +32,7 @@ const getTimestamp = () => {
 const svgs = {
     chat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
     close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
-    minimize: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-    thumbUp: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`,
-    thumbDown: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path></svg>`
+    minimize: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`
 };
 
 /**
@@ -182,19 +180,23 @@ export const init = (node) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            
+            const likeIconPath = buildPath('assets/images/icons/like.svg');
+            const dislikeIconPath = buildPath('assets/images/icons/dislike.svg');
+
             row.innerHTML = `
                 <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar" onerror="this.style.display='none'">
                 <div class="cdlv-support-chat__bubble-wrapper" style="width: 100%;">
-                    <div class="cdlv-support-chat__bubble">${stepsText.replace(/\n/g, '<br>')}</div>
+                    <div class="cdlv-support-chat__bubble">${stepsText}</div>
                     <div style="display: flex; align-items: center; margin-top: 0.25rem;">
                         <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
                         <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #666;">
                             <span>Was this helpful?</span>
-                            <button type="button" style="background:none; border:none; cursor:pointer; opacity: 0.5; transition: opacity 0.2s;" onclick="this.style.opacity=1; this.nextElementSibling.style.opacity=0.5;">
-                                ${svgs.thumbUp}
+                            <button type="button" class="cdlv-support-chat__feedback-btn" onclick="this.classList.add('is-selected'); this.nextElementSibling.classList.remove('is-selected'); this.nextElementSibling.style.opacity='0.5'; this.style.opacity='1';">
+                                <img src="${likeIconPath}" alt="Like">
                             </button>
-                            <button type="button" style="background:none; border:none; cursor:pointer; opacity: 0.5; transition: opacity 0.2s;" onclick="this.style.opacity=1; this.previousElementSibling.style.opacity=0.5;">
-                                ${svgs.thumbDown}
+                            <button type="button" class="cdlv-support-chat__feedback-btn" onclick="this.classList.add('is-selected'); this.previousElementSibling.classList.remove('is-selected'); this.previousElementSibling.style.opacity='0.5'; this.style.opacity='1';">
+                                <img src="${dislikeIconPath}" alt="Dislike">
                             </button>
                         </div>
                     </div>
@@ -203,7 +205,6 @@ export const init = (node) => {
             elements.stream.appendChild(row);
             scrollToBottom();
             
-            // Immediately queue the end options loop
             triggerGlobalEnd();
         });
     };
@@ -271,7 +272,6 @@ export const init = (node) => {
 
             const form = document.createElement('form');
             form.className = 'cdlv-support-chat__form';
-            // FIXED: Constrain form width so it doesn't stretch based on long paragraph text
             form.style.marginTop = 'var(--spacing-xs)';
             form.style.maxWidth = '300px'; 
             
@@ -414,14 +414,7 @@ export const init = (node) => {
                     if (action === 'reinstate' || action === 'settings') {
                         appendBotMessage("Follow these quick steps to update your delivery preferences.");
                         
-                        const instructions = `
-                            1. Log in to your account.<br>
-                            2. Go to "Manage My Deliveries" under "My Subscriptions".<br>
-                            3. Select the delivery you'd like to adjust.<br>
-                            4. Toggle your preferences or skip settings.<br>
-                            5. Click "Save Changes" at the bottom.
-                        `;
-                        // This appends the steps, adds feedback UI, and automatically queues GlobalEnd
+                        const instructions = `1. <strong>Log in</strong> to your account.<br>2. Go to <strong>"Manage My Deliveries"</strong> under "My Subscriptions".<br>3. <strong>Select the delivery</strong> you'd like to adjust.<br>4. <strong>Toggle your preferences</strong> or skip settings.<br>5. Click <strong>"Save Changes"</strong> at the bottom.`;
                         appendStepsWithFeedback(instructions);
                     } else if (action === 'else') {
                         triggerHumanPipeline();
@@ -459,14 +452,7 @@ export const init = (node) => {
                                             setTimeout(() => {
                                                 if (data.orderId.length > 3) {
                                                     appendBotMessage("Follow these quick steps to update your delivery.");
-                                                    const steps = `
-                                                        <strong>Order Found!</strong><br><br>
-                                                        To ${sanitizeText(orderAction)} this order:<br>
-                                                        1. Go to your Account Dashboard.<br>
-                                                        2. Navigate to "My Orders".<br>
-                                                        3. Select Order ${sanitizeText(data.orderId)}.<br>
-                                                        4. Click the "${sanitizeText(orderAction)}" button to proceed.
-                                                    `;
+                                                    const steps = `<strong>Order Found!</strong><br><br>To ${sanitizeText(orderAction)} this order:<br>1. Go to your <strong>Account Dashboard</strong>.<br>2. Navigate to <strong>"My Orders"</strong>.<br>3. Select <strong>Order ${sanitizeText(data.orderId)}</strong>.<br>4. Click the <strong>"${sanitizeText(orderAction)}"</strong> button to proceed.`;
                                                     appendStepsWithFeedback(steps);
                                                 } else {
                                                     appendBotMessage("It looks like those details don't match our records.");

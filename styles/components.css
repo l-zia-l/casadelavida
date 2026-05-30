@@ -2877,6 +2877,36 @@ display: inline-block;
     color: rgba(0, 0, 0, 0.6);
 }
 
+/* --- Feedback Buttons --- */
+.cdlv-support-chat__feedback-btn {
+    background-color: var(--color-primary);
+    border: none;
+    border-radius: var(--radius-strict);
+    padding: 0.4rem;
+    width: clamp(2rem, 4vw, 2.5rem);
+    height: clamp(2rem, 4vw, 2.5rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.cdlv-support-chat__feedback-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: filter var(--transition-fast);
+}
+
+.cdlv-support-chat__feedback-btn.is-selected {
+    background-color: var(--color-accent);
+}
+
+.cdlv-support-chat__feedback-btn.is-selected img {
+    filter: brightness(0) invert(1);
+}
+
 /* -------------------------
    CART ITEM ROW
    ------------------------- */
