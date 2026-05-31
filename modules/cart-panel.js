@@ -51,6 +51,9 @@ let cartState = {
     shippingRate: 35.00
 };
 
+// --- BACKEND SIMULATOR ---
+const simulateBackendCall = () => new Promise(resolve => setTimeout(resolve, 800));
+
 // --- DATA PRESERVATION ENGINE ---
 // Scrapes the current DOM values and saves them to state BEFORE a view changes
 const saveFormState = (node) => {
@@ -260,7 +263,7 @@ const renderSuccessView = () => `
         <p style="margin-bottom: var(--spacing-md); max-width: 600px; text-align: center; color: rgba(0,0,0,0.6);">
             Your receipt will be emailed to you shortly with your order details. Thank you.
         </p>
-        <small style="color: rgba(0,0,0,0.4);">Redirecting to homepage...</small>
+        <a href="${buildPath('index.html')}" class="cdlv-cart-panel__empty-btn">Return to Homepage</a>
     </div>
 `;
 
@@ -702,40 +705,53 @@ export const init = (node) => {
     });
 
     // Event Delegation: Form Submissions
-    node.addEventListener('submit', (e) => {
+    node.addEventListener('submit', async (e) => {
         e.preventDefault(); 
         
-        if (e.target.id === 'shipping-details-form') {
-            saveFormState(node); // Save state on submit!
-            cartState.currentStep = 'Payment Info';
-            updateView(node);
-        } else if (e.target.id === 'payment-details-form') {
-            saveFormState(node); // Save state on submit!
-            cartState.currentStep = 'Review';
-            updateView(node);
-        } else if (e.target.id === 'place-order-form') {
-            const submitBtn = e.target.querySelector('.cdlv-review-submit');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Processing...';
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.7';
+        const formId = e.target.id;
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
 
+        // Spinner SVG template
+        const spinnerHTML = `<svg class="cdlv-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>`;
+
+        if (formId === 'shipping-details-form' || formId === 'payment-details-form') {
+            // 1. Lock UI & Show Loading State
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `${spinnerHTML} Processing...`;
+
+            // 2. Await the mocked backend check (e.g., validating address or checking stock)
+            await simulateBackendCall();
+
+            // 3. Save state and route to next step
+            saveFormState(node);
+            cartState.currentStep = formId === 'shipping-details-form' ? 'Payment Info' : 'Review';
+            updateView(node);
+
+        } else if (formId === 'place-order-form') {
+            // 1. Lock UI & Show Loading State
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `${spinnerHTML} Processing...`;
+
+            // 2. Await the mocked backend payment processing
             setTimeout(() => {
-                const backendErrorOccurred = false; 
+                const backendErrorOccurred = false; // Toggle to true to test the error UI
 
                 if (backendErrorOccurred) {
                     showNotification('error', 'Something went wrong, please try again or check your internet connection. If the problem persists please contact support.');
+                    
+                    // Unlock UI on failure
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
-                    submitBtn.style.opacity = '1';
                 } else {
+                    // Success Routing
                     cartState.currentStep = 'Success';
-                    updateView(node, false);
-                    setTimeout(() => {
-                        window.location.href = buildPath('index.html');
-                    }, 4000);
+                    updateView(node, false); 
+                    
+                    // Note: Auto-redirect has been removed. 
+                    // The user will manually click the "Return to Homepage" button.
                 }
-            }, 1500);
+            }, 1500); // 1.5s simulated payment delay
         }
     });
 };

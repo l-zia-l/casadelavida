@@ -3627,6 +3627,39 @@ display: inline-block;
 }
 
 /* ==========================================================================
+   BUTTON LOADING STATES & SPINNERS
+   ========================================================================== */
+
+@keyframes cdlv-button-spin {
+    100% { transform: rotate(360deg); }
+}
+
+.cdlv-spinner {
+    animation: cdlv-button-spin 0.8s linear infinite;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: inline-block;
+}
+
+/* Update both submit buttons to use flexbox for icon/text alignment */
+.cdlv-shipping-form__submit,
+.cdlv-review-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* Space between spinner and text */
+}
+
+/* Ensure disabled buttons don't trigger hover effects */
+.cdlv-shipping-form__submit:disabled,
+.cdlv-review-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none ;
+    box-shadow: none ;
+}
+
+/* ==========================================================================
    A11Y: FOCUS MANAGEMENT & KEYBOARD NAVIGATION
    ========================================================================== */
 
@@ -3677,6 +3710,10 @@ display: inline-block;
     .cdlv-notification {
         transition-duration: 0.01ms !important;
         transform: none !important;
+    }
+
+    .cdlv-spinner {
+        animation-duration: 2s; /* Slows the spin down significantly */
     }
 }
 
