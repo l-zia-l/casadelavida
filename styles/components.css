@@ -5333,7 +5333,6 @@ h3.cdlv-product-page__item-title {
     display: flex;
     gap: var(--spacing-sm);
     max-width: 85%;
-    animation: fade-in-up var(--transition-base) forwards;
 }
 
 .cdlv-support-chat__msg-row--bot {

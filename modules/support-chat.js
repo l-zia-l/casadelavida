@@ -115,7 +115,11 @@ export const init = (node) => {
 
     // 3. UI Helper Functions
     const scrollToBottom = () => {
-        setTimeout(() => { elements.stream.scrollTop = elements.stream.scrollHeight; }, 50);
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                elements.stream.scrollTop = elements.stream.scrollHeight;
+            });
+        });
     };
 
     const setFocusOnOpen = () => {
@@ -264,7 +268,7 @@ export const init = (node) => {
 
     const appendUserMessage = (text) => {
         const row = document.createElement('div');
-        row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--user';
+        row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--user animate-enter';
         row.innerHTML = `
             <div class="cdlv-support-chat__bubble-wrapper">
                 <div class="cdlv-support-chat__bubble">${sanitizeText(text)}</div>
@@ -280,9 +284,9 @@ export const init = (node) => {
     const appendBotMessage = (text) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
-            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot animate-enter';
             row.innerHTML = `
-                <img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">
+                <img src="${botAvatarPath}" alt="Vida" class="cdlv-support-chat__avatar" loading="lazy" decoding="async">
                 <div class="cdlv-support-chat__bubble-wrapper">
                     <div class="cdlv-support-chat__bubble">${text.replace(/\n/g, '<br>')}</div>
                     <span class="cdlv-support-chat__timestamp">${getTimestamp()}</span>
