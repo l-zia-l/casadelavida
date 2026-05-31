@@ -5517,6 +5517,30 @@ select.cdlv-support-chat__input {
     cursor: pointer;
 }
 
+/* --- File Input Styling --- */
+.cdlv-support-chat__input--file {
+    padding: 0.5rem; /* Slightly tighter padding for file inputs */
+}
+
+.cdlv-support-chat__input--file::file-selector-button {
+    background-color: var(--color-neutral-bg);
+    border: 1px solid var(--color-text-dark);
+    color: var(--color-text-dark);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-strict);
+    cursor: pointer;
+    margin-right: 0.75rem;
+    font-family: var(--font-family-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.cdlv-support-chat__input--file::file-selector-button:hover {
+    background-color: var(--color-text-dark);
+    color: var(--color-text-light);
+}
+
 .cdlv-support-chat__submit {
     background-color: var(--color-accent);
     color: var(--color-text-light);

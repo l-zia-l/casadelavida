@@ -395,6 +395,9 @@ export const init = (node) => {
                             ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                         </select>
                     `;
+                } else if (f.type === 'file') {
+                    // Added file type handling for attachments
+                    inputHTML = `<input class="cdlv-support-chat__input cdlv-support-chat__input--file" type="file" name="${f.name}" accept="${f.accept || '*/*'}" ${f.required ? 'required' : ''}>`;
                 } else {
                     inputHTML = `<input class="cdlv-support-chat__input" type="${f.type}" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}>`;
                 }
@@ -931,7 +934,16 @@ export const init = (node) => {
         else if (topic === 'shop') runShopPipeline();
         else if (topic === 'care') runCareTipsPipeline();
         else if (topic === 'tech') {
-            askWithForm("If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.", [{ label: 'Describe Issue', name: 'issue', type: 'textarea', required: true }], 'Submit Report', () => triggerGlobalEnd());
+            // Updated Tech Issues Pipeline to include screenshot attachment
+            askWithForm(
+                "If you are having trouble finding an order or managing a subscription, I recommend using the specific options in our main menu or visiting our Help Center. If you are experiencing a glitch or bug on the website, please describe it below and attach a screenshot if possible.", 
+                [
+                    { label: 'Describe Issue', name: 'issue', type: 'textarea', required: true },
+                    { label: 'Attach Screenshot (Optional)', name: 'screenshot', type: 'file', accept: 'image/*', required: false }
+                ], 
+                'Submit Report', 
+                () => triggerGlobalEnd()
+            );
         }
         else {
             triggerHumanPipeline();
