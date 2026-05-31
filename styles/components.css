@@ -5866,6 +5866,52 @@ select.cdlv-support-chat__input {
     transform: scale(1.05);
 }
 
+/* --- ACCESSIBILITY: REDUCED MOTION --- */
+@media (prefers-reduced-motion: reduce) {
+    /* Disable hardware-accelerated clip-path reveals in favor of instant display */
+    .cdlv-support-chat-window {
+        transition: none !important;
+        clip-path: none !important;
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    .cdlv-support-chat-window.is-open {
+        opacity: 1;
+        visibility: visible;
+        clip-path: none !important;
+    }
+
+    .cdlv-support-chat-video-overlay {
+        transition: none !important;
+        clip-path: none !important;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .cdlv-support-chat-video-overlay.is-active {
+        opacity: 1;
+        visibility: visible;
+        clip-path: none !important;
+    }
+
+    /* Disable infinite continuous animations */
+    .cdlv-support-chat__gem {
+        animation: none !important;
+        transform: scale(1) !important;
+        opacity: 1 !important;
+    }
+
+    /* Remove floating interactions */
+    .cdlv-support-chat-launcher {
+        transition: background-color var(--transition-fast) !important;
+    }
+    
+    .cdlv-support-chat-launcher:hover {
+        transform: none !important;
+    }
+}
+
 /* ==========================================================================
    MICRO-SCREEN OVERRIDE (< 320px)
    ========================================================================== */

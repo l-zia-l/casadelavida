@@ -31,16 +31,16 @@ const getTimestamp = () => {
 
 // SVG Assets
 const svgs = {
-    chat: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
-    close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
-    minimize: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
-    play: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
-    pause: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`,
-    rewind: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>`,
-    fastForward: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>`,
-    volume: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>`,
-    mute: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="1" x2="1" y2="23"></line></svg>`,
-    cc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><path d="M9 10a2 2 0 0 0-2 2v0a2 2 0 0 0 2 2"></path><path d="M17 10a2 2 0 0 0-2 2v0a2 2 0 0 0 2 2"></path></svg>`
+    chat: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
+    close: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+    minimize: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+    play: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`,
+    pause: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`,
+    rewind: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg>`,
+    fastForward: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>`,
+    volume: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>`,
+    mute: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="1" x2="1" y2="23"></line></svg>`,
+    cc: `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><path d="M9 10a2 2 0 0 0-2 2v0a2 2 0 0 0 2 2"></path><path d="M17 10a2 2 0 0 0-2 2v0a2 2 0 0 0 2 2"></path></svg>`
 };
 
 /**
@@ -53,26 +53,26 @@ export const init = (node) => {
     
     // 1. Build Base HTML Structure
     const markup = `
-        <button class="cdlv-support-chat-launcher" aria-label="Open Support Chat" id="cdlv-chat-launcher">
+        <button class="cdlv-support-chat-launcher" aria-label="Open Support Chat" aria-expanded="false" aria-controls="cdlv-chat-window" id="cdlv-chat-launcher">
             <span class="cdlv-support-chat-launcher__text">Chat</span>
             ${svgs.chat}
         </button>
 
-        <section class="cdlv-support-chat-window" id="cdlv-chat-window" aria-hidden="true">
+        <section class="cdlv-support-chat-window" id="cdlv-chat-window" role="dialog" aria-modal="true" aria-labelledby="cdlv-chat-title" aria-hidden="true">
             <header class="cdlv-support-chat__header">
-                <h2 class="cdlv-support-chat__header-title">How can I help?</h2>
+                <h2 class="cdlv-support-chat__header-title" id="cdlv-chat-title">How can I help?</h2>
                 <div class="cdlv-support-chat__header-actions">
                     <button class="cdlv-support-chat__btn-icon" id="cdlv-chat-min" aria-label="Minimize Chat">${svgs.minimize}</button>
                     <button class="cdlv-support-chat__btn-icon" id="cdlv-chat-close" aria-label="Close and Restart Chat">${svgs.close}</button>
                 </div>
             </header>
             
-            <div class="cdlv-support-chat__stream" id="cdlv-chat-stream">
-            </div>
+            <div class="cdlv-support-chat__stream" id="cdlv-chat-stream" aria-live="polite">
+                </div>
 
             <div class="cdlv-support-chat__modal-overlay" id="cdlv-chat-modal">
-                <div class="cdlv-support-chat__modal">
-                    <h3>End Chat Session?</h3>
+                <div class="cdlv-support-chat__modal" role="alertdialog" aria-modal="true" aria-labelledby="cdlv-modal-title">
+                    <h3 id="cdlv-modal-title">End Chat Session?</h3>
                     <p>Closing the chat will reset your current progress.</p>
                     <div class="cdlv-support-chat__modal-actions">
                         <button class="cdlv-support-chat__pill cdlv-support-chat__pill--primary" id="cdlv-modal-confirm">End Session</button>
@@ -81,18 +81,11 @@ export const init = (node) => {
                 </div>
             </div>
 
-            <div class="cdlv-support-chat-video-overlay" id="cdlv-chat-video-overlay">
+            <div class="cdlv-support-chat-video-overlay" id="cdlv-chat-video-overlay" role="dialog" aria-modal="true" aria-label="Video Player" aria-hidden="true">
                 <div class="cdlv-support-chat-video-container">
                     <button class="cdlv-support-chat-video-close" id="cdlv-video-close" aria-label="Close Video">${svgs.close}</button>
                     <video id="cdlv-chat-video-el" class="cdlv-support-chat-video-el" playsinline></video>
-                    <div class="cdlv-support-chat-video-controls">
-                        <button class="cdlv-video-btn" id="cdlv-video-rewind" aria-label="Rewind 10 Seconds">${svgs.rewind}</button>
-                        <button class="cdlv-video-btn" id="cdlv-video-playpause" aria-label="Play or Pause">${svgs.play}</button>
-                        <button class="cdlv-video-btn" id="cdlv-video-ff" aria-label="Fast Forward 10 Seconds">${svgs.fastForward}</button>
-                        <button class="cdlv-video-btn" id="cdlv-video-mute" aria-label="Mute or Unmute">${svgs.volume}</button>
-                        <button class="cdlv-video-btn" id="cdlv-video-cc" aria-label="Toggle Captions">${svgs.cc}</button>
                     </div>
-                </div>
             </div>
         </section>
     `;
@@ -125,13 +118,23 @@ export const init = (node) => {
         setTimeout(() => { elements.stream.scrollTop = elements.stream.scrollHeight; }, 50);
     };
 
+    const setFocusOnOpen = () => {
+        // Focus the first interactive element or the title
+        elements.window.setAttribute('aria-hidden', 'false');
+        elements.launcher.setAttribute('aria-expanded', 'true');
+        elements.btnClose.focus(); 
+    };
+
     const closeAndResetChat = () => {
         elements.window.classList.remove('is-open');
+        elements.window.setAttribute('aria-hidden', 'true');
+        elements.launcher.setAttribute('aria-expanded', 'false');
         document.body.classList.remove('u-chat-open'); 
         elements.stream.innerHTML = ''; 
         messageQueue.length = 0; 
         isTyping = false;
         humanContacted = false;
+        elements.launcher.focus(); // Return focus to launcher
     };
 
     const attachAvatarFallbacks = () => {
@@ -146,14 +149,19 @@ export const init = (node) => {
     const openVideo = (srcUrl) => {
         elements.videoEl.src = srcUrl;
         elements.videoOverlay.classList.add('is-active');
+        elements.videoOverlay.setAttribute('aria-hidden', 'false');
         elements.videoEl.play().catch(e => console.log("Autoplay prevented.", e));
         elements.videoPlayPause.innerHTML = svgs.pause;
+        elements.videoPlayPause.focus(); // Route focus to the video player
     };
 
     const closeVideo = () => {
         elements.videoEl.pause();
         elements.videoEl.src = '';
         elements.videoOverlay.classList.remove('is-active');
+        elements.videoOverlay.setAttribute('aria-hidden', 'true');
+        // Return focus to the stream so user doesn't get lost
+        elements.stream.focus(); 
     };
 
     elements.videoClose.addEventListener('click', closeVideo);
@@ -193,6 +201,21 @@ export const init = (node) => {
 
     elements.videoEl.addEventListener('ended', () => {
         elements.videoPlayPause.innerHTML = svgs.play;
+    });
+
+    // Global Keyboard Event Listener for 'Escape' key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            // Check contextual layer stack from top to bottom
+            if (elements.videoOverlay.classList.contains('is-active')) {
+                closeVideo();
+            } else if (elements.modal.classList.contains('is-active')) {
+                elements.modal.classList.remove('is-active');
+                elements.btnClose.focus();
+            } else if (elements.window.classList.contains('is-open')) {
+                elements.btnMin.click(); // Standard minimize behavior
+            }
+        }
     });
 
     // --- 3.5 Message Queuing System ---
