@@ -6,7 +6,7 @@
    A11y: WCAG Compliant. Custom quantity controls with aria labels.
    Security: Strict CSP Compliance.
    Pricing: Dynamic algorithmic discounts.
-   UX: Smart rendering prevents duplicate configuration blocks if no choices exist.
+   UX: Smart configuration rendering and interactive Add to Cart state loop.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
@@ -22,12 +22,16 @@ const defaultConfig = {
     title: "The Serenity Wellness Box",
     subtitle: "Organic Matcha, Raw Honey, and Artisan Accessories.",
     images: [],
-    ingredients: "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
+    composition: "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
     bestFor: "Morning rituals, mindfulness practices, or deep focus work sessions.",
     funFact: "Matcha contains L-theanine, an amino acid that promotes relaxed alertness without the caffeine crash.",
     proTip: "Allow your water to cool slightly (to about 175°F) before pouring over matcha to prevent burning the leaves.",
     deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
-    sizes: [],
+    sizes: [
+        { id: "s1", name: "Grand", desc: "60 Servings", price: 800 },
+        { id: "s2", name: "Deluxe", desc: "40 Servings", price: 700, popular: true, default: true },
+        { id: "s3", name: "Original", desc: "20 Servings", price: 600 }
+    ],
     colors: [],
     subscription: {
         priceText: "Up to 30% Off + Free Shipping",
@@ -38,18 +42,15 @@ const defaultConfig = {
 const generateOptionsForQuantity = (quantity, config) => {
     let html = '';
     
-    // AWARENESS LOGIC: Check if there are actually multiple options to choose from
     const hasMultipleSizes = config.sizes && config.sizes.length > 1;
     const hasMultipleColors = config.colors && config.colors.length > 1;
     const hasChoices = hasMultipleSizes || hasMultipleColors;
     
-    // If no choices exist, lock the rendering loop to 1 iteration to prevent UI clutter
     const iterations = hasChoices ? quantity : 1;
     
     for (let i = 1; i <= iterations; i++) {
         html += `<div class="cdlv-product-page__item-config" data-item-index="${i}">`;
         
-        // Only show "Item X Configuration" if we are rendering multiple blocks
         if (iterations > 1) {
             html += `<h3 class="cdlv-product-page__item-title">Item ${i} Configuration</h3>`;
         }
@@ -139,7 +140,7 @@ export const init = (node, customConfig = {}) => {
                 <div class="cdlv-product-page__desc">
                     <h2 class="cdlv-product-page__subtitle">${sanitizeText(config.subtitle)}</h2>
                     <ul class="cdlv-product-page__bullet-list" id="desc-list">
-                        <li><strong>Ingredients:</strong> ${sanitizeText(config.ingredients)}</li>
+                        <li><strong>Composition:</strong> ${sanitizeText(config.composition)}</li>
                         <li><strong>Best For:</strong> ${sanitizeText(config.bestFor)}</li>
                         <li><strong>Fun Fact:</strong> ${sanitizeText(config.funFact)}</li>
                         <li><strong>Pro Tip:</strong> ${sanitizeText(config.proTip)}</li>
@@ -213,6 +214,30 @@ export const init = (node, customConfig = {}) => {
     
     const dynamicContainer = node.querySelector('#dynamic-options-container');
     const purchaseRadios = node.querySelectorAll('input[name="purchase_type"]');
+    const addToCartBtn = node.querySelector('#add-to-cart-btn');
+
+    // ==========================================================================
+    // INTERACTIVE CART BUTTON STATE MACHINE
+    // ==========================================================================
+    let cartState = 'initial'; // possible states: 'initial', 'added', 'modified'
+
+    const markAsModified = () => {
+        if (cartState === 'added' || cartState === 'saved') {
+            cartState = 'modified';
+            addToCartBtn.textContent = 'Save Changes';
+            addToCartBtn.classList.remove('is-success');
+        }
+    };
+
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', () => {
+            if (cartState === 'initial' || cartState === 'modified') {
+                cartState = cartState === 'initial' ? 'added' : 'saved';
+                addToCartBtn.textContent = cartState === 'added' ? 'Added to Cart' : 'Saved';
+                addToCartBtn.classList.add('is-success');
+            }
+        });
+    }
 
     // Custom Quantity Button Listeners
     if (qtyInput && btnMinus && btnPlus) {
@@ -239,6 +264,7 @@ export const init = (node, customConfig = {}) => {
                 e.target.value = 1;
             }
             dynamicContainer.innerHTML = generateOptionsForQuantity(val, config);
+            markAsModified(); // Trigger state change
         });
     }
 
@@ -250,6 +276,7 @@ export const init = (node, customConfig = {}) => {
             } else {
                 mainWrapper.classList.remove('cdlv-product-page--subscription-active');
             }
+            markAsModified(); // Trigger state change
         });
     });
 
@@ -257,11 +284,10 @@ export const init = (node, customConfig = {}) => {
         mainWrapper.classList.add('cdlv-product-page--subscription-active');
     }
 
-    // Read More Logic with Debounced ResizeObserver
+    // Read More Logic
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
             const isExpanded = descList.classList.contains('is-expanded');
-            const currentMax = descList.style.maxHeight;
             
             descList.style.maxHeight = 'none';
             const trueHeight = descList.scrollHeight;
@@ -330,6 +356,7 @@ export const init = (node, customConfig = {}) => {
         });
     });
 
+    // Options Grid Change Tracker (Sizes & Colors)
     if (dynamicContainer) {
         dynamicContainer.addEventListener('change', (e) => {
             if (e.target.type === 'radio') {
@@ -341,6 +368,7 @@ export const init = (node, customConfig = {}) => {
                     allLabels.forEach(label => label.classList.remove('is-selected'));
                     labelBox.classList.add('is-selected');
                 }
+                markAsModified(); // Trigger state change
             }
         });
     }
