@@ -85,7 +85,16 @@ export const init = (node) => {
                 <div class="cdlv-support-chat-video-container">
                     <button class="cdlv-support-chat-video-close" id="cdlv-video-close" aria-label="Close Video">${svgs.close}</button>
                     <video id="cdlv-chat-video-el" class="cdlv-support-chat-video-el" playsinline></video>
+                    
+                    <div class="cdlv-support-chat-video-controls">
+                        <button class="cdlv-video-btn" id="cdlv-video-rewind" aria-label="Rewind 10 Seconds">${svgs.rewind}</button>
+                        <button class="cdlv-video-btn" id="cdlv-video-playpause" aria-label="Play or Pause">${svgs.play}</button>
+                        <button class="cdlv-video-btn" id="cdlv-video-ff" aria-label="Fast Forward 10 Seconds">${svgs.fastForward}</button>
+                        <button class="cdlv-video-btn" id="cdlv-video-mute" aria-label="Mute or Unmute">${svgs.volume}</button>
+                        <button class="cdlv-video-btn" id="cdlv-video-cc" aria-label="Toggle Captions">${svgs.cc}</button>
                     </div>
+
+                </div>
             </div>
         </aside>
     `;
@@ -1083,6 +1092,7 @@ export const init = (node) => {
     elements.launcher.addEventListener('click', () => {
         elements.window.classList.add('is-open');
         document.body.classList.add('u-chat-open'); 
+        setFocusOnOpen(); // <- Added this to trap focus for accessibility
         if (elements.stream.children.length === 0) {
             setTimeout(() => startFlow(), 600); 
         }
