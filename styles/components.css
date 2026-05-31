@@ -2160,15 +2160,6 @@ display: inline-block;
     margin-top: var(--spacing-lg);
 }
 
-/* --- ACCESSIBILITY UTILITIES --- */
-
-/* Ensures dynamically focused headings don't show an ugly default outline 
-  when programmatically focused via JS.
-*/
-#cdlv-focus-target:focus {
-    outline: none;
-}
-
 /* --- ACCESSIBILITY & PERFORMANCE UTILITIES --- */
 
 /* [OPTIMIZATION]: Using 'outline' guarantees zero layout shift (CLS) 
@@ -3059,6 +3050,51 @@ display: inline-block;
     color: var(--color-text-dark);
 }
 
+.cdlv-cart-item__title-link {
+    text-decoration: none;
+    color: inherit;
+    outline-offset: 4px;
+}
+
+.cdlv-cart-item__title-link:hover .cdlv-cart-item__title {
+    color: var(--color-accent);
+}
+
+.cdlv-cart-item__text-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.25rem;
+}
+
+.cdlv-cart-item__action-link {
+    font-family: var(--font-family-body);
+    font-size: 0.85rem;
+    color: var(--color-accent); /* Uses your specified accent color */
+    opacity: 0.8;
+    text-decoration: underline;
+    transition: opacity var(--transition-fast);
+}
+
+.cdlv-cart-item__action-link:hover {
+    opacity: 1;
+}
+
+.cdlv-cart-item__action-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+}
+
+/* Ensure the image link behaves properly */
+.cdlv-cart-item__image-wrap {
+    display: block; /* Required since we changed it from a div to an anchor tag */
+}
+.cdlv-cart-item__image-wrap:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
 /* -------------------------
    RIGHT COLUMN: SUMMARY
    ------------------------- */
@@ -3521,6 +3557,75 @@ display: inline-block;
     justify-content: center; /* Center the back button under the massive submit */
 }
 
+.cdlv-notification {
+    position: fixed;
+    bottom: var(--spacing-md);
+    right: var(--spacing-md);
+    width: min(90vw, 400px);
+    background: var(--color-primary);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-strict);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform var(--transition-base), opacity var(--transition-base);
+}
+
+.cdlv-notification.is-visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Error State Styling */
+.cdlv-notification--error {
+    border-left: 4px solid #8c3b3b; /* Distinct dark red for errors */
+}
+
+/* Success State Styling (If you ever use it globally) */
+.cdlv-notification--success {
+    border-left: 4px solid var(--color-accent); 
+}
+
+.cdlv-notification__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-sm);
+}
+
+.cdlv-notification p {
+    font-family: var(--font-family-body);
+    font-size: 0.9rem;
+    color: var(--color-text-dark);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.cdlv-notification__close {
+    background: transparent;
+    border: none;
+    color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition-fast);
+}
+
+.cdlv-notification__close:hover {
+    color: var(--color-text-dark);
+}
+
+.cdlv-notification__close:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
 /* ==========================================================================
    A11Y: FOCUS MANAGEMENT & KEYBOARD NAVIGATION
    ========================================================================== */
@@ -3566,6 +3671,11 @@ display: inline-block;
     .cdlv-cart-panel__empty-btn:hover,
     .cdlv-shipping-form__submit:hover,
     .cdlv-review-submit:hover {
+        transform: none !important;
+    }
+
+    .cdlv-notification {
+        transition-duration: 0.01ms !important;
         transform: none !important;
     }
 }

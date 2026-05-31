@@ -285,6 +285,15 @@ body.u-chat-open {
 .u-mt-sm { margin-top: var(--spacing-sm); }
 .u-flex-col { display: flex; flex-direction: column; gap: var(--spacing-sm); }
 
+/* --- ACCESSIBILITY UTILITIES --- */
+
+/* Ensures dynamically focused headings don't show an ugly default outline 
+  when programmatically focused via JS.
+*/
+#cdlv-focus-target:focus {
+    outline: none;
+}
+
 /* ULTRA-WIDE SCREEN ADJUSTMENTS */
 @media (min-width: 1600px) { html { font-size: 110%; } }
 @media (min-width: 2000px) { html { font-size: 125%; } }

@@ -34,7 +34,8 @@ let cartState = {
             price: 600.00,
             quantity: 1,
             maxStock: 10,
-            image: 'assets/images/products/box_3.webp'
+            image: 'assets/images/products/box_3.webp',
+            url: 'shop/packages/product_1.html'
         },
         {
             id: 'prod_002',
@@ -43,7 +44,8 @@ let cartState = {
             price: 100.00,
             quantity: 3,
             maxStock: 3, 
-            image: 'assets/images/products/item_1.webp'
+            image: 'assets/images/products/item_1.webp',
+            url: 'shop/products/product_1.html'
         }
     ],
     shippingRate: 35.00
@@ -102,28 +104,30 @@ const renderEmptyState = () => `...`; // (Keep this exactly as you had it, omitt
 const renderCartItems = () => {
     return cartState.items.map(item => `
         <article class="cdlv-cart-item" data-id="${sanitizeText(item.id)}">
-            <div class="cdlv-cart-item__image-wrap u-img-loader">
-                <img src="${buildPath(item.image)}" 
-                    alt="${sanitizeText(item.name)}" 
-                    class="cdlv-cart-item__image"
-                    loading="lazy" 
-                    decoding="async">
-            </div>
+            <a href="${buildPath(item.url || 'shop.html')}" class="cdlv-cart-item__image-wrap u-img-loader" aria-label="View ${sanitizeText(item.name)}">
+                <img src="${buildPath(item.image)}" alt="${sanitizeText(item.name)}" class="cdlv-cart-item__image" loading="lazy" decoding="async">
+            </a>
             
             <div class="cdlv-cart-item__details">
-                <h3 class="cdlv-cart-item__title">${sanitizeText(item.name)}</h3>
+                <a href="${buildPath(item.url || 'shop.html')}" class="cdlv-cart-item__title-link">
+                    <h3 class="cdlv-cart-item__title">${sanitizeText(item.name)}</h3>
+                </a>
                 <p class="cdlv-cart-item__variant">${sanitizeText(item.variant)}</p>
-                <button type="button" class="cdlv-cart-item__remove" data-action="remove">Remove</button>
+                
+                <div class="cdlv-cart-item__text-actions">
+                    <a href="${buildPath(item.url || 'shop.html')}" class="cdlv-cart-item__action-link">Edit Item</a>
+                    <button type="button" class="cdlv-cart-item__remove" data-action="remove">Remove</button>
+                </div>
             </div>
 
             <div class="cdlv-cart-item__actions">
                 <div class="cdlv-cart-item__qty-control">
                     <button type="button" class="cdlv-cart-item__qty-btn" data-action="decrease" aria-label="Decrease quantity" ${item.quantity <= 1 ? 'disabled' : ''}>
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
                     <span class="cdlv-cart-item__qty-value" data-target="qty">${sanitizeText(item.quantity)}</span>
                     <button type="button" class="cdlv-cart-item__qty-btn" data-action="increase" aria-label="Increase quantity" ${item.quantity >= item.maxStock ? 'disabled' : ''}>
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
                 </div>
                 <span class="cdlv-cart-item__stock-warning" data-target="warning" ${item.quantity >= item.maxStock ? '' : 'hidden'}>Only ${sanitizeText(item.maxStock)} left in stock.</span>
@@ -203,6 +207,62 @@ const renderDetailedSummary = () => {
         </aside>
     `;
 };
+
+const showNotification = (type, message) => {
+    // Remove existing notification if present
+    const existing = document.querySelector('.cdlv-notification');
+    if (existing) existing.remove();
+
+    const notification = document.createElement('div');
+    notification.className = `cdlv-notification cdlv-notification--${type}`;
+    notification.setAttribute('role', 'alert');
+    notification.innerHTML = `
+        <div class="cdlv-notification__content">
+            <p>${sanitizeText(message)}</p>
+            <button type="button" class="cdlv-notification__close" aria-label="Close alert">
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+
+    // Trigger reflow for CSS animation
+    requestAnimationFrame(() => {
+        notification.classList.add('is-visible');
+    });
+
+    notification.querySelector('.cdlv-notification__close').addEventListener('click', () => {
+        notification.classList.remove('is-visible');
+        setTimeout(() => notification.remove(), 300); // Wait for transition
+    });
+
+    // Auto-dismiss after 6 seconds
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            notification.classList.remove('is-visible');
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 6000);
+};
+
+// --- SUCCESS VIEW ---
+const renderSuccessView = () => `
+    <div class="cdlv-cart-panel__empty">
+        <svg aria-hidden="true" focusable="false" class="cdlv-cart-panel__empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--color-accent); opacity: 1;">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <h2 class="cdlv-cart-panel__empty-title">Order Placed Successfully.</h2>
+        <p style="margin-bottom: var(--spacing-sm); max-width: 600px; text-align: center; color: var(--color-text-dark);">
+            Take a deep breath. You've taken a wonderful step toward nurturing your body, mind, and daily moments of calm.
+        </p>
+        <p style="margin-bottom: var(--spacing-md); max-width: 600px; text-align: center; color: rgba(0,0,0,0.6);">
+            Your receipt will be emailed to you shortly with your order details. Thank you.
+        </p>
+        <small style="color: rgba(0,0,0,0.4);">Redirecting to homepage...</small>
+    </div>
+`;
 
 const renderCartView = () => `
     <div class="cdlv-cart-panel__layout">
@@ -461,10 +521,14 @@ const updateView = (node, pushHistory = true) => {
         viewContent = renderPaymentForm();
     } else if (cartState.currentStep === 'Review') {
         viewContent = renderReviewView();
+    } else if (cartState.currentStep === 'Success') {
+        viewContent = renderSuccessView();
     }
 
+    const progressHTML = cartState.currentStep === 'Success' ? '' : renderTabbedProgress(cartState.currentStep);
+
     node.innerHTML = `
-        ${renderTabbedProgress(cartState.currentStep)}
+        ${progressHTML}
         ${viewContent}
     `;
 
@@ -650,8 +714,28 @@ export const init = (node) => {
             cartState.currentStep = 'Review';
             updateView(node);
         } else if (e.target.id === 'place-order-form') {
-            // Success Redirect
-            window.location.href = buildPath('status/success.html');
+            const submitBtn = e.target.querySelector('.cdlv-review-submit');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+
+            setTimeout(() => {
+                const backendErrorOccurred = false; 
+
+                if (backendErrorOccurred) {
+                    showNotification('error', 'Something went wrong, please try again or check your internet connection. If the problem persists please contact support.');
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                } else {
+                    cartState.currentStep = 'Success';
+                    updateView(node, false);
+                    setTimeout(() => {
+                        window.location.href = buildPath('index.html');
+                    }, 4000);
+                }
+            }, 1500);
         }
     });
 };
