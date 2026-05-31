@@ -58,7 +58,7 @@ export const init = (node) => {
             ${svgs.chat}
         </button>
 
-        <section class="cdlv-support-chat-window" id="cdlv-chat-window" role="dialog" aria-modal="true" aria-labelledby="cdlv-chat-title" aria-hidden="true">
+        <aside class="cdlv-support-chat-window" id="cdlv-chat-window" role="dialog" aria-modal="true" aria-labelledby="cdlv-chat-title" aria-hidden="true">
             <header class="cdlv-support-chat__header">
                 <h2 class="cdlv-support-chat__header-title" id="cdlv-chat-title">How can I help?</h2>
                 <div class="cdlv-support-chat__header-actions">
@@ -87,7 +87,7 @@ export const init = (node) => {
                     <video id="cdlv-chat-video-el" class="cdlv-support-chat-video-el" playsinline></video>
                     </div>
             </div>
-        </section>
+        </aside>
     `;
     
     node.innerHTML = markup;
@@ -351,7 +351,7 @@ export const init = (node) => {
             const row = document.createElement('div');
             row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
             
-            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">`;
+            const avatarHTML = `<img src="${botAvatarPath}" alt="" class="cdlv-support-chat__avatar" loading="lazy" decoding="async">`;
             
             const wrapper = document.createElement('div');
             wrapper.className = 'cdlv-support-chat__bubble-wrapper u-w-100';
