@@ -402,9 +402,9 @@ export const init = (node) => {
     const askWithForm = (text, fields, submitLabel, callback) => {
         enqueueBotAction(() => {
             const row = document.createElement('div');
-            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot';
+            row.className = 'cdlv-support-chat__msg-row cdlv-support-chat__msg-row--bot animate-enter';
             
-            const avatarHTML = `<img src="${botAvatarPath}" alt="Flora" class="cdlv-support-chat__avatar">`;
+            const avatarHTML = `<img src="${botAvatarPath}" alt="" class="cdlv-support-chat__avatar" loading="lazy" decoding="async">`;
             
             const wrapper = document.createElement('div');
             wrapper.className = 'cdlv-support-chat__bubble-wrapper u-w-100';
@@ -422,20 +422,44 @@ export const init = (node) => {
                 group.className = 'cdlv-support-chat__form-group';
                 
                 let inputHTML = '';
+                
+                // 1. Set Length Boundaries
+                const isReq = f.required ? 'required' : '';
+                const maxLen = f.maxLength || (f.type === 'textarea' ? 500 : 100);
+                const minLen = f.minLength || (f.required ? 2 : 0);
+                
+                // 2. Assign Smart Regex Patterns (Prevents HTML/Script injection at the browser level)
+                let patternStr = '';
+                if (f.pattern) {
+                    patternStr = `pattern="${f.pattern}" title="${f.title || 'Invalid format'}"`;
+                } else if (f.name === 'firstName' || f.name === 'lastName') {
+                    // Only letters, spaces, and hyphens for names
+                    patternStr = `pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\\s\\-']+$" title="Letters, spaces, and hyphens only"`;
+                } else if (f.name === 'orderId') {
+                    // Strict alphanumeric and hyphens for order IDs
+                    patternStr = `pattern="^[A-Za-z0-9\\-]+$" title="Alphanumeric characters and hyphens only"`;
+                }
+
+                // 3. Build Inputs with Constraints
                 if (f.type === 'textarea') {
-                    inputHTML = `<textarea class="cdlv-support-chat__textarea" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}></textarea>`;
+                    inputHTML = `<textarea class="cdlv-support-chat__textarea" name="${f.name}" placeholder="${f.placeholder || ''}" maxlength="${maxLen}" minlength="${minLen}" ${isReq}></textarea>`;
                 } else if (f.type === 'select') {
                     inputHTML = `
-                        <select class="cdlv-support-chat__input" name="${f.name}" ${f.required ? 'required' : ''}>
+                        <select class="cdlv-support-chat__input" name="${f.name}" ${isReq}>
                             <option value="" ${f.required ? 'disabled selected' : 'selected'}>Select an option...</option>
                             ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                         </select>
                     `;
                 } else if (f.type === 'file') {
-                    // Added file type handling for attachments
-                    inputHTML = `<input class="cdlv-support-chat__input cdlv-support-chat__input--file" type="file" name="${f.name}" accept="${f.accept || '*/*'}" ${f.required ? 'required' : ''}>`;
+                    // Default 5MB max limit if not specified
+                    const maxSize = f.maxSize || 5242880; 
+                    inputHTML = `<input class="cdlv-support-chat__input cdlv-support-chat__input--file" type="file" name="${f.name}" accept="${f.accept || '*/*'}" data-max-size="${maxSize}" ${isReq}>`;
+                    inputHTML += `<small style="color: #666; font-size: 0.7rem; margin-top: 0.25rem;">Max size: ${Math.round(maxSize / 1024 / 1024)}MB</small>`;
+                } else if (f.type === 'number') {
+                    // Prevent massive integer overflow
+                    inputHTML = `<input class="cdlv-support-chat__input" type="${f.type}" name="${f.name}" placeholder="${f.placeholder || ''}" min="${f.min || 0}" max="${f.max || 99999}" ${isReq}>`;
                 } else {
-                    inputHTML = `<input class="cdlv-support-chat__input" type="${f.type}" name="${f.name}" placeholder="${f.placeholder || ''}" ${f.required ? 'required' : ''}>`;
+                    inputHTML = `<input class="cdlv-support-chat__input" type="${f.type}" name="${f.name}" placeholder="${f.placeholder || ''}" maxlength="${maxLen}" minlength="${minLen}" ${patternStr} ${isReq}>`;
                 }
 
                 group.innerHTML = `
@@ -451,11 +475,40 @@ export const init = (node) => {
             submitBtn.textContent = submitLabel;
             form.appendChild(submitBtn);
 
+            // 4. Form Submission & Custom Validation Hook
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
+                
+                // Native HTML5 Validation Check (Triggers browser error bubbles)
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                // File Size Validation
+                const fileInputs = form.querySelectorAll('input[type="file"]');
+                for (let fileInput of fileInputs) {
+                    if (fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        const maxSize = parseInt(fileInput.getAttribute('data-max-size'), 10);
+                        if (file.size > maxSize) {
+                            alert(`The file "${file.name}" is too large. Please upload a file smaller than ${Math.round(maxSize / 1024 / 1024)}MB.`);
+                            return; // Halt submission
+                        }
+                    }
+                }
+
                 const formData = new FormData(form);
                 const data = Object.fromEntries(formData.entries());
                 
+                // Final Sweep: Run every extracted string through your global text sanitizer
+                Object.keys(data).forEach(key => {
+                    if (typeof data[key] === 'string') {
+                        data[key] = sanitizeText(data[key]);
+                    }
+                });
+                
+                // Lock the form
                 Array.from(form.elements).forEach(el => el.disabled = true);
                 submitBtn.textContent = 'Submitted';
                 submitBtn.style.backgroundColor = 'var(--color-text-dark)';
