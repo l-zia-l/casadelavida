@@ -5760,23 +5760,25 @@ select.cdlv-support-chat__input {
 .cdlv-support-chat-video-container {
     width: 90%;
     max-width: 800px;
-    max-height: 90vh; /* Constrains the entire modal to the viewport height */
+    max-height: 90vh; 
     background: var(--color-primary); 
     border-radius: var(--radius-strict);
     position: relative;
     display: flex;
     flex-direction: column;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    overflow: hidden;
+    overflow: visible; /* <-- Changed from hidden so the button can float outside */
 }
 
 .cdlv-support-chat-video-el {
     width: 100%;
-    max-height: calc(90vh - 60px); /* Fits video securely above the controls bar */
+    max-height: calc(90vh - 60px); 
     height: auto;
     background: #000;
     display: block;
-    object-fit: contain; /* Ensures tall/vertical videos scale down automatically */
+    object-fit: contain; 
+    border-top-left-radius: var(--radius-strict);
+    border-top-right-radius: var(--radius-strict);
 }
 
 /* Custom Controls Bar */
@@ -5787,7 +5789,9 @@ select.cdlv-support-chat__input {
     gap: var(--spacing-sm);
     padding: var(--spacing-xs);
     background: var(--color-primary); 
-    flex-shrink: 0; /* Prevents controls from squishing */
+    flex-shrink: 0; 
+    border-bottom-left-radius: var(--radius-strict);
+    border-bottom-right-radius: var(--radius-strict);
 }
 
 .cdlv-video-btn {
