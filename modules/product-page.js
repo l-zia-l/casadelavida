@@ -3,11 +3,12 @@
    Architecture: Exportable ES Module driving an isolated 2-column interface.
    Security: Enforces Zero-Trust mapping via centralized product register.
    Data Design: Splits dynamic inputs (color, size) into discrete schema keys.
+   State Sync: Reverts session-tracked items to prevent cart duplication.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
-import { addToCart } from '../utils/cart.js';
-import { getProductFromRegistry } from '../utils/inventory.js'; // <-- CENTRAL DATA REGISTRY
+import { addToCart, getCart, updateItemQuantity } from '../utils/cart.js'; // <-- ADDED GET/UPDATE IMPORTS
+import { getProductFromRegistry } from '../utils/inventory.js';
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string' && typeof str !== 'number') return '';
@@ -16,10 +17,6 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 };
 
-/**
- * Dynamically renders item selection cards depending on the current customer quantity selection.
- * Enforces structured key allocation for size and color inputs.
- */
 const generateOptionsForQuantity = (quantity, product) => {
     let html = '';
     
@@ -27,7 +24,6 @@ const generateOptionsForQuantity = (quantity, product) => {
     const hasMultipleColors = product.colors && product.colors.length > 1;
     const hasChoices = hasMultipleSizes || hasMultipleColors;
     
-    // If no complex choices exist, iterate just once to capture baseline defaults cleanly
     const iterations = hasChoices ? quantity : 1;
     
     for (let i = 1; i <= iterations; i++) {
@@ -37,7 +33,6 @@ const generateOptionsForQuantity = (quantity, product) => {
             html += `<h3 class="cdlv-product-page__item-title">Item ${i} Configuration</h3>`;
         }
 
-        // 1. Structural Size Array Resolution
         if (product.sizes && product.sizes.length > 0) {
             html += `<div class="cdlv-product-page__options-grid" role="group" aria-label="Select Size for Item ${i}">`;
             product.sizes.forEach(size => {
@@ -45,7 +40,6 @@ const generateOptionsForQuantity = (quantity, product) => {
                 const isChecked = size.default || product.sizes.length === 1 ? 'checked' : '';
                 const popularBadge = size.popular ? `<span class="cdlv-product-page__popular-badge" aria-hidden="true">Most Popular Size</span>` : '';
                 
-                // secure visual subscription baseline estimation matching server protocols (30% off metric)
                 const secureSubFactor = product.subscriptionDiscount ? (1 - (product.subscriptionDiscount / 100)) : 0.7;
                 const calculatedSubPrice = Math.round(size.price * secureSubFactor);
                 
@@ -69,7 +63,6 @@ const generateOptionsForQuantity = (quantity, product) => {
             html += `</div>`;
         }
 
-        // 2. Structural Color Array Resolution
         if (product.colors && product.colors.length > 0) {
             html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors" role="group" aria-label="Select Color for Item ${i}">`;
             product.colors.forEach(color => {
@@ -95,7 +88,6 @@ const generateOptionsForQuantity = (quantity, product) => {
 };
 
 export const init = (node, customConfig = {}) => {
-    // SECURITY GATEWAY: Identify and instantiate the verified record matching the payload registration token
     if (!customConfig.id) {
         console.error("Architect Exception: Critical initialization block failure. Missing configuration ID declaration token context.", node);
         return;
@@ -103,7 +95,6 @@ export const init = (node, customConfig = {}) => {
     
     const product = getProductFromRegistry(customConfig.id);
     
-    // Resolve imagery structures
     const imageryList = product.images || (product.image ? [product.image] : []);
     const mainImgPath = imageryList.length > 0 ? buildPath(sanitizeText(imageryList[0])) : '';
     
@@ -198,7 +189,6 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = moduleHTML;
 
-    // Target Selection Mappings
     const mainWrapper = node.querySelector('.cdlv-product-page');
     const mainImg = node.querySelector('#main-product-image');
     const thumbnails = node.querySelectorAll('.cdlv-product-page__thumb-btn');
@@ -212,6 +202,7 @@ export const init = (node, customConfig = {}) => {
     const addToCartBtn = node.querySelector('#add-to-cart-btn');
 
     let cartState = 'initial'; 
+    let sessionAddedItems = new Map(); // <-- TRACKS ITEMS ADDED BY THIS SPECIFIC PAGE VISIT
 
     const markAsModified = () => {
         if (cartState === 'added' || cartState === 'saved') {
@@ -221,15 +212,24 @@ export const init = (node, customConfig = {}) => {
         }
     };
 
-    // ==========================================================================
-    // NORMALIZED DATA STORAGE PIPELINE
-    // ==========================================================================
     if (addToCartBtn && !product.isOutOfStock) {
         addToCartBtn.addEventListener('click', () => {
             if (cartState === 'initial' || cartState === 'modified') {
                 const isSubscription = node.querySelector('#radio-sub')?.checked || false;
                 const quantity = parseInt(qtyInput.value, 10);
                 
+                // 1. REVERT PREVIOUS SESSION ADDITIONS
+                // Subtract the exact configurations we pushed to the cart previously
+                sessionAddedItems.forEach((oldId) => {
+                    const currentCart = getCart();
+                    const existingItem = currentCart.find(c => c.id === oldId);
+                    if (existingItem) {
+                        updateItemQuantity(oldId, existingItem.quantity - 1);
+                    }
+                });
+                sessionAddedItems.clear();
+
+                // 2. PROCESS CURRENT UI CONFIGURATIONS
                 for (let i = 1; i <= quantity; i++) {
                     const sizeRadio = node.querySelector(`input[name="item_${i}_size"]:checked`);
                     const colorRadio = node.querySelector(`input[name="item_${i}_color"]:checked`);
@@ -246,10 +246,11 @@ export const init = (node, customConfig = {}) => {
                         finalPrice = Math.round(finalPrice * factor);
                     }
 
-                    // STRUCTURAL SCHEMA SEPARATION: Color, size, and sub flags are isolated properties
+                    const generatedId = `${product.id}_${selectedSizeId}_${selectedColorId || 'none'}_${isSubscription ? 'sub' : 'one'}`;
+
                     const cartItem = {
-                        id: `${product.id}_${selectedSizeId}_${selectedColorId || 'none'}_${isSubscription ? 'sub' : 'one'}`,
-                        product_id: product.id, // Immutable reference back to registry core
+                        id: generatedId,
+                        product_id: product.id,
                         name: product.title,
                         size: selectedSizeId,
                         color: selectedColorId,
@@ -262,6 +263,7 @@ export const init = (node, customConfig = {}) => {
                     };
                     
                     addToCart(cartItem);
+                    sessionAddedItems.set(i, generatedId); // Record this specific generation
                 }
 
                 cartState = cartState === 'initial' ? 'added' : 'saved';
@@ -271,7 +273,6 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Interactive Control Loops
     if (qtyInput && btnMinus && btnPlus) {
         btnMinus.addEventListener('click', () => {
             let val = parseInt(qtyInput.value, 10);
@@ -315,7 +316,6 @@ export const init = (node, customConfig = {}) => {
         mainWrapper.classList.add('cdlv-product-page--subscription-active');
     }
 
-    // Read More Text Collapsing Toggle Loop
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
             const isExpanded = descList.classList.contains('is-expanded');
@@ -361,7 +361,6 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Media Thumbnail Selection Loop
     thumbnails.forEach(thumb => {
         thumb.addEventListener('click', (e) => {
             const targetSrc = e.currentTarget.getAttribute('data-target-src');
