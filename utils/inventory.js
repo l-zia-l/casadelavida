@@ -39,8 +39,8 @@ export const INVENTORY = Object.freeze({
             { id: "c4", name: "Cream", img: "assets/images/products/box_4.webp", default: false }
         ]),
         subscription: Object.freeze({
-            priceText: "GH₵ 1300 + free shipping",
-            desc: "Best Value: Up to 30% off. Skip or cancel anytime."
+            priceText: "Up to 30% Off + Free Shipping",
+            desc: "Best Value: Skip or cancel anytime."
         })
     }),
 
@@ -55,7 +55,7 @@ export const INVENTORY = Object.freeze({
         funFact: "Loose-leaf teas preserve more natural volatile oils than conventional machine-ground tea bags.",
         proTip: "Steep covered for 7-10 minutes to capture all therapeutic botanical compounds.",
         deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
-        subscriptionDiscount: 10,
+        subscriptionDiscount: 30,
         isOutOfStock: false,
         hideActions: false,
         inAccra: true,
@@ -81,7 +81,7 @@ export const INVENTORY = Object.freeze({
         funFact: "Turmeric's active compound curcumin is highly fat-soluble and pairs beautifully with natural honey matrix components.",
         proTip: "Stir into a warm cup of milk or plant milk to form an instant golden elixir.",
         deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
-        subscriptionDiscount: 0,
+        subscriptionDiscount: 30,
         isOutOfStock: true,
         hideActions: false,
         inAccra: true,
@@ -91,8 +91,8 @@ export const INVENTORY = Object.freeze({
         ]),
         colors: Object.freeze([]),
         subscription: Object.freeze({
-            priceText: "Available for one-time standard order",
-            desc: "Wiped clean upon inventory exhaustion."
+            priceText: "Up to 30% Off + Free Shipping",
+            desc: "Best Value: Skip or cancel anytime."
         })
     }),
 
@@ -107,7 +107,7 @@ export const INVENTORY = Object.freeze({
         funFact: "Saffron requires over 75,000 hand-picked blossoms to cultivate just a single pound of spice.",
         proTip: "Drizzle over fresh cheeses or sourdough toast during quiet afternoon reflections.",
         deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
-        subscriptionDiscount: 10,
+        subscriptionDiscount: 30,
         isOutOfStock: false,
         hideActions: false,
         inAccra: true,
@@ -117,8 +117,8 @@ export const INVENTORY = Object.freeze({
         ]),
         colors: Object.freeze([]),
         subscription: Object.freeze({
-            priceText: "Up to 10% Off on regular monthly delivery",
-            desc: "Skip or cancel your subscription whenever needed."
+            priceText: "Up to 30% Off + Free Shipping",
+            desc: "Best Value: Skip or cancel anytime."
         })
     }),
 
@@ -133,20 +133,18 @@ export const INVENTORY = Object.freeze({
         funFact: "Black seed oil has been revered for centuries as a comprehensive holistic remedy, while the raw honey acts as a perfect, nutrient-dense vehicle for its intense, earthy therapeutic properties.",
         proTip: "For the most effective absorption, enjoy one teaspoon of this infused honey on its own or stirred into warm (not boiling) tea during your morning self-care routine.",
         deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
-        subscriptionDiscount: 10,
+        subscriptionDiscount: 30,
         isOutOfStock: true,
         hideActions: false,
         inAccra: true,
         inTamale: false,
         sizes: Object.freeze([
-            { id: "s1", name: "Grand", desc: "40 Servings", price: 240.00, popular: false, default: false },
-            { id: "s2", name: "Deluxe", desc: "25 Servings", price: 180.00, popular: true, default: true },
-            { id: "s3", name: "Original", desc: "10 Servings", price: 100.00, popular: false, default: false }
+            { id: "s1", name: "Standard", desc: "250g Glass Jar", price: 100.00, popular: true, default: true }
         ]),
         colors: Object.freeze([]),
         subscription: Object.freeze({
-            priceText: "GH₵ 540 + free shipping",
-            desc: "Best Value: Up to 30% off. Skip or cancel anytime."
+            priceText: "Up to 30% Off + Free Shipping",
+            desc: "Best Value: Skip or cancel anytime."
         })
     }),
 
@@ -161,7 +159,7 @@ export const INVENTORY = Object.freeze({
         funFact: "Micro-mesh filtration maximizes warm water convection without particle leaching.",
         proTip: "Rinse under warm run water immediately post-brew to clear organic solids without soaps.",
         deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
-        subscriptionDiscount: 10,
+        subscriptionDiscount: 30,
         isOutOfStock: false,
         hideActions: false,
         inAccra: true,
@@ -171,8 +169,8 @@ export const INVENTORY = Object.freeze({
         ]),
         colors: Object.freeze([]),
         subscription: Object.freeze({
-            priceText: "Add accessory replenishment updates",
-            desc: "Billed on cycle terms cleanly."
+            priceText: "Up to 30% Off + Free Shipping",
+            desc: "Best Value: Skip or cancel anytime."
         })
     }),
 
@@ -193,7 +191,7 @@ export const INVENTORY = Object.freeze({
         funFact: "Natural soy wax burns cleanly with up to 50% longer lifespans than petroleum paraffin.",
         proTip: "Trim the fiber wick to 1/4 inch before lighting to guarantee clean soot-free burning.",
         deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
-        subscriptionDiscount: 0,
+        subscriptionDiscount: 30,
         isOutOfStock: true,
         hideActions: false,
         inAccra: true,
@@ -201,10 +199,15 @@ export const INVENTORY = Object.freeze({
         sizes: Object.freeze([
             { id: "s1", name: "Standard", desc: "8oz Glass tumbler", price: 100.00, popular: true, default: true }
         ]),
-        colors: Object.freeze([]),
+        colors: Object.freeze([
+            { id: "c1", name: "Baby Pink", img: "assets/images/products/item_6.1.webp", default: true },
+            { id: "c2", name: "Crimson red", img: "assets/images/products/item_6.2.webp", default: false },
+            { id: "c3", name: "Navy Blue", img: "assets/images/products/item_6.3.webp", default: false },
+            { id: "c4", name: "Cream", img: "assets/images/products/item_6.4.webp", default: false }
+        ]),
         subscription: Object.freeze({
-            priceText: "One-time luxury accessory allocation",
-            desc: "Subject to seasonal sourcing window ceilings."
+            priceText: "Up to 30% Off + Free Shipping",
+            desc: "Best Value: Skip or cancel anytime."
         })
     })
 });
