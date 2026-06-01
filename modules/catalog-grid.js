@@ -2,11 +2,10 @@
    MODULE: CATALOG GRID LOGIC (modules/catalog-grid.js)
    Architecture: Exportable ES Module driving high-performance product loops.
    Security: Enforces strict data-integrity via centralized product reference registry.
-   A11y: Fully semantic landmarks with dynamic target control optimization.
+   UX Update: Retains safe link traversal routing to enforce product page item validation.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
-import { addToCart } from '../utils/cart.js'; // <-- ENFORCED EXPLICIT IMPORT
 import { getProductFromRegistry } from '../utils/inventory.js'; // <-- CENTRAL REGISTER INGESTION
 
 const defaultConfig = {
@@ -49,7 +48,6 @@ export const init = (node, customConfig = {}) => {
     const isTamalePage = currentPath.includes('tamale.html');
 
     const productsHTML = configProducts.map((configItem, index) => {
-        // SECURITY GATEWAY: Force resolution of item properties directly out of the frozen database file layer
         if (!configItem.id) {
             console.warn(`Catalog layout structural exception: Index ${index} missing required validation id tracking token.`);
             return '';
@@ -61,8 +59,8 @@ export const init = (node, customConfig = {}) => {
         const safeImage = buildPath(product.image);
         const safeLink = buildPath(product.link || '#');
         
-        // Resolve canonical pricing using the preconfigured default size option mapping
-        const defaultSizeObj = product.sizes?.find(s => s.default) || product.sizes?.[0] || { price: 0.00, id: 's1' };
+        // Resolve default pricing representation from registry mapping
+        const defaultSizeObj = product.sizes?.find(s => s.default) || product.sizes?.[0] || { price: 0.00 };
         const basePrice = parseFloat(defaultSizeObj.price || 0);
         const discount = product.subscriptionDiscount ? parseFloat(product.subscriptionDiscount) : 0;
         
@@ -80,7 +78,7 @@ export const init = (node, customConfig = {}) => {
         let availabilityHTML = '';
         let actionBtnHTML = '';
 
-        // Local Delivery Logic: Evaluate parameters safely derived from inventory layer
+        // Local Delivery Logic
         let isAvailableLocally = true;
         if (isAccraPage && !product.inAccra) {
             isAvailableLocally = false;
@@ -88,7 +86,6 @@ export const init = (node, customConfig = {}) => {
             isAvailableLocally = false;
         }
 
-        // Render localized exception banners cleanly if context requires bounding rules
         if (!isAvailableLocally) {
             availabilityHTML = `
                 <div class="cdlv-catalog-grid__status-banner" role="alert">
@@ -108,20 +105,13 @@ export const init = (node, customConfig = {}) => {
                 `;
             }
 
-            // Evaluate item availability checks cleanly
-            const isOOS = product.isOutOfStock || !isAvailableLocally;
-            const btnText = isOOS ? 'Out of Stock' : 'Add to Cart';
-            const btnClass = isOOS ? 'cdlv-btn--disabled' : 'cdlv-btn--primary';
-            const disabledState = isOOS ? 'disabled aria-disabled="true" tabindex="-1"' : '';
-
-            // --- ZERO-TRUST NORMALIZED MARKETING ATTRIBUTES ---
+            // --- REDIRECT ARCHITECTURE: View Product Link Mapping ---
+            // Button styles and parameters are retained perfectly intact
             actionBtnHTML = `
-                <button type="button" class="cdlv-btn ${btnClass}" ${disabledState}
-                    data-action="catalog-add"
-                    data-id="${sanitizeHTML(product.id)}"
-                    data-size-id="${sanitizeHTML(defaultSizeObj.id)}"
-                    data-price="${sanitizeHTML(basePrice)}">
-                    ${sanitizeHTML(btnText)}
+                <button type="button" class="cdlv-btn cdlv-btn--primary"
+                    data-action="catalog-view"
+                    data-url="${sanitizeHTML(safeLink)}">
+                    View Product
                 </button>
             `;
         }
@@ -163,46 +153,15 @@ export const init = (node, customConfig = {}) => {
             </div>
         </section>
     `;
-};
 
-// ==========================================================================
-// CENTRALIZED COMPONENT INTERACTION TRACKING DELGATE
-// ==========================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    // Intercept event target bubbling from global body container context
-    document.body.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-action="catalog-add"]');
+    // --- SCOPED INTERACTION ROUTING TOGGLE ---
+    node.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action="catalog-view"]');
         if (!btn) return;
         
-        const productId = btn.getAttribute('data-id');
-        const product = getProductFromRegistry(productId);
-        const selectedSizeId = btn.getAttribute('data-size-id');
-        const parsedPrice = parseFloat(btn.getAttribute('data-price'));
-
-        // STRUCTURAL SCHEMA FORMATTING: Normalize data payload into decoupled state definitions
-        const standardizedCartItem = {
-            id: `${product.id}_${selectedSizeId}_none_one`,
-            product_id: product.id,
-            name: product.title,
-            size: selectedSizeId,
-            color: null,
-            isSubscription: false,
-            price: parsedPrice,
-            quantity: 1,
-            maxStock: product.maxStock || 10,
-            image: product.image,
-            url: product.link
-        };
-        
-        addToCart(standardizedCartItem);
-        
-        // Retain original style loop updates
-        const originalText = btn.textContent;
-        btn.textContent = 'Added ✓';
-        btn.classList.add('is-success');
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.classList.remove('is-success');
-        }, 1500);
+        const targetUrl = btn.getAttribute('data-url');
+        if (targetUrl) {
+            window.location.href = targetUrl;
+        }
     });
-});
+};
