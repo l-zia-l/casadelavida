@@ -6,6 +6,7 @@
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
+import { getCart, updateItemQuantity, removeFromCart, clearCart } from '../utils/cart.js';
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string' && typeof str !== 'number') return '';
@@ -26,28 +27,7 @@ let cartState = {
         momoNetwork: 'mtn', momoPhone: '', 
         cardName: '', cardNumber: '', cardExp: '', cardCvc: ''
     },
-    items: [
-        {
-            id: 'prod_001',
-            name: 'Calming Fertility Package',
-            variant: 'Signature Collection',
-            price: 600.00,
-            quantity: 1,
-            maxStock: 10,
-            image: 'assets/images/products/box_3.webp',
-            url: 'shop/packages/product_1.html'
-        },
-        {
-            id: 'prod_002',
-            name: 'Honey Infused Tumeric',
-            variant: '250g Glass Jar',
-            price: 100.00,
-            quantity: 3,
-            maxStock: 3, 
-            image: 'assets/images/products/item_1.webp',
-            url: 'shop/products/product_1.html'
-        }
-    ],
+    items: getCart(),
     shippingRate: 35.00
 };
 
@@ -631,20 +611,21 @@ export const init = (node) => {
 
         // Cart Actions (Quantity/Remove logic remains exactly the same)
         const itemNode = actionBtn.closest('.cdlv-cart-item');
-        if (!itemNode) return;
-        
-        const itemId = itemNode.getAttribute('data-id');
-        const itemIndex = cartState.items.findIndex(i => i.id === itemId);
-        if (itemIndex === -1) return;
+        if (itemNode) {
+            const itemId = itemNode.getAttribute('data-id');
+            const itemIndex = cartState.items.findIndex(i => i.id === itemId);
+            if (itemIndex === -1) return;
 
-        const item = cartState.items[itemIndex];
+            const item = cartState.items[itemIndex];
 
-        if (action === 'increase' || action === 'decrease') {
-            if (action === 'increase' && item.quantity < item.maxStock) {
-                item.quantity += 1;
-            } else if (action === 'decrease' && item.quantity > 1) {
-                item.quantity -= 1;
-            }
+            if (action === 'increase' || action === 'decrease') {
+                if (action === 'increase' && item.quantity < item.maxStock) {
+                    item.quantity += 1;
+                    updateItemQuantity(item.id, item.quantity); // <-- UPDATE LOCALSTORAGE
+                } else if (action === 'decrease' && item.quantity > 1) {
+                    item.quantity -= 1;
+                    updateItemQuantity(item.id, item.quantity); // <-- UPDATE LOCALSTORAGE
+                }
 
             const qtyNode = itemNode.querySelector('[data-target="qty"]');
             const priceNode = itemNode.querySelector('[data-target="item-price"]');
@@ -665,8 +646,10 @@ export const init = (node) => {
             }
             updateFinancials(node);
         } 
+        }
         else if (action === 'remove') {
-            cartState.items.splice(itemIndex, 1);
+            removeFromCart(item.id); // <-- REMOVE FROM LOCALSTORAGE
+            cartState.items = getCart(); // Sync local state
             itemNode.style.opacity = '0';
             itemNode.style.transition = 'opacity var(--transition-fast)';
             
@@ -735,7 +718,7 @@ export const init = (node) => {
 
             // 2. Await the mocked backend payment processing
             setTimeout(() => {
-                const backendErrorOccurred = false; // Toggle to true to test the error UI
+                const backendErrorOccurred = false; 
 
                 if (backendErrorOccurred) {
                     showNotification('error', 'Something went wrong, please try again or check your internet connection. If the problem persists please contact support.');
@@ -745,13 +728,12 @@ export const init = (node) => {
                     submitBtn.disabled = false;
                 } else {
                     // Success Routing
+                    clearCart(); // <-- CLEAR BROWSER STORAGE ON SUCCESS
+                    cartState.items = []; // Clear local UI state
                     cartState.currentStep = 'Success';
-                    updateView(node, false); 
-                    
-                    // Note: Auto-redirect has been removed. 
-                    // The user will manually click the "Return to Homepage" button.
+                    updateView(node, false);
                 }
-            }, 1500); // 1.5s simulated payment delay
+            }, 1500); 
         }
     });
 };

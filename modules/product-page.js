@@ -10,6 +10,7 @@
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
+import { addToCart } from '../utils/cart.js';
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string') return '';
@@ -219,7 +220,7 @@ export const init = (node, customConfig = {}) => {
     // ==========================================================================
     // INTERACTIVE CART BUTTON STATE MACHINE
     // ==========================================================================
-    let cartState = 'initial'; // possible states: 'initial', 'added', 'modified'
+    let cartState = 'initial'; 
 
     const markAsModified = () => {
         if (cartState === 'added' || cartState === 'saved') {
@@ -232,6 +233,44 @@ export const init = (node, customConfig = {}) => {
     if (addToCartBtn) {
         addToCartBtn.addEventListener('click', () => {
             if (cartState === 'initial' || cartState === 'modified') {
+                
+                // --- NEW LOCALSTORAGE INTEGRATION ---
+                const isSubscription = node.querySelector('#radio-sub')?.checked;
+                const quantity = parseInt(qtyInput.value, 10);
+                
+                // Because your UI allows different configs for each item if qty > 1, 
+                // we iterate and add them as individual entries into the cart.
+                for (let i = 1; i <= quantity; i++) {
+                    const sizeRadio = node.querySelector(`input[name="item_${i}_size"]:checked`);
+                    const colorRadio = node.querySelector(`input[name="item_${i}_color"]:checked`);
+                    
+                    const selectedSizeId = sizeRadio ? sizeRadio.value : (config.sizes?.[0]?.id || 'default');
+                    const sizeObj = config.sizes?.find(s => s.id === selectedSizeId) || { price: 0, name: 'Standard' };
+                    
+                    // Calculate price securely based on UI selection
+                    let finalPrice = sizeObj.price;
+                    if (isSubscription) {
+                        finalPrice = Math.round(finalPrice * 0.7); // 30% off UI logic
+                    }
+
+                    const variantName = [sizeObj.name, colorRadio?.value].filter(Boolean).join(' - ');
+                    
+                    // Build the standardized item payload for the cart
+                    const cartItem = {
+                        id: `${config.id || 'prod_' + Math.random().toString(36).substr(2, 5)}_${selectedSizeId}`,
+                        name: config.title,
+                        variant: isSubscription ? `${variantName} (Sub)` : variantName,
+                        price: finalPrice,
+                        quantity: 1, 
+                        maxStock: 10,
+                        image: config.images[0] || '',
+                        url: window.location.pathname
+                    };
+                    
+                    addToCart(cartItem);
+                }
+                // --- END LOCALSTORAGE INTEGRATION ---
+
                 cartState = cartState === 'initial' ? 'added' : 'saved';
                 addToCartBtn.textContent = cartState === 'added' ? 'Added to Cart' : 'Saved';
                 addToCartBtn.classList.add('is-success');

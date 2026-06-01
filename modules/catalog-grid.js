@@ -100,9 +100,20 @@ export const init = (node, customConfig = {}) => {
             const btnText = isOOS ? 'Out of Stock' : 'Add to Cart';
             const btnClass = isOOS ? 'cdlv-btn--disabled' : 'cdlv-btn--primary';
             const disabledState = isOOS ? 'disabled aria-disabled="true" tabindex="-1"' : '';
+            
+            // We need a fallback ID if the config doesn't provide one
+            const safeId = product.id || `cat_prod_${index}`;
+            const safeFinalPrice = discount > 0 ? (basePrice - (basePrice * (discount / 100))) : basePrice;
 
+            // --- INJECT DATA ATTRIBUTES FOR CART ---
             actionBtnHTML = `
-                <button type="button" class="cdlv-btn ${btnClass}" ${disabledState}>
+                <button type="button" class="cdlv-btn ${btnClass}" ${disabledState}
+                    data-action="catalog-add"
+                    data-id="${sanitizeHTML(safeId)}"
+                    data-title="${sanitizeHTML(product.title)}"
+                    data-price="${safeFinalPrice}"
+                    data-image="${sanitizeHTML(product.image)}"
+                    data-url="${sanitizeHTML(product.link || '#')}">
                     ${sanitizeHTML(btnText)}
                 </button>
             `;
@@ -145,4 +156,32 @@ export const init = (node, customConfig = {}) => {
             </div>
         </section>
     `;
+
+    // --- NEW: ADD TO CART LISTENER FOR GRID ---
+    node.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action="catalog-add"]');
+        if (!btn) return;
+        
+        const item = {
+            id: btn.getAttribute('data-id'),
+            name: btn.getAttribute('data-title'),
+            variant: 'Standard', 
+            price: parseFloat(btn.getAttribute('data-price')),
+            quantity: 1,
+            maxStock: 10,
+            image: btn.getAttribute('data-image'),
+            url: btn.getAttribute('data-url')
+        };
+        
+        addToCart(item);
+        
+        // Visual feedback
+        const originalText = btn.textContent;
+        btn.textContent = 'Added ✓';
+        btn.classList.add('is-success');
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove('is-success');
+        }, 1500);
+    });
 };
