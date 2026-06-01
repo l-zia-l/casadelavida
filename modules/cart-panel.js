@@ -7,7 +7,8 @@
 
 import { buildPath } from '../utils/path.js';
 import { getCart, updateItemQuantity, removeFromCart, clearCart } from '../utils/cart.js';
-import { getProductFromRegistry } from '../utils/inventory.js'; // <-- CENTRAL REGISTRY INGESTION
+import { getProductFromRegistry } from '../utils/inventory.js';
+import { dispatchOrderToDatabase } from '../utils/database.js';
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string' && typeof str !== 'number') return '';
@@ -713,24 +714,27 @@ export const init = (node) => {
             updateView(node);
 
         } else if (formId === 'place-order-form') {
+            // 1. Lock UI & Show Loading State
             submitBtn.disabled = true;
             submitBtn.innerHTML = `${spinnerHTML} Processing...`;
 
-            // This placeholder structure is fully optimized to dispatch 'cartState' data to database.js
-            setTimeout(() => {
-                const backendErrorOccurred = false; 
+            // 2. Execute Production Live Transaction Dispatch
+            const databaseTransactionResult = await dispatchOrderToDatabase(cartState);
 
-                if (backendErrorOccurred) {
-                    showNotification('error', 'Something went wrong, please try again or check your internet connection. If the problem persists please contact support.');
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                } else {
-                    clearCart();
-                    cartState.items = [];
-                    cartState.currentStep = 'Success';
-                    updateView(node, false);
-                }
-            }, 1500); 
+            if (databaseTransactionResult && databaseTransactionResult.success) {
+                // Success Routing Pipeline
+                clearCart();
+                cartState.items = [];
+                cartState.currentStep = 'Success';
+                updateView(node, false);
+            } else {
+                // Fail Gracefully without leaking server stack parameters to clients
+                showNotification('error', 'Something went wrong, please try again or check your network. If the issue persists, contact support.');
+                
+                // Unlock interface inputs cleanly for structural corrections
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         }
     });
 };
