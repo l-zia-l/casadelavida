@@ -11,6 +11,12 @@ export const INVENTORY = Object.freeze({
         subtitle: "Curated holistic self-care routines for intentional feminine wellness.",
         image: "assets/images/products/box_3.webp",
         link: "shop/packages/fertility-wellness-box.html",
+        images: Object.freeze([
+            "assets/images/products/box_1.webp",
+            "assets/images/products/box_2.webp",
+            "assets/images/products/box_3.webp",
+            "assets/images/products/box_4.webp"
+        ]),
         composition: "Each premium box is crafted from durable, high-quality materials and includes an artisanal selection of: our signature loose-leaf herbal infusions, raw honey, pure black seed oil, a heat-resistant glass tea infuser, and a hand-poured ritual candle.",
         bestFor: "Creating a dedicated space for “soft life” rituals, fertility support, gentle body detoxification, and nurturing your mind during busy days.",
         funFact: "Every box arrives with exclusive, beautifully designed instruction cards that guide you step-by-step through the intention and preparation of each ritual item, ensuring a deeply mindful experience.",
@@ -176,6 +182,12 @@ export const INVENTORY = Object.freeze({
         subtitle: "Hand-poured aromatic ritual candles for spatial serenity.",
         image: "assets/images/products/item_6.3.webp",
         link: "shop/accessories/vanilla-candle.html",
+        images: Object.freeze([
+            "assets/images/products/item_6.1.webp",
+            "assets/images/products/item_6.2.webp",
+            "assets/images/products/item_6.3.webp",
+            "assets/images/products/item_6.4.webp"
+        ]),
         composition: "100% natural soy wax core paired with essential vanilla oil extracts.",
         bestFor: "Establishing an anchor point for mindfulness and grounding routines.",
         funFact: "Natural soy wax burns cleanly with up to 50% longer lifespans than petroleum paraffin.",

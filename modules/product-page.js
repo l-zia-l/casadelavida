@@ -2,12 +2,11 @@
    MODULE: PRODUCT PAGE ENGINE (modules/product-page.js)
    Architecture: Exportable ES Module driving an isolated 2-column interface.
    Security: Enforces Zero-Trust mapping via centralized product register.
-   Data Design: Splits dynamic inputs (color, size) into discrete schema keys.
-   State Sync: Reverts session-tracked items to prevent cart duplication.
+   State Sync: Hydrates from LocalStorage and preserves form selections across updates.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
-import { addToCart, getCart, updateItemQuantity } from '../utils/cart.js'; // <-- ADDED GET/UPDATE IMPORTS
+import { addToCart, getCart, updateItemQuantity } from '../utils/cart.js';
 import { getProductFromRegistry } from '../utils/inventory.js';
 
 const sanitizeText = (str) => {
@@ -19,7 +18,6 @@ const sanitizeText = (str) => {
 
 const generateOptionsForQuantity = (quantity, product) => {
     let html = '';
-    
     const hasMultipleSizes = product.sizes && product.sizes.length > 1;
     const hasMultipleColors = product.colors && product.colors.length > 1;
     const hasChoices = hasMultipleSizes || hasMultipleColors;
@@ -94,7 +92,6 @@ export const init = (node, customConfig = {}) => {
     }
     
     const product = getProductFromRegistry(customConfig.id);
-    
     const imageryList = product.images || (product.image ? [product.image] : []);
     const mainImgPath = imageryList.length > 0 ? buildPath(sanitizeText(imageryList[0])) : '';
     
@@ -202,7 +199,82 @@ export const init = (node, customConfig = {}) => {
     const addToCartBtn = node.querySelector('#add-to-cart-btn');
 
     let cartState = 'initial'; 
-    let sessionAddedItems = new Map(); // <-- TRACKS ITEMS ADDED BY THIS SPECIFIC PAGE VISIT
+    let sessionAddedItems = new Map();
+
+    // --- ENGINE MODULE: DOM PARAMETER SCRAPER ---
+    const scrapeCurrentPageSelections = () => {
+        const currentQty = parseInt(qtyInput.value, 10);
+        const selections = [];
+        for (let i = 1; i <= currentQty; i++) {
+            const sizeRadio = node.querySelector(`input[name="item_${i}_size"]:checked`);
+            const colorRadio = node.querySelector(`input[name="item_${i}_color"]:checked`);
+            selections.push({
+                size: sizeRadio ? sizeRadio.value : null,
+                color: colorRadio ? colorRadio.value : null
+            });
+        }
+        return selections;
+    };
+
+    // --- ENGINE MODULE: INPUT CONFIG RE-APPLYER ---
+    const applySelectionsToDOM = (selections) => {
+        selections.forEach((selection, idx) => {
+            const i = idx + 1;
+            if (selection.size) {
+                const targetRadio = node.querySelector(`input[name="item_${i}_size"][value="${selection.size}"]`);
+                if (targetRadio) {
+                    targetRadio.checked = true;
+                    const container = targetRadio.closest('.cdlv-product-page__options-grid');
+                    if (container) {
+                        container.querySelectorAll('.cdlv-product-page__option-box').forEach(l => l.classList.remove('is-selected'));
+                        targetRadio.closest('.cdlv-product-page__option-box')?.classList.add('is-selected');
+                    }
+                }
+            }
+            if (selection.color) {
+                const targetRadio = node.querySelector(`input[name="item_${i}_color"][value="${selection.color}"]`);
+                if (targetRadio) {
+                    targetRadio.checked = true;
+                    const container = targetRadio.closest('.cdlv-product-page__options-grid');
+                    if (container) {
+                        container.querySelectorAll('.cdlv-product-page__option-box').forEach(l => l.classList.remove('is-selected'));
+                        targetRadio.closest('.cdlv-product-page__option-box')?.classList.add('is-selected');
+                    }
+                }
+            }
+        });
+    };
+
+    // --- ENGINE MODULE: LIVE HYDRATION SYSTEM ---
+    const hydrateFromExistingCart = () => {
+        const activeCart = getCart();
+        const existingItems = activeCart.filter(item => item.product_id === product.id);
+        
+        if (existingItems.length > 0) {
+            cartState = 'added';
+            addToCartBtn.textContent = 'Save Changes';
+            addToCartBtn.classList.add('is-success');
+            
+            qtyInput.value = existingItems.length;
+            dynamicContainer.innerHTML = generateOptionsForQuantity(existingItems.length, product);
+            
+            const structuredSelections = existingItems.map(item => ({
+                size: item.size,
+                color: item.color
+            }));
+            applySelectionsToDOM(structuredSelections);
+            
+            // Seed our memory tracker with these IDs so editing them re-evaluates properly
+            existingItems.forEach((item, index) => {
+                sessionAddedItems.set(index + 1, item.id);
+                if (item.isSubscription) {
+                    const subRadio = node.querySelector('#radio-sub');
+                    if (subRadio) subRadio.checked = true;
+                    mainWrapper.classList.add('cdlv-product-page--subscription-active');
+                }
+            });
+        }
+    };
 
     const markAsModified = () => {
         if (cartState === 'added' || cartState === 'saved') {
@@ -218,8 +290,7 @@ export const init = (node, customConfig = {}) => {
                 const isSubscription = node.querySelector('#radio-sub')?.checked || false;
                 const quantity = parseInt(qtyInput.value, 10);
                 
-                // 1. REVERT PREVIOUS SESSION ADDITIONS
-                // Subtract the exact configurations we pushed to the cart previously
+                // Remove older configuration slots from global browser state cleanly
                 sessionAddedItems.forEach((oldId) => {
                     const currentCart = getCart();
                     const existingItem = currentCart.find(c => c.id === oldId);
@@ -229,7 +300,6 @@ export const init = (node, customConfig = {}) => {
                 });
                 sessionAddedItems.clear();
 
-                // 2. PROCESS CURRENT UI CONFIGURATIONS
                 for (let i = 1; i <= quantity; i++) {
                     const sizeRadio = node.querySelector(`input[name="item_${i}_size"]:checked`);
                     const colorRadio = node.querySelector(`input[name="item_${i}_color"]:checked`);
@@ -263,11 +333,11 @@ export const init = (node, customConfig = {}) => {
                     };
                     
                     addToCart(cartItem);
-                    sessionAddedItems.set(i, generatedId); // Record this specific generation
+                    sessionAddedItems.set(i, generatedId);
                 }
 
-                cartState = cartState === 'initial' ? 'added' : 'saved';
-                addToCartBtn.textContent = cartState === 'added' ? 'Added to Cart' : 'Saved';
+                cartState = 'saved';
+                addToCartBtn.textContent = 'Saved';
                 addToCartBtn.classList.add('is-success');
             }
         });
@@ -277,27 +347,25 @@ export const init = (node, customConfig = {}) => {
         btnMinus.addEventListener('click', () => {
             let val = parseInt(qtyInput.value, 10);
             if (val > 1) {
+                const savedSelections = scrapeCurrentPageSelections(); // Save choices
                 qtyInput.value = val - 1;
-                qtyInput.dispatchEvent(new Event('change'));
+                
+                dynamicContainer.innerHTML = generateOptionsForQuantity(val - 1, product);
+                applySelectionsToDOM(savedSelections.slice(0, val - 1)); // Restore choices
+                markAsModified();
             }
         });
 
         btnPlus.addEventListener('click', () => {
             let val = parseInt(qtyInput.value, 10);
             if (val < parseInt(qtyInput.max, 10)) {
+                const savedSelections = scrapeCurrentPageSelections(); // Save choices
                 qtyInput.value = val + 1;
-                qtyInput.dispatchEvent(new Event('change'));
+                
+                dynamicContainer.innerHTML = generateOptionsForQuantity(val + 1, product);
+                applySelectionsToDOM(savedSelections); // Restore choices for older forms seamlessly
+                markAsModified();
             }
-        });
-
-        qtyInput.addEventListener('change', (e) => {
-            let val = parseInt(e.target.value, 10);
-            if (isNaN(val) || val < 1) {
-                val = 1;
-                e.target.value = 1;
-            }
-            dynamicContainer.innerHTML = generateOptionsForQuantity(val, product);
-            markAsModified();
         });
     }
 
@@ -311,10 +379,6 @@ export const init = (node, customConfig = {}) => {
             markAsModified();
         });
     });
-
-    if (node.querySelector('#radio-sub')?.checked) {
-        mainWrapper.classList.add('cdlv-product-page--subscription-active');
-    }
 
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
@@ -395,4 +459,7 @@ export const init = (node, customConfig = {}) => {
             }
         });
     }
+
+    // Run active lookups immediately upon node initialization to synchronize configurations
+    hydrateFromExistingCart();
 };
