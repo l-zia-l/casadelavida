@@ -20,14 +20,13 @@ const sanitizeText = (str) => {
 // Application Runtime State Machine
 let cartState = {
     currentStep: 'Cart',
-    paymentMethod: 'momo',
+    paymentMethod: 'test_momo',
     shippingDetails: { 
         firstName: '', lastName: '', email: '', phone: '', 
         address: '', city: '', region: '', landmark: '', notes: '' 
     },
     paymentDetails: {
-        momoNetwork: 'mtn', momoPhone: '', 
-        cardName: '', cardNumber: '', cardExp: '', cardCvc: ''
+        testNumber: '' 
     },
     items: getCart(),
     shippingRate: 35.00
@@ -51,15 +50,7 @@ const saveFormState = (node) => {
             notes: node.querySelector('#delivery-notes')?.value || ''
         };
     } else if (cartState.currentStep === 'Payment Info') {
-        if (cartState.paymentMethod === 'momo') {
-            cartState.paymentDetails.momoNetwork = node.querySelector('#momo-network')?.value || 'mtn';
-            cartState.paymentDetails.momoPhone = node.querySelector('#momo-phone')?.value || '';
-        } else if (cartState.paymentMethod === 'card') {
-            cartState.paymentDetails.cardName = node.querySelector('#card-name')?.value || '';
-            cartState.paymentDetails.cardNumber = node.querySelector('#card-number')?.value || '';
-            cartState.paymentDetails.cardExp = node.querySelector('#card-exp')?.value || '';
-            cartState.paymentDetails.cardCvc = node.querySelector('#card-cvc')?.value || '';
-        }
+        cartState.paymentDetails.testNumber = node.querySelector('#test-payment-number')?.value || '';
     }
 };
 
@@ -86,14 +77,13 @@ const renderTabbedProgress = (activeStep) => {
 const renderEmptyState = () => `
     <div class="cdlv-cart-panel__empty">
         <h2 class="cdlv-cart-panel__empty-title">Your Cart is Empty</h2>
-        <p style="margin-bottom: var(--spacing-md); color: var(--color-text-dark);">Nurture yourself by filling it with items from our collection.</p>
+        <p class="cdlv-cart-panel__empty-desc">Nurture yourself by filling it with items from our collection.</p>
         <a href="${buildPath('shop.html')}" class="cdlv-cart-panel__empty-btn">Explore Shop</a>
     </div>
 `;
 
 const renderCartItems = () => {
     return cartState.items.map(item => {
-        // SECURITY PIPELINE: Resolve structural parameters dynamically out of the central registry
         const productRegistryRef = getProductFromRegistry(item.product_id);
         const matchedSize = productRegistryRef.sizes?.find(s => s.id === item.size);
         const matchedColor = productRegistryRef.colors?.find(c => c.id === item.color);
@@ -187,9 +177,17 @@ const renderDetailedSummary = () => {
     const total = subtotal + cartState.shippingRate;
     const itemsList = cartState.items.map(item => {
         const referenceDef = getProductFromRegistry(item.product_id);
+        const matchedSize = referenceDef.sizes?.find(s => s.id === item.size);
+        const matchedColor = referenceDef.colors?.find(c => c.id === item.color);
+        const variantText = [matchedSize?.name, matchedColor?.name].filter(Boolean).join(' - ');
+        const variantHtml = variantText ? `<div class="cdlv-cart-summary__item-variant">${sanitizeText(variantText)}</div>` : '';
+
         return `
-            <div class="cdlv-cart-summary__item-row">
-                <span class="cdlv-cart-summary__item-name">${sanitizeText(item.quantity)}x ${sanitizeText(referenceDef.title || item.name)}</span>
+            <div class="cdlv-cart-summary__item-row cdlv-cart-summary__item-row--wrap">
+                <div class="cdlv-cart-summary__item-info">
+                    <span class="cdlv-cart-summary__item-name">${sanitizeText(item.quantity)}x ${sanitizeText(referenceDef.title || item.name)}</span>
+                    ${variantHtml}
+                </div>
                 <span class="cdlv-cart-summary__item-price">₵${sanitizeText((item.price * item.quantity).toFixed(2))}</span>
             </div>
         `;
@@ -249,15 +247,15 @@ const showNotification = (type, message) => {
 // --- SUCCESS VIEW ---
 const renderSuccessView = () => `
     <div class="cdlv-cart-panel__empty">
-        <svg aria-hidden="true" focusable="false" class="cdlv-cart-panel__empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color: var(--color-accent); opacity: 1;">
+        <svg aria-hidden="true" focusable="false" class="cdlv-cart-panel__empty-icon cdlv-cart-panel__success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
         </svg>
         <h2 class="cdlv-cart-panel__empty-title">Order Placed Successfully.</h2>
-        <p style="margin-bottom: var(--spacing-sm); max-width: 600px; text-align: center; color: var(--color-text-dark);">
+        <p class="cdlv-cart-panel__success-desc">
             Take a deep breath. You've taken a wonderful step toward nurturing your body, mind, and daily moments of calm.
         </p>
-        <p style="margin-bottom: var(--spacing-md); max-width: 600px; text-align: center; color: rgba(0,0,0,0.6);">
+        <p class="cdlv-cart-panel__success-note">
             Your receipt will be emailed to you shortly with your order details. Thank you.
         </p>
         <a href="${buildPath('index.html')}" class="cdlv-cart-panel__empty-btn">Return to Homepage</a>
@@ -265,8 +263,8 @@ const renderSuccessView = () => `
 `;
 
 const renderCartView = () => `
-    <div class="cdlv-cart-panel__layout">
-        <div class="cdlv-cart-panel__list">
+    <div class="cdlv-cart-panel__layout cdlv-cart-panel__layout--wrap">
+        <div class="cdlv-cart-panel__list cdlv-cart-panel__main-area">
             <div class="cdlv-cart-panel__list-header">
                 <h2>Review Your Items</h2>
                 <span data-target="item-count">${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}</span>
@@ -275,8 +273,21 @@ const renderCartView = () => `
                 ${renderCartItems()}
             </div>
         </div>
-        <div class="cdlv-cart-panel__sidebar">
+        <div class="cdlv-cart-panel__sidebar cdlv-cart-panel__side-area">
             ${renderSummary()}
+        </div>
+        <div class="cdlv-cart-summary__cta-wrapper cdlv-cart-panel__action-area">
+            <button type="button" class="cdlv-cart-summary__checkout-btn" data-action="checkout">Secure Checkout</button>
+            <div class="cdlv-cart-summary__trust-signals cdlv-review-back-wrapper--margin">
+                <span class="cdlv-cart-summary__trust-item">
+                    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Secure Payment
+                </span>
+                <span class="cdlv-cart-summary__trust-item">
+                    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Fast Local Delivery
+                </span>
+            </div>
         </div>
     </div>
 `;
@@ -284,8 +295,8 @@ const renderCartView = () => `
 const renderShippingForm = () => {
     const s = cartState.shippingDetails;
     return `
-    <div class="cdlv-cart-panel__layout">
-        <section class="cdlv-shipping-form">
+    <div class="cdlv-cart-panel__layout cdlv-cart-panel__layout--wrap">
+        <section class="cdlv-shipping-form cdlv-cart-panel__main-area">
             <h2 class="cdlv-shipping-form__title" tabindex="-1">Shipping & Personal Details</h2>
             <form id="shipping-details-form" class="cdlv-shipping-form__grid">
                 <div class="cdlv-form-group">
@@ -335,16 +346,16 @@ const renderShippingForm = () => {
                     </div>
                     <textarea id="delivery-notes" data-target="notes" rows="3" placeholder="e.g., Please leave at the gate...">${sanitizeText(s.notes)}</textarea>
                 </div>
-
-                <div class="cdlv-shipping-form__actions cdlv-form-group--full">
-                    <button type="button" class="cdlv-shipping-form__back" data-action="back-to-cart">Back to Cart</button>
-                    <button type="submit" class="cdlv-shipping-form__submit">Continue to Payment</button>
-                </div>
             </form>
         </section>
         
-        <div class="cdlv-cart-panel__sidebar">
+        <div class="cdlv-cart-panel__sidebar cdlv-cart-panel__side-area">
             ${renderDetailedSummary()}
+        </div>
+
+        <div class="cdlv-shipping-form__actions cdlv-form-group--full cdlv-cart-panel__action-area">
+            <button type="button" class="cdlv-shipping-form__back" data-action="back-to-cart">Back to Cart</button>
+            <button type="submit" form="shipping-details-form" class="cdlv-shipping-form__submit">Continue to Payment</button>
         </div>
     </div>
     `;
@@ -352,98 +363,31 @@ const renderShippingForm = () => {
 
 const renderPaymentForm = () => {
     const p = cartState.paymentDetails;
-    let paymentFields = '';
-    
-    if (cartState.paymentMethod === 'momo') {
-        paymentFields = `
-            <div class="cdlv-payment-fields">
-                <div class="cdlv-form-group">
-                    <label for="momo-network">Select Network *</label>
-                    <select id="momo-network" required aria-required="true">
-                        <option value="mtn" ${p.momoNetwork === 'mtn' ? 'selected' : ''}>MTN Mobile Money</option>
-                        <option value="telecel" ${p.momoNetwork === 'telecel' ? 'selected' : ''}>Telecel Cash</option>
-                        <option value="at" ${p.momoNetwork === 'at' ? 'selected' : ''}>AT Money</option>
-                    </select>
-                </div>
-                <div class="cdlv-form-group">
-                    <label for="momo-phone">Mobile Money Number *</label>
-                    <input type="tel" id="momo-phone" value="${sanitizeText(p.momoPhone)}" placeholder="e.g. 024 123 4567" required aria-required="true">
-                </div>
-            </div>
-        `;
-    } else if (cartState.paymentMethod === 'card') {
-        paymentFields = `
-            <div class="cdlv-payment-fields">
-                <div class="cdlv-form-group cdlv-form-group--full">
-                    <label for="card-name">Name on Card *</label>
-                    <input type="text" id="card-name" value="${sanitizeText(p.cardName)}" required aria-required="true">
-                </div>
-                <div class="cdlv-form-group cdlv-form-group--full">
-                    <label for="card-number">Card Number *</label>
-                    <input type="text" id="card-number" value="${sanitizeText(p.cardNumber)}" placeholder="0000 0000 0000 0000" required aria-required="true">
-                </div>
-                <div class="cdlv-form-group">
-                    <label for="card-exp">Expiry Date *</label>
-                    <input type="text" id="card-exp" value="${sanitizeText(p.cardExp)}" placeholder="MM/YY" required aria-required="true">
-                </div>
-                <div class="cdlv-form-group">
-                    <label for="card-cvc">CVC *</label>
-                    <input type="text" id="card-cvc" value="${sanitizeText(p.cardCvc)}" placeholder="123" required aria-required="true">
-                </div>
-            </div>
-        `;
-    } else if (cartState.paymentMethod === 'paypal') {
-        paymentFields = `<div class="cdlv-payment-fields cdlv-payment-fields--redirect"><p>After clicking "Review Order", you will be redirected to PayPal to complete your purchase securely.</p></div>`;
-    }
-
     return `
-        <div class="cdlv-cart-panel__layout">
-            <section class="cdlv-shipping-form">
+        <div class="cdlv-cart-panel__layout cdlv-cart-panel__layout--wrap">
+            <section class="cdlv-shipping-form cdlv-cart-panel__main-area">
                 <h2 class="cdlv-shipping-form__title" tabindex="-1">Payment Information</h2>
-                <div class="cdlv-payment-options" aria-label="Payment Methods">
-                    <button type="button" 
-                            class="cdlv-payment-option ${cartState.paymentMethod === 'momo' ? 'is-selected' : ''}" 
-                            data-action="select-payment" 
-                            data-method="momo" 
-                            aria-pressed="${cartState.paymentMethod === 'momo'}">
-                        <span class="cdlv-payment-option__label">Mobile Money</span>
-                        <div class="cdlv-payment-option__icons">
-                            <img src="${buildPath('assets/icons/mtn.svg')}" alt="MTN" class="cdlv-payment-icon">
-                        </div>
-                    </button>
-
-                    <button type="button" 
-                            class="cdlv-payment-option ${cartState.paymentMethod === 'card' ? 'is-selected' : ''}" 
-                            data-action="select-payment" 
-                            data-method="card" 
-                            aria-pressed="${cartState.paymentMethod === 'card'}">
-                        <span class="cdlv-payment-option__label">Credit/Debit Card</span>
-                        <div class="cdlv-payment-option__icons">
-                            <img src="${buildPath('assets/icons/visa.svg')}" alt="Visa" class="cdlv-payment-icon">
-                        </div>
-                    </button>
-                    <button type="button" 
-                            class="cdlv-payment-option ${cartState.paymentMethod === 'paypal' ? 'is-selected' : ''}" 
-                            data-action="select-payment" 
-                            data-method="paypal" 
-                            aria-pressed="${cartState.paymentMethod === 'paypal'}">
-                        <span class="cdlv-payment-option__label">PayPal</span>
-                        <div class="cdlv-payment-option__icons">
-                            <img src="${buildPath('assets/icons/paypal.svg')}" alt="PayPal" class="cdlv-payment-icon">
-                        </div>
-                    </button>
-                </div>
-
+                <p class="cdlv-shipping-form__desc">
+                    In the future, the secure payment API will trigger here. For testing, please supply a reference number.
+                </p>
+                
                 <form id="payment-details-form" class="cdlv-shipping-form__grid">
-                    ${paymentFields}
-                    <div class="cdlv-shipping-form__actions cdlv-form-group--full">
-                        <button type="button" class="cdlv-shipping-form__back" data-action="back-to-shipping">Back to Shipping</button>
-                        <button type="submit" class="cdlv-shipping-form__submit">Review Order</button>
+                    <div class="cdlv-payment-fields cdlv-payment-fields--full">
+                        <div class="cdlv-form-group cdlv-form-group--full">
+                            <label for="test-payment-number">Test Payment Number *</label>
+                            <input type="text" id="test-payment-number" value="${sanitizeText(p.testNumber)}" placeholder="Enter test number..." required aria-required="true">
+                        </div>
                     </div>
                 </form>
             </section>
-            <div class="cdlv-cart-panel__sidebar">
+            
+            <div class="cdlv-cart-panel__sidebar cdlv-cart-panel__side-area">
                 ${renderDetailedSummary()} 
+            </div>
+
+            <div class="cdlv-shipping-form__actions cdlv-form-group--full cdlv-cart-panel__action-area">
+                <button type="button" class="cdlv-shipping-form__back" data-action="back-to-shipping">Back to Shipping</button>
+                <button type="submit" form="payment-details-form" class="cdlv-shipping-form__submit">Review Order</button>
             </div>
         </div>
     `;
@@ -454,8 +398,8 @@ const renderReviewView = () => {
     const fullName = `${s.firstName} ${s.lastName}`.trim() || 'No name provided';
     
     return `
-        <div class="cdlv-cart-panel__layout">
-            <section class="cdlv-shipping-form">
+        <div class="cdlv-cart-panel__layout cdlv-cart-panel__layout--wrap">
+            <section class="cdlv-shipping-form cdlv-cart-panel__main-area">
                 <h2 class="cdlv-shipping-form__title" tabindex="-1">Review & Confirm</h2>
                 
                 <div class="cdlv-review-grid">
@@ -475,27 +419,28 @@ const renderReviewView = () => {
                             <h3>Payment Method</h3>
                             <button type="button" class="cdlv-review-edit" data-action="edit-payment">Edit</button>
                         </div>
-                        <p><strong>${cartState.paymentMethod === 'momo' ? 'Mobile Money' : cartState.paymentMethod === 'card' ? 'Credit/Debit Card' : 'PayPal'}</strong></p>
-                        <p class="cdlv-review-card__note">You will not be charged until you click 'Place Order'.</p>
+                        <p><strong>Test API Checkout</strong></p>
+                        <p class="cdlv-review-card__note">Reference: ${sanitizeText(cartState.paymentDetails.testNumber)}</p>
                     </article>
                 </div>
 
-                <form id="place-order-form" class="cdlv-review-actions">
-                    <div class="cdlv-review-terms">
+                <form id="place-order-form">
+                    <div class="cdlv-review-terms cdlv-review-terms--margin">
                         <input type="checkbox" id="terms-agree" required aria-required="true">
                         <label for="terms-agree">I agree to the <a href="${buildPath('legal/terms-of-service.html')}" target="_blank">Terms of Service</a> and <a href="${buildPath('legal/privacy-policy.html')}" target="_blank">Privacy Policy</a>.</label>
-                    </div>
-                    
-                    <button type="submit" class="cdlv-review-submit">Place Order</button>
-                    
-                    <div class="cdlv-review-back-wrapper">
-                        <button type="button" class="cdlv-shipping-form__back" data-action="back-to-payment">Back to Payment</button>
                     </div>
                 </form>
             </section>
             
-            <div class="cdlv-cart-panel__sidebar">
+            <div class="cdlv-cart-panel__sidebar cdlv-cart-panel__side-area">
                 ${renderDetailedSummary()}
+            </div>
+
+            <div class="cdlv-review-actions cdlv-cart-panel__action-area">
+                <button type="submit" form="place-order-form" class="cdlv-review-submit">Place Order</button>
+                <div class="cdlv-review-back-wrapper cdlv-review-back-wrapper--margin">
+                    <button type="button" class="cdlv-shipping-form__back" data-action="back-to-payment">Back to Payment</button>
+                </div>
             </div>
         </div>
     `;
@@ -571,7 +516,6 @@ export const init = (node) => {
         }
     });
 
-    // Centralized Click Event Track Delegation
     node.addEventListener('click', (e) => {
         const actionBtn = e.target.closest('[data-action]');
         if (!actionBtn) return;
@@ -606,17 +550,6 @@ export const init = (node) => {
             return;
         }
 
-        if (action === 'select-payment') {
-            saveFormState(node);
-            const method = actionBtn.getAttribute('data-method');
-            if (cartState.paymentMethod !== method) {
-                cartState.paymentMethod = method;
-                updateView(node); 
-            }
-            return;
-        }
-
-        // --- FIXED SUB-ELEMENT LOOKUP AND SCOPING CONSTRAINTS ---
         const itemNode = actionBtn.closest('.cdlv-cart-item');
         if (itemNode) {
             const itemId = itemNode.getAttribute('data-id');
@@ -696,7 +629,7 @@ export const init = (node) => {
     node.addEventListener('submit', async (e) => {
         e.preventDefault(); 
         const formId = e.target.id;
-        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const submitBtn = document.querySelector(`button[form="${formId}"]`);
         const originalText = submitBtn.textContent;
         const spinnerHTML = `<svg class="cdlv-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>`;
 
@@ -711,24 +644,18 @@ export const init = (node) => {
             updateView(node);
 
         } else if (formId === 'place-order-form') {
-            // 1. Lock UI & Show Loading State
             submitBtn.disabled = true;
             submitBtn.innerHTML = `${spinnerHTML} Processing...`;
 
-            // 2. Execute Production Live Transaction Dispatch
             const databaseTransactionResult = await dispatchOrderToDatabase(cartState);
 
             if (databaseTransactionResult && databaseTransactionResult.success) {
-                // Success Routing Pipeline
                 clearCart();
                 cartState.items = [];
                 cartState.currentStep = 'Success';
                 updateView(node, false);
             } else {
-                // Fail Gracefully without leaking server stack parameters to clients
                 showNotification('error', 'Something went wrong, please try again or check your network. If the issue persists, contact support.');
-                
-                // Unlock interface inputs cleanly for structural corrections
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }

@@ -2753,13 +2753,55 @@ display: inline-block;
     transform: translateY(-2px);
 }
 
+.cdlv-cart-panel__empty-desc {
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text-dark);
+}
+
+.cdlv-cart-panel__success-icon {
+    color: var(--color-accent);
+    opacity: 1;
+}
+
+.cdlv-cart-panel__success-desc {
+    margin-bottom: var(--spacing-sm);
+    max-width: 600px;
+    text-align: center;
+    color: var(--color-text-dark);
+}
+
+.cdlv-cart-panel__success-note {
+    margin-bottom: var(--spacing-md);
+    max-width: 600px;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.6);
+}
+
 /* -------------------------
    LAYOUT ENGINE
    ------------------------- */
+.cdlv-cart-panel__layout--wrap {
+    flex-wrap: wrap;
+}
+
 .cdlv-cart-panel__layout {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+}
+
+.cdlv-cart-panel__main-area {
+    order: 1;
+}
+
+.cdlv-cart-panel__side-area {
+    order: 2;
+}
+
+.cdlv-cart-panel__action-area {
+    order: 3;
+    width: 100%;
+    margin-top: var(--spacing-md);
 }
 
 @media (min-width: 1024px) {
@@ -3218,6 +3260,12 @@ display: inline-block;
     margin-block: var(--spacing-sm);
 }
 
+.cdlv-shipping-form__desc {
+    margin-bottom: var(--spacing-md);
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 0.9rem;
+}
+
 .cdlv-form-group {
     display: flex;
     flex-direction: column;
@@ -3318,66 +3366,8 @@ display: inline-block;
     transform: translateY(-2px);
 }
 
-/* ==========================================================================
-   MODULE: PAYMENT OPTIONS
-   ========================================================================== */
-.cdlv-payment-options {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-}
-
-@media (min-width: 768px) {
-    .cdlv-payment-options {
-        flex-direction: row;
-    }
-}
-
-.cdlv-payment-option {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: var(--spacing-sm);
-    background: var(--color-primary);
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: var(--radius-strict);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.cdlv-payment-option:hover {
-    border-color: rgba(0, 0, 0, 0.4);
-    background: rgba(0, 0, 0, 0.02);
-}
-
-.cdlv-payment-option.is-selected {
-    border-color: var(--color-accent);
-    outline: 1px solid var(--color-accent); /* Double up for high contrast */
-    background: rgba(71, 59, 117, 0.03); /* Faint accent tint */
-}
-
-.cdlv-payment-option__label {
-    font-family: var(--font-family-body);
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--color-text-dark);
-}
-
-.cdlv-payment-option__icons {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    height: 24px;
-}
-
-.cdlv-payment-icon {
-    height: 100%;
-    width: auto;
-    object-fit: cover;
+.cdlv-payment-fields--full {
+    grid-column: 1 / -1;
 }
 
 /* -------------------------
@@ -3388,6 +3378,10 @@ display: inline-block;
     flex-direction: column;
     gap: 0.5rem;
     margin-bottom: var(--spacing-sm);
+}
+
+.cdlv-cart-summary__item-row--wrap {
+    flex-wrap: wrap;
 }
 
 .cdlv-cart-summary__item-row {
@@ -3406,6 +3400,20 @@ display: inline-block;
 .cdlv-cart-summary__item-price {
     font-weight: 500;
     color: var(--color-text-dark);
+    margin-top: 0.1rem;
+}
+
+.cdlv-cart-summary__item-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding-right: 1rem;
+}
+
+.cdlv-cart-summary__item-variant {
+    font-size: 0.8rem;
+    color: rgba(0, 0, 0, 0.6);
+    margin-top: 0.2rem;
 }
 
 /* ==========================================================================
@@ -3519,6 +3527,21 @@ display: inline-block;
 
 .cdlv-review-terms a:hover {
     text-decoration: none;
+}
+
+.cdlv-review-card__date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-dark);
+}
+
+.cdlv-review-terms--margin {
+    margin-top: var(--spacing-md);
+}
+
+.cdlv-review-back-wrapper--margin {
+    margin-top: 1rem;
 }
 
 /* The Massive CTA Button */
