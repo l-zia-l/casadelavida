@@ -16,7 +16,7 @@ export const getCart = () => {
         return storedCart ? JSON.parse(storedCart) : [];
     } catch (error) {
         console.error('Failed to parse cart data from LocalStorage:', error);
-        return []; // Return empty cart if JSON is corrupted
+        return [];
     }
 };
 
@@ -38,10 +38,10 @@ const saveCart = (cart) => {
  */
 export const addToCart = (item) => {
     const cart = getCart();
-    // Check if the exact product (and variant, if applicable) is already in the cart
-    const existingItemIndex = cart.findIndex(
-        (cartItem) => cartItem.id === item.id && cartItem.variant === item.variant
-    );
+    
+    // ARCHITECTURE UPDATE: We now rely purely on our composite ID 
+    // (which securely bakes in size, color, and subscription flags)
+    const existingItemIndex = cart.findIndex((cartItem) => cartItem.id === item.id);
 
     if (existingItemIndex > -1) {
         // Increment quantity, ensuring we don't exceed maxStock if provided
@@ -58,7 +58,7 @@ export const addToCart = (item) => {
 
 /**
  * Updates the quantity of a specific item.
- * @param {string} id - The product ID.
+ * @param {string} id - The composite product ID.
  * @param {number} newQuantity - The new quantity value.
  */
 export const updateItemQuantity = (id, newQuantity) => {
@@ -67,7 +67,6 @@ export const updateItemQuantity = (id, newQuantity) => {
 
     if (itemIndex > -1) {
         if (newQuantity <= 0) {
-            // Remove item entirely if quantity drops to 0 or below
             cart.splice(itemIndex, 1);
         } else {
             const maxStock = cart[itemIndex].maxStock || Infinity;
@@ -79,7 +78,7 @@ export const updateItemQuantity = (id, newQuantity) => {
 
 /**
  * Completely removes an item from the cart.
- * @param {string} id - The product ID.
+ * @param {string} id - The composite product ID.
  */
 export const removeFromCart = (id) => {
     const cart = getCart();
@@ -97,13 +96,16 @@ export const clearCart = () => {
 /**
  * ZERO TRUST PAYLOAD GENERATOR
  * Strips out local prices, names, and images. Returns only the pure
- * mathematical requirements for the database checkout transaction.
- * @returns {Array} [{ product_id: string, quantity: number }]
+ * structural requirements for the database checkout transaction.
+ * @returns {Array} Clean checkout payload mapped to database expectations.
  */
 export const getCheckoutPayload = () => {
     const cart = getCart();
     return cart.map(item => ({
-        product_id: item.id,
-        quantity: item.quantity
+        product_id: item.product_id, // The immutable base ID for database lookup
+        quantity: item.quantity,
+        size: item.size || null,
+        color: item.color || null,
+        is_subscription: Boolean(item.isSubscription)
     }));
 };
