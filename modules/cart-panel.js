@@ -642,7 +642,11 @@ export const init = (node) => {
                 cartState.currentStep = 'Success';
                 updateView(node, false);
             } else {
-                showNotification('error', 'Something went wrong, please try again or check your network. If the issue persists, contact support.');
+                // Show the exact server rejection reason in the notification popup
+                const errorAlert = databaseTransactionResult.triageMessage 
+                    || 'Transmission error encountered processing checkout.';
+                showNotification('error', errorAlert);
+                
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             }

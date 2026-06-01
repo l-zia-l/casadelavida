@@ -51,8 +51,15 @@ export const dispatchOrderToDatabase = async (cartState) => {
 
         if (!response.ok) {
             const rawErrorMsg = await response.text();
-            console.error("Backend Error Capture Trace logs:", rawErrorMsg);
-            throw new Error("Server transmission error encountered.");
+            console.error("CRITICAL DATABASE REJECTION RESPONSE:", rawErrorMsg);
+            
+            // Temporary Triage Hack: Bubble the real error message to your UI popup!
+            try {
+                const parsedError = JSON.parse(rawErrorMsg);
+                return { success: false, triageMessage: parsedError.message || rawErrorMsg };
+            } catch {
+                return { success: false, triageMessage: rawErrorMsg };
+            }
         }
 
         return await response.json();
