@@ -1,52 +1,33 @@
 /* ==========================================================================
-   MODULE: PRODUCT PAGE (modules/product-page.js)
-   Architecture: Exportable ES Module generating a fluid, 2-column e-commerce 
-                 interface. Uses event delegation for performance.
-   SEO: Semantic heading structures (h1, h2, h3).
-   A11y: WCAG Compliant. Custom quantity controls with aria labels.
-   Security: Strict CSP Compliance.
-   Pricing: Dynamic algorithmic discounts.
-   UX: Smart configuration rendering and interactive Add to Cart state loop.
+   MODULE: PRODUCT PAGE ENGINE (modules/product-page.js)
+   Architecture: Exportable ES Module driving an isolated 2-column interface.
+   Security: Enforces Zero-Trust mapping via centralized product register.
+   Data Design: Splits dynamic inputs (color, size) into discrete schema keys.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
 import { addToCart } from '../utils/cart.js';
+import { getProductFromRegistry } from '../utils/inventory.js'; // <-- CENTRAL DATA REGISTRY
 
 const sanitizeText = (str) => {
-    if (typeof str !== 'string') return '';
+    if (typeof str !== 'string' && typeof str !== 'number') return '';
     const tempDiv = document.createElement('div');
-    tempDiv.textContent = str;
+    tempDiv.textContent = str.toString();
     return tempDiv.innerHTML;
 };
 
-const defaultConfig = {
-    title: "The Serenity Wellness Box",
-    subtitle: "Organic Matcha, Raw Honey, and Artisan Accessories.",
-    images: [],
-    composition: "Organic Ceremonial Grade Matcha, Wildflower Raw Honey, White Peony Tea Leaves.",
-    bestFor: "Morning rituals, mindfulness practices, or deep focus work sessions.",
-    funFact: "Matcha contains L-theanine, an amino acid that promotes relaxed alertness without the caffeine crash.",
-    proTip: "Allow your water to cool slightly (to about 175°F) before pouring over matcha to prevent burning the leaves.",
-    deliveryCountryMsg: "Available for same-day local delivery in Accra and Tamale.",
-    sizes: [
-        { id: "s1", name: "Grand", desc: "60 Servings", price: 800 },
-        { id: "s2", name: "Deluxe", desc: "40 Servings", price: 700, popular: true, default: true },
-        { id: "s3", name: "Original", desc: "20 Servings", price: 600 }
-    ],
-    colors: [],
-    subscription: {
-        priceText: "Up to 30% Off + Free Shipping",
-        desc: "Best Value: Skip or cancel anytime."
-    }
-};
-
-const generateOptionsForQuantity = (quantity, config) => {
+/**
+ * Dynamically renders item selection cards depending on the current customer quantity selection.
+ * Enforces structured key allocation for size and color inputs.
+ */
+const generateOptionsForQuantity = (quantity, product) => {
     let html = '';
     
-    const hasMultipleSizes = config.sizes && config.sizes.length > 1;
-    const hasMultipleColors = config.colors && config.colors.length > 1;
+    const hasMultipleSizes = product.sizes && product.sizes.length > 1;
+    const hasMultipleColors = product.colors && product.colors.length > 1;
     const hasChoices = hasMultipleSizes || hasMultipleColors;
     
+    // If no complex choices exist, iterate just once to capture baseline defaults cleanly
     const iterations = hasChoices ? quantity : 1;
     
     for (let i = 1; i <= iterations; i++) {
@@ -56,14 +37,17 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `<h3 class="cdlv-product-page__item-title">Item ${i} Configuration</h3>`;
         }
 
-        if (config.sizes && config.sizes.length > 0) {
+        // 1. Structural Size Array Resolution
+        if (product.sizes && product.sizes.length > 0) {
             html += `<div class="cdlv-product-page__options-grid" role="group" aria-label="Select Size for Item ${i}">`;
-            config.sizes.forEach(size => {
-                const isSelected = size.default || config.sizes.length === 1 ? 'is-selected' : '';
-                const isChecked = size.default || config.sizes.length === 1 ? 'checked' : '';
+            product.sizes.forEach(size => {
+                const isSelected = size.default || product.sizes.length === 1 ? 'is-selected' : '';
+                const isChecked = size.default || product.sizes.length === 1 ? 'checked' : '';
                 const popularBadge = size.popular ? `<span class="cdlv-product-page__popular-badge" aria-hidden="true">Most Popular Size</span>` : '';
                 
-                const calculatedSubPrice = Math.round(size.price * 0.7);
+                // secure visual subscription baseline estimation matching server protocols (30% off metric)
+                const secureSubFactor = product.subscriptionDiscount ? (1 - (product.subscriptionDiscount / 100)) : 0.7;
+                const calculatedSubPrice = Math.round(size.price * secureSubFactor);
                 
                 html += `
                     <label class="cdlv-product-page__option-box ${isSelected}" data-type="size">
@@ -71,10 +55,10 @@ const generateOptionsForQuantity = (quantity, config) => {
                         <input type="radio" name="item_${i}_size" value="${sanitizeText(size.id)}" class="cdlv-product-page__sr-only" ${isChecked}>
                         <div class="cdlv-product-page__price-wrapper">
                             <span class="cdlv-product-page__option-price cdlv-product-page__price-original">
-                                <span class="cdlv-product-page__sr-only">Original Price: </span>GH₵ ${sanitizeText(size.price.toString())}
+                                <span class="cdlv-product-page__sr-only">Original Price: </span>GH₵ ${sanitizeText(size.price.toFixed(2))}
                             </span>
                             <span class="cdlv-product-page__option-price cdlv-product-page__price-discount">
-                                <span class="cdlv-product-page__sr-only">Subscription Price: </span>GH₵ ${calculatedSubPrice.toString()}
+                                <span class="cdlv-product-page__sr-only">Subscription Price: </span>GH₵ ${calculatedSubPrice.toFixed(2)}
                             </span>
                         </div>
                         <span class="cdlv-product-page__option-name">${sanitizeText(size.name)}</span>
@@ -85,16 +69,18 @@ const generateOptionsForQuantity = (quantity, config) => {
             html += `</div>`;
         }
 
-        if (config.colors && config.colors.length > 0) {
+        // 2. Structural Color Array Resolution
+        if (product.colors && product.colors.length > 0) {
             html += `<div class="cdlv-product-page__options-grid cdlv-product-page__options-grid--colors" role="group" aria-label="Select Color for Item ${i}">`;
-            config.colors.forEach(color => {
-                const isSelected = color.default || config.colors.length === 1 ? 'is-selected' : '';
-                const isChecked = color.default || config.colors.length === 1 ? 'checked' : '';
+            product.colors.forEach(color => {
+                const isSelected = color.default || product.colors.length === 1 ? 'is-selected' : '';
+                const isChecked = color.default || product.colors.length === 1 ? 'checked' : '';
                 const resolvedImgPath = buildPath(sanitizeText(color.img));
+                
                 html += `
                     <label class="cdlv-product-page__option-box cdlv-product-page__option-box--color ${isSelected}" data-type="color">
                         <input type="radio" name="item_${i}_color" value="${sanitizeText(color.id)}" class="cdlv-product-page__sr-only" ${isChecked}>
-                        <img src="${resolvedImgPath}" alt="${sanitizeText(config.title)} in ${sanitizeText(color.name)}" class="cdlv-product-page__option-img u-img-loader u-img-reveal" loading="lazy" decoding="async">
+                        <img src="${resolvedImgPath}" alt="${sanitizeText(product.title)} in ${sanitizeText(color.name)}" class="cdlv-product-page__option-img u-img-loader u-img-reveal" loading="lazy" decoding="async">
                         <div class="cdlv-product-page__color-text">
                             <span class="cdlv-product-page__option-name">${sanitizeText(color.name)}</span>
                         </div>
@@ -109,20 +95,29 @@ const generateOptionsForQuantity = (quantity, config) => {
 };
 
 export const init = (node, customConfig = {}) => {
-    const config = { ...defaultConfig, ...customConfig };
-    const mainImgPath = config.images.length > 0 ? buildPath(sanitizeText(config.images[0])) : '';
+    // SECURITY GATEWAY: Identify and instantiate the verified record matching the payload registration token
+    if (!customConfig.id) {
+        console.error("Architect Exception: Critical initialization block failure. Missing configuration ID declaration token context.", node);
+        return;
+    }
+    
+    const product = getProductFromRegistry(customConfig.id);
+    
+    // Resolve imagery structures
+    const imageryList = product.images || (product.image ? [product.image] : []);
+    const mainImgPath = imageryList.length > 0 ? buildPath(sanitizeText(imageryList[0])) : '';
     
     const moduleHTML = `
         <article class="cdlv-product-page" data-image-sync>
-            <h1 class="cdlv-product-page__title-mobile">${sanitizeText(config.title)}</h1>
+            <h1 class="cdlv-product-page__title-mobile">${sanitizeText(product.title)}</h1>
 
             <section class="cdlv-product-page__overview" aria-label="Product Gallery and Description">
                 <div class="cdlv-product-page__main-img-wrapper u-img-loader">
-                    <img id="main-product-image" src="${mainImgPath}" alt="${sanitizeText(config.title)} - Main Product View" class="u-img-reveal" fetchpriority="high" loading="eager" decoding="sync">
+                    <img id="main-product-image" src="${mainImgPath}" alt="${sanitizeText(product.title)} - Main Product View" class="u-img-reveal" fetchpriority="high" loading="eager" decoding="sync">
                 </div>
                 
                 <div class="cdlv-product-page__slider" role="group" aria-label="Product Image Gallery">
-                    ${config.images.map((img, idx) => {
+                    ${imageryList.map((img, idx) => {
                         const resolvedThumbPath = buildPath(sanitizeText(img));
                         const isCurrent = idx === 0 ? 'aria-current="true"' : 'aria-current="false"';
                         const activeClass = idx === 0 ? 'is-active' : '';
@@ -139,25 +134,25 @@ export const init = (node, customConfig = {}) => {
                 </div>
 
                 <div class="cdlv-product-page__desc">
-                    <h2 class="cdlv-product-page__subtitle">${sanitizeText(config.subtitle)}</h2>
+                    <h2 class="cdlv-product-page__subtitle">${sanitizeText(product.subtitle)}</h2>
                     <ul class="cdlv-product-page__bullet-list" id="desc-list">
-                        <li><strong>Composition:</strong> ${sanitizeText(config.composition)}</li>
-                        <li><strong>Best For:</strong> ${sanitizeText(config.bestFor)}</li>
-                        <li><strong>Fun Fact:</strong> ${sanitizeText(config.funFact)}</li>
-                        <li><strong>Pro Tip:</strong> ${sanitizeText(config.proTip)}</li>
+                        <li><strong>Composition:</strong> ${sanitizeText(product.composition)}</li>
+                        <li><strong>Best For:</strong> ${sanitizeText(product.bestFor)}</li>
+                        <li><strong>Fun Fact:</strong> ${sanitizeText(product.funFact)}</li>
+                        <li><strong>Pro Tip:</strong> ${sanitizeText(product.proTip)}</li>
                     </ul>
                     <button type="button" class="cdlv-product-page__read-more-btn" id="read-more-btn" aria-expanded="false" aria-controls="desc-list">Read More</button>
                     
-                    ${config.deliveryCountryMsg ? `
+                    ${product.deliveryCountryMsg ? `
                         <div class="cdlv-product-page__delivery-msg" role="status">
-                            ${sanitizeText(config.deliveryCountryMsg)}
+                            ${sanitizeText(product.deliveryCountryMsg)}
                         </div>
                     ` : ''}
                 </div>
             </section>
 
             <section class="cdlv-product-page__details" aria-label="Product Configuration and Checkout">
-                <div class="cdlv-product-page__title-desktop" aria-hidden="true">${sanitizeText(config.title)}</div>
+                <div class="cdlv-product-page__title-desktop" aria-hidden="true">${sanitizeText(product.title)}</div>
 
                 <div class="cdlv-product-page__form-group">
                     <label class="cdlv-product-page__label" for="qty">Quantity</label>
@@ -169,17 +164,17 @@ export const init = (node, customConfig = {}) => {
                 </div>
 
                 <div id="dynamic-options-container">
-                    ${generateOptionsForQuantity(1, config)}
+                    ${generateOptionsForQuantity(1, product)}
                 </div>
 
-                <fieldset class="cdlv-product-page__purchase-fieldset">
+                <fieldset class="cdlv-product-page__purchase-fieldset" ${product.subscriptionDiscount ? '' : 'hidden'}>
                     <legend class="cdlv-product-page__label cdlv-product-page__purchase-legend">Purchasing Options</legend>
                     <div class="cdlv-product-page__purchase-options">
                         <label class="cdlv-product-page__radio-row">
                             <input type="radio" name="purchase_type" value="subscription" id="radio-sub" class="cdlv-product-page__radio-input">
                             <div class="cdlv-product-page__radio-content">
-                                <span class="cdlv-product-page__radio-title">Start a Subscription: ${sanitizeText(config.subscription.priceText)}</span>
-                                <span class="cdlv-product-page__radio-desc">${sanitizeText(config.subscription.desc)}</span>
+                                <span class="cdlv-product-page__radio-title">Start a Subscription: ${sanitizeText(product.subscription?.priceText || '')}</span>
+                                <span class="cdlv-product-page__radio-desc">${sanitizeText(product.subscription?.desc || '')}</span>
                             </div>
                         </label>
                         
@@ -193,7 +188,9 @@ export const init = (node, customConfig = {}) => {
                 </fieldset>
 
                 <div class="cdlv-product-page__submit-wrapper">
-                    <button type="button" class="cdlv-product-page__btn" id="add-to-cart-btn">Add to Cart</button>
+                    <button type="button" class="cdlv-product-page__btn" id="add-to-cart-btn" ${product.isOutOfStock ? 'disabled aria-disabled="true"' : ''}>
+                        ${product.isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                    </button>
                 </div>
             </section>
         </article>
@@ -201,25 +198,19 @@ export const init = (node, customConfig = {}) => {
 
     node.innerHTML = moduleHTML;
 
-    // DOM Elements
+    // Target Selection Mappings
     const mainWrapper = node.querySelector('.cdlv-product-page');
     const mainImg = node.querySelector('#main-product-image');
     const thumbnails = node.querySelectorAll('.cdlv-product-page__thumb-btn');
     const readMoreBtn = node.querySelector('#read-more-btn');
     const descList = node.querySelector('#desc-list');
-    
-    // Custom Quantity Logic Elements
     const qtyInput = node.querySelector('#qty');
     const btnMinus = node.querySelector('#qty-minus');
     const btnPlus = node.querySelector('#qty-plus');
-    
     const dynamicContainer = node.querySelector('#dynamic-options-container');
     const purchaseRadios = node.querySelectorAll('input[name="purchase_type"]');
     const addToCartBtn = node.querySelector('#add-to-cart-btn');
 
-    // ==========================================================================
-    // INTERACTIVE CART BUTTON STATE MACHINE
-    // ==========================================================================
     let cartState = 'initial'; 
 
     const markAsModified = () => {
@@ -230,46 +221,48 @@ export const init = (node, customConfig = {}) => {
         }
     };
 
-    if (addToCartBtn) {
+    // ==========================================================================
+    // NORMALIZED DATA STORAGE PIPELINE
+    // ==========================================================================
+    if (addToCartBtn && !product.isOutOfStock) {
         addToCartBtn.addEventListener('click', () => {
             if (cartState === 'initial' || cartState === 'modified') {
-                
-                // --- NEW LOCALSTORAGE INTEGRATION ---
-                const isSubscription = node.querySelector('#radio-sub')?.checked;
+                const isSubscription = node.querySelector('#radio-sub')?.checked || false;
                 const quantity = parseInt(qtyInput.value, 10);
                 
-                // Because your UI allows different configs for each item if qty > 1, 
-                // we iterate and add them as individual entries into the cart.
                 for (let i = 1; i <= quantity; i++) {
                     const sizeRadio = node.querySelector(`input[name="item_${i}_size"]:checked`);
                     const colorRadio = node.querySelector(`input[name="item_${i}_color"]:checked`);
                     
-                    const selectedSizeId = sizeRadio ? sizeRadio.value : (config.sizes?.[0]?.id || 'default');
-                    const sizeObj = config.sizes?.find(s => s.id === selectedSizeId) || { price: 0, name: 'Standard' };
+                    const selectedSizeId = sizeRadio ? sizeRadio.value : (product.sizes?.[0]?.id || 's1');
+                    const selectedColorId = colorRadio ? colorRadio.value : null;
                     
-                    // Calculate price securely based on UI selection
+                    const sizeObj = product.sizes?.find(s => s.id === selectedSizeId) || { price: 0, name: 'Standard' };
+                    const colorObj = product.colors?.find(c => c.id === selectedColorId);
+                    
                     let finalPrice = sizeObj.price;
-                    if (isSubscription) {
-                        finalPrice = Math.round(finalPrice * 0.7); // 30% off UI logic
+                    if (isSubscription && product.subscriptionDiscount) {
+                        const factor = 1 - (product.subscriptionDiscount / 100);
+                        finalPrice = Math.round(finalPrice * factor);
                     }
 
-                    const variantName = [sizeObj.name, colorRadio?.value].filter(Boolean).join(' - ');
-                    
-                    // Build the standardized item payload for the cart
+                    // STRUCTURAL SCHEMA SEPARATION: Color, size, and sub flags are isolated properties
                     const cartItem = {
-                        id: `${config.id || 'prod_' + Math.random().toString(36).substr(2, 5)}_${selectedSizeId}`,
-                        name: config.title,
-                        variant: isSubscription ? `${variantName} (Sub)` : variantName,
-                        price: finalPrice,
+                        id: `${product.id}_${selectedSizeId}_${selectedColorId || 'none'}_${isSubscription ? 'sub' : 'one'}`,
+                        product_id: product.id, // Immutable reference back to registry core
+                        name: product.title,
+                        size: selectedSizeId,
+                        color: selectedColorId,
+                        isSubscription: isSubscription,
+                        price: finalPrice, 
                         quantity: 1, 
-                        maxStock: 10,
-                        image: config.images[0] || '',
+                        maxStock: product.maxStock || 10,
+                        image: colorObj ? colorObj.img : product.image,
                         url: window.location.pathname
                     };
                     
                     addToCart(cartItem);
                 }
-                // --- END LOCALSTORAGE INTEGRATION ---
 
                 cartState = cartState === 'initial' ? 'added' : 'saved';
                 addToCartBtn.textContent = cartState === 'added' ? 'Added to Cart' : 'Saved';
@@ -278,7 +271,7 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Custom Quantity Button Listeners
+    // Interactive Control Loops
     if (qtyInput && btnMinus && btnPlus) {
         btnMinus.addEventListener('click', () => {
             let val = parseInt(qtyInput.value, 10);
@@ -302,12 +295,11 @@ export const init = (node, customConfig = {}) => {
                 val = 1;
                 e.target.value = 1;
             }
-            dynamicContainer.innerHTML = generateOptionsForQuantity(val, config);
-            markAsModified(); // Trigger state change
+            dynamicContainer.innerHTML = generateOptionsForQuantity(val, product);
+            markAsModified();
         });
     }
 
-    // Dynamic Pricing Subscription Logic
     purchaseRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             if (e.target.value === 'subscription') {
@@ -315,19 +307,18 @@ export const init = (node, customConfig = {}) => {
             } else {
                 mainWrapper.classList.remove('cdlv-product-page--subscription-active');
             }
-            markAsModified(); // Trigger state change
+            markAsModified();
         });
     });
 
-    if (node.querySelector('#radio-sub').checked) {
+    if (node.querySelector('#radio-sub')?.checked) {
         mainWrapper.classList.add('cdlv-product-page--subscription-active');
     }
 
-    // Read More Logic
+    // Read More Text Collapsing Toggle Loop
     if (readMoreBtn && descList) {
         const evaluateReadMore = () => {
             const isExpanded = descList.classList.contains('is-expanded');
-            
             descList.style.maxHeight = 'none';
             const trueHeight = descList.scrollHeight;
 
@@ -338,9 +329,7 @@ export const init = (node, customConfig = {}) => {
             }
 
             descList.style.maxHeight = '';
-            const constrainedHeight = descList.clientHeight;
-
-            if (trueHeight > constrainedHeight) {
+            if (trueHeight > descList.clientHeight) {
                 readMoreBtn.style.display = 'inline-block';
             } else {
                 readMoreBtn.style.display = 'none';
@@ -356,7 +345,6 @@ export const init = (node, customConfig = {}) => {
 
         readMoreBtn.addEventListener('click', () => {
             const isExpanded = descList.classList.contains('is-expanded');
-            
             if (!isExpanded) {
                 descList.classList.add('is-expanded');
                 descList.style.maxHeight = descList.scrollHeight + 'px';
@@ -373,7 +361,7 @@ export const init = (node, customConfig = {}) => {
         });
     }
 
-    // Thumbnail logic
+    // Media Thumbnail Selection Loop
     thumbnails.forEach(thumb => {
         thumb.addEventListener('click', (e) => {
             const targetSrc = e.currentTarget.getAttribute('data-target-src');
@@ -395,19 +383,16 @@ export const init = (node, customConfig = {}) => {
         });
     });
 
-    // Options Grid Change Tracker (Sizes & Colors)
     if (dynamicContainer) {
         dynamicContainer.addEventListener('change', (e) => {
             if (e.target.type === 'radio') {
                 const labelBox = e.target.closest('.cdlv-product-page__option-box');
                 const gridContainer = labelBox.closest('.cdlv-product-page__options-grid');
-                
                 if (gridContainer) {
-                    const allLabels = gridContainer.querySelectorAll('.cdlv-product-page__option-box');
-                    allLabels.forEach(label => label.classList.remove('is-selected'));
+                    gridContainer.querySelectorAll('.cdlv-product-page__option-box').forEach(l => l.classList.remove('is-selected'));
                     labelBox.classList.add('is-selected');
                 }
-                markAsModified(); // Trigger state change
+                markAsModified();
             }
         });
     }

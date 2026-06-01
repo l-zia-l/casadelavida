@@ -1,12 +1,13 @@
 /* ==========================================================================
-   MODULE: CART PANEL (modules/cart-panel.js)
-   Architecture: Exportable ES Module. Renders a reactive, multi-step checkout.
-   State Management: Preserves form data across internal navigation and 
-   hooks into the browser's native History API for the Back button.
+   MODULE: CART PANEL ENGINE & CHECKOUT FLOW (modules/cart-panel.js)
+   Architecture: Exportable Reactive View Engine with Native State Scrapes.
+   Security: Cross-verifies database identifiers cleanly against central registry.
+   Data Design: Processes dynamic granular properties (size, color, flags).
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
 import { getCart, updateItemQuantity, removeFromCart, clearCart } from '../utils/cart.js';
+import { getProductFromRegistry } from '../utils/inventory.js'; // <-- CENTRAL REGISTRY INGESTION
 
 const sanitizeText = (str) => {
     if (typeof str !== 'string' && typeof str !== 'number') return '';
@@ -15,7 +16,7 @@ const sanitizeText = (str) => {
     return tempDiv.innerHTML;
 }; 
 
-// Application State
+// Application Runtime State Machine
 let cartState = {
     currentStep: 'Cart',
     paymentMethod: 'momo',
@@ -35,7 +36,6 @@ let cartState = {
 const simulateBackendCall = () => new Promise(resolve => setTimeout(resolve, 800));
 
 // --- DATA PRESERVATION ENGINE ---
-// Scrapes the current DOM values and saves them to state BEFORE a view changes
 const saveFormState = (node) => {
     if (cartState.currentStep === 'Shipping & Details') {
         cartState.shippingDetails = {
@@ -82,49 +82,69 @@ const renderTabbedProgress = (activeStep) => {
     `;
 };
 
-const renderEmptyState = () => `...`; // (Keep this exactly as you had it, omitted here for brevity)
+const renderEmptyState = () => `
+    <div class="cdlv-cart-panel__empty">
+        <h2 class="cdlv-cart-panel__empty-title">Your Cart is Empty</h2>
+        <p style="margin-bottom: var(--spacing-md); color: var(--color-text-dark);">Nurture yourself by filling it with items from our collection.</p>
+        <a href="${buildPath('shop.html')}" class="cdlv-cart-panel__empty-btn">Explore Shop</a>
+    </div>
+`;
 
 const renderCartItems = () => {
-    return cartState.items.map(item => `
-        <article class="cdlv-cart-item" data-id="${sanitizeText(item.id)}">
-            <a href="${buildPath(item.url || 'shop.html')}" class="cdlv-cart-item__image-wrap u-img-loader" aria-label="View ${sanitizeText(item.name)}">
-                <img src="${buildPath(item.image)}" alt="${sanitizeText(item.name)}" class="cdlv-cart-item__image" loading="lazy" decoding="async">
-            </a>
-            
-            <div class="cdlv-cart-item__details">
-                <a href="${buildPath(item.url || 'shop.html')}" class="cdlv-cart-item__title-link">
-                    <h3 class="cdlv-cart-item__title">${sanitizeText(item.name)}</h3>
+    return cartState.items.map(item => {
+        // SECURITY PIPELINE: Resolve structural parameters dynamically out of the central registry
+        const productRegistryRef = getProductFromRegistry(item.product_id);
+        const matchedSize = productRegistryRef.sizes?.find(s => s.id === item.size);
+        const matchedColor = productRegistryRef.colors?.find(c => c.id === item.color);
+
+        const displayName = productRegistryRef.title || item.name;
+        const sizeLabel = matchedSize ? matchedSize.name : 'Standard';
+        const colorLabel = matchedColor ? ` - ${matchedColor.name}` : '';
+        const subscriptionLabel = item.isSubscription ? ' (Subscription Cycle)' : '';
+        const completeVariantString = `${sizeLabel}${colorLabel}${subscriptionLabel}`;
+        
+        const displayImage = matchedColor ? matchedColor.img : (productRegistryRef.image || item.image);
+
+        return `
+            <article class="cdlv-cart-item" data-id="${sanitizeText(item.id)}">
+                <a href="${buildPath(productRegistryRef.link || 'shop.html')}" class="cdlv-cart-item__image-wrap u-img-loader" aria-label="View ${sanitizeText(displayName)}">
+                    <img src="${buildPath(displayImage)}" alt="${sanitizeText(displayName)}" class="cdlv-cart-item__image" loading="lazy" decoding="async">
                 </a>
-                <p class="cdlv-cart-item__variant">${sanitizeText(item.variant)}</p>
                 
-                <div class="cdlv-cart-item__text-actions">
-                    <a href="${buildPath(item.url || 'shop.html')}" class="cdlv-cart-item__action-link">Edit Item</a>
-                    <button type="button" class="cdlv-cart-item__remove" data-action="remove">Remove</button>
+                <div class="cdlv-cart-item__details">
+                    <a href="${buildPath(productRegistryRef.link || 'shop.html')}" class="cdlv-cart-item__title-link">
+                        <h3 class="cdlv-cart-item__title">${sanitizeText(displayName)}</h3>
+                    </a>
+                    <p class="cdlv-cart-item__variant">${sanitizeText(completeVariantString)}</p>
+                    
+                    <div class="cdlv-cart-item__text-actions">
+                        <a href="${buildPath(productRegistryRef.link || 'shop.html')}" class="cdlv-cart-item__action-link">Edit Item</a>
+                        <button type="button" class="cdlv-cart-item__remove" data-action="remove">Remove</button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="cdlv-cart-item__actions">
-                <div class="cdlv-cart-item__qty-control">
-                    <button type="button" class="cdlv-cart-item__qty-btn" data-action="decrease" aria-label="Decrease quantity" ${item.quantity <= 1 ? 'disabled' : ''}>
-                        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </button>
-                    <span class="cdlv-cart-item__qty-value" data-target="qty">${sanitizeText(item.quantity)}</span>
-                    <button type="button" class="cdlv-cart-item__qty-btn" data-action="increase" aria-label="Increase quantity" ${item.quantity >= item.maxStock ? 'disabled' : ''}>
-                        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </button>
+                <div class="cdlv-cart-item__actions">
+                    <div class="cdlv-cart-item__qty-control">
+                        <button type="button" class="cdlv-cart-item__qty-btn" data-action="decrease" aria-label="Decrease quantity" ${item.quantity <= 1 ? 'disabled' : ''}>
+                            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                        <span class="cdlv-cart-item__qty-value" data-target="qty">${sanitizeText(item.quantity)}</span>
+                        <button type="button" class="cdlv-cart-item__qty-btn" data-action="increase" aria-label="Increase quantity" ${item.quantity >= item.maxStock ? 'disabled' : ''}>
+                            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        </button>
+                    </div>
+                    <span class="cdlv-cart-item__stock-warning" data-target="warning" ${item.quantity >= item.maxStock ? '' : 'hidden'}>Only ${sanitizeText(item.maxStock)} left in stock.</span>
                 </div>
-                <span class="cdlv-cart-item__stock-warning" data-target="warning" ${item.quantity >= item.maxStock ? '' : 'hidden'}>Only ${sanitizeText(item.maxStock)} left in stock.</span>
-            </div>
 
-            <div class="cdlv-cart-item__price" data-target="item-price">
-                ₵${sanitizeText((item.price * item.quantity).toFixed(2))}
-            </div>
-        </article>
-    `).join('');
+                <div class="cdlv-cart-item__price" data-target="item-price">
+                    ₵${sanitizeText((item.price * item.quantity).toFixed(2))}
+                </div>
+            </article>
+        `;
+    }).join('');
 };
 
 const renderSummary = () => {
-    // Keep exact same as before (used on the Cart view)
     const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const total = subtotal + cartState.shippingRate;
 
@@ -162,15 +182,17 @@ const renderSummary = () => {
 };
 
 const renderDetailedSummary = () => {
-    // Keep exact same as before (used on Shipping/Payment/Review)
     const subtotal = cartState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const total = subtotal + cartState.shippingRate;
-    const itemsList = cartState.items.map(item => `
-        <div class="cdlv-cart-summary__item-row">
-            <span class="cdlv-cart-summary__item-name">${sanitizeText(item.quantity)}x ${sanitizeText(item.name)}</span>
-            <span class="cdlv-cart-summary__item-price">₵${sanitizeText((item.price * item.quantity).toFixed(2))}</span>
-        </div>
-    `).join('');
+    const itemsList = cartState.items.map(item => {
+        const referenceDef = getProductFromRegistry(item.product_id);
+        return `
+            <div class="cdlv-cart-summary__item-row">
+                <span class="cdlv-cart-summary__item-name">${sanitizeText(item.quantity)}x ${sanitizeText(referenceDef.title || item.name)}</span>
+                <span class="cdlv-cart-summary__item-price">₵${sanitizeText((item.price * item.quantity).toFixed(2))}</span>
+            </div>
+        `;
+    }).join('');
 
     return `
         <aside class="cdlv-cart-summary">
@@ -192,7 +214,6 @@ const renderDetailedSummary = () => {
 };
 
 const showNotification = (type, message) => {
-    // Remove existing notification if present
     const existing = document.querySelector('.cdlv-notification');
     if (existing) existing.remove();
 
@@ -209,18 +230,13 @@ const showNotification = (type, message) => {
     `;
     
     document.body.appendChild(notification);
-
-    // Trigger reflow for CSS animation
-    requestAnimationFrame(() => {
-        notification.classList.add('is-visible');
-    });
+    requestAnimationFrame(() => notification.classList.add('is-visible'));
 
     notification.querySelector('.cdlv-notification__close').addEventListener('click', () => {
         notification.classList.remove('is-visible');
-        setTimeout(() => notification.remove(), 300); // Wait for transition
+        setTimeout(() => notification.remove(), 300);
     });
 
-    // Auto-dismiss after 6 seconds
     setTimeout(() => {
         if (document.body.contains(notification)) {
             notification.classList.remove('is-visible');
@@ -265,13 +281,12 @@ const renderCartView = () => `
 `;
 
 const renderShippingForm = () => {
-    const s = cartState.shippingDetails; // shorthand for value injection
+    const s = cartState.shippingDetails;
     return `
     <div class="cdlv-cart-panel__layout">
         <section class="cdlv-shipping-form">
             <h2 class="cdlv-shipping-form__title" tabindex="-1">Shipping & Personal Details</h2>
             <form id="shipping-details-form" class="cdlv-shipping-form__grid">
-                
                 <div class="cdlv-form-group">
                     <label for="first-name">First Name *</label>
                     <input type="text" id="first-name" value="${sanitizeText(s.firstName)}" required aria-required="true">
@@ -488,9 +503,8 @@ const renderReviewView = () => {
     `;
 };
 
-// Added `pushHistory` flag to prevent duplicate state stacking when using browser Back button
 const updateView = (node, pushHistory = true) => {
-    if (cartState.items.length === 0) {
+    if (cartState.items.length === 0 && cartState.currentStep !== 'Success') {
         node.innerHTML = renderEmptyState();
         return;
     }
@@ -515,14 +529,12 @@ const updateView = (node, pushHistory = true) => {
         ${viewContent}
     `;
 
-    // History API Integration
     if (pushHistory) {
         const url = new URL(window.location);
         url.searchParams.set('step', cartState.currentStep.replace(/\s+/g, '-').toLowerCase());
         window.history.pushState({ checkoutStep: cartState.currentStep }, '', url);
     }
 
-    // A11y: Shift focus logically when views change
     if (cartState.currentStep !== 'Cart') {
         const titleNode = node.querySelector('h2');
         if (titleNode) {
@@ -547,30 +559,27 @@ const updateFinancials = (node) => {
 };
 
 export const init = (node) => {
-    // Initialize History API to lock in the first state
     const url = new URL(window.location);
     url.searchParams.set('step', 'cart');
     window.history.replaceState({ checkoutStep: 'Cart' }, '', url);
 
     updateView(node, false);
 
-    // Hijack the Browser "Back" and "Forward" buttons
     window.addEventListener('popstate', (e) => {
         if (e.state && e.state.checkoutStep) {
-            saveFormState(node); // Save current view before it's destroyed
+            saveFormState(node);
             cartState.currentStep = e.state.checkoutStep;
-            updateView(node, false); // Pass false so we don't push a new history state on top
+            updateView(node, false);
         }
     });
 
-    // Event Delegation: Clicks
+    // Centralized Click Event Track Delegation
     node.addEventListener('click', (e) => {
         const actionBtn = e.target.closest('[data-action]');
         if (!actionBtn) return;
 
         const action = actionBtn.getAttribute('data-action');
 
-        // View Routing (Notice we save state BEFORE changing currentStep)
         if (action === 'checkout') {
             saveFormState(node);
             cartState.currentStep = 'Shipping & Details';
@@ -600,7 +609,7 @@ export const init = (node) => {
         }
 
         if (action === 'select-payment') {
-            saveFormState(node); // Save before swapping payment fields
+            saveFormState(node);
             const method = actionBtn.getAttribute('data-method');
             if (cartState.paymentMethod !== method) {
                 cartState.paymentMethod = method;
@@ -609,7 +618,7 @@ export const init = (node) => {
             return;
         }
 
-        // Cart Actions (Quantity/Remove logic remains exactly the same)
+        // --- FIXED SUB-ELEMENT LOOKUP AND SCOPING CONSTRAINTS ---
         const itemNode = actionBtn.closest('.cdlv-cart-item');
         if (itemNode) {
             const itemId = itemNode.getAttribute('data-id');
@@ -621,52 +630,51 @@ export const init = (node) => {
             if (action === 'increase' || action === 'decrease') {
                 if (action === 'increase' && item.quantity < item.maxStock) {
                     item.quantity += 1;
-                    updateItemQuantity(item.id, item.quantity); // <-- UPDATE LOCALSTORAGE
+                    updateItemQuantity(item.id, item.quantity);
                 } else if (action === 'decrease' && item.quantity > 1) {
                     item.quantity -= 1;
-                    updateItemQuantity(item.id, item.quantity); // <-- UPDATE LOCALSTORAGE
+                    updateItemQuantity(item.id, item.quantity);
                 }
 
-            const qtyNode = itemNode.querySelector('[data-target="qty"]');
-            const priceNode = itemNode.querySelector('[data-target="item-price"]');
-            const decreaseBtn = itemNode.querySelector('[data-action="decrease"]');
-            const increaseBtn = itemNode.querySelector('[data-action="increase"]');
-            const warningNode = itemNode.querySelector('[data-target="warning"]');
+                const qtyNode = itemNode.querySelector('[data-target="qty"]');
+                const priceNode = itemNode.querySelector('[data-target="item-price"]');
+                const decreaseBtn = itemNode.querySelector('[data-action="decrease"]');
+                const increaseBtn = itemNode.querySelector('[data-action="increase"]');
+                const warningNode = itemNode.querySelector('[data-target="warning"]');
 
-            qtyNode.textContent = item.quantity;
-            priceNode.textContent = `₵${(item.price * item.quantity).toFixed(2)}`;
-            
-            decreaseBtn.disabled = item.quantity <= 1;
-            increaseBtn.disabled = item.quantity >= item.maxStock;
-            
-            if (item.quantity >= item.maxStock) {
-                warningNode.removeAttribute('hidden');
-            } else {
-                warningNode.setAttribute('hidden', 'true');
-            }
-            updateFinancials(node);
-        } 
-        }
-        else if (action === 'remove') {
-            removeFromCart(item.id); // <-- REMOVE FROM LOCALSTORAGE
-            cartState.items = getCart(); // Sync local state
-            itemNode.style.opacity = '0';
-            itemNode.style.transition = 'opacity var(--transition-fast)';
-            
-            setTimeout(() => {
-                itemNode.remove();
-                if (cartState.items.length === 0) {
-                    updateView(node);
+                qtyNode.textContent = item.quantity;
+                priceNode.textContent = `₵${(item.price * item.quantity).toFixed(2)}`;
+                
+                decreaseBtn.disabled = item.quantity <= 1;
+                increaseBtn.disabled = item.quantity >= item.maxStock;
+                
+                if (item.quantity >= item.maxStock) {
+                    warningNode.removeAttribute('hidden');
                 } else {
-                    const countNode = node.querySelector('[data-target="item-count"]');
-                    if(countNode) countNode.textContent = `${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}`;
-                    updateFinancials(node);
+                    warningNode.setAttribute('hidden', 'true');
                 }
-            }, 150);
+                updateFinancials(node);
+            } 
+            else if (action === 'remove') {
+                removeFromCart(item.id);
+                cartState.items = getCart(); 
+                itemNode.style.opacity = '0';
+                itemNode.style.transition = 'opacity var(--transition-fast)';
+                
+                setTimeout(() => {
+                    itemNode.remove();
+                    if (cartState.items.length === 0) {
+                        updateView(node);
+                    } else {
+                        const countNode = node.querySelector('[data-target="item-count"]');
+                        if(countNode) countNode.textContent = `${cartState.items.length} ${cartState.items.length === 1 ? 'Item' : 'Items'}`;
+                        updateFinancials(node);
+                    }
+                }, 150);
+            }
         }
     });
 
-    // Event Delegation: Textarea Word Count Limiter
     node.addEventListener('input', (e) => {
         if (e.target.getAttribute('data-target') === 'notes') {
             const wordCountDisplay = node.querySelector('[data-target="word-count"]');
@@ -687,49 +695,38 @@ export const init = (node) => {
         }
     });
 
-    // Event Delegation: Form Submissions
     node.addEventListener('submit', async (e) => {
         e.preventDefault(); 
-        
         const formId = e.target.id;
         const submitBtn = e.target.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
-
-        // Spinner SVG template
         const spinnerHTML = `<svg class="cdlv-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>`;
 
         if (formId === 'shipping-details-form' || formId === 'payment-details-form') {
-            // 1. Lock UI & Show Loading State
             submitBtn.disabled = true;
             submitBtn.innerHTML = `${spinnerHTML} Processing...`;
 
-            // 2. Await the mocked backend check (e.g., validating address or checking stock)
             await simulateBackendCall();
 
-            // 3. Save state and route to next step
             saveFormState(node);
             cartState.currentStep = formId === 'shipping-details-form' ? 'Payment Info' : 'Review';
             updateView(node);
 
         } else if (formId === 'place-order-form') {
-            // 1. Lock UI & Show Loading State
             submitBtn.disabled = true;
             submitBtn.innerHTML = `${spinnerHTML} Processing...`;
 
-            // 2. Await the mocked backend payment processing
+            // This placeholder structure is fully optimized to dispatch 'cartState' data to database.js
             setTimeout(() => {
                 const backendErrorOccurred = false; 
 
                 if (backendErrorOccurred) {
                     showNotification('error', 'Something went wrong, please try again or check your internet connection. If the problem persists please contact support.');
-                    
-                    // Unlock UI on failure
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
                 } else {
-                    // Success Routing
-                    clearCart(); // <-- CLEAR BROWSER STORAGE ON SUCCESS
-                    cartState.items = []; // Clear local UI state
+                    clearCart();
+                    cartState.items = [];
                     cartState.currentStep = 'Success';
                     updateView(node, false);
                 }

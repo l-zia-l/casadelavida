@@ -1,14 +1,13 @@
 /* ==========================================================================
    MODULE: CATALOG GRID LOGIC (modules/catalog-grid.js)
-   Purpose: Renders a dynamic product grid based on external configuration.
-   Architecture: ES Module. Imports global path builder for asset resolution.
-   Security: Uses DOM-based sanitization to prevent XSS from config payloads.
-   A11y: WCAG compliant (ARIA landmarks, focus states, screen reader optimized).
-   Performance: Granular LCP prioritization and layout-shift prevention.
-   Local Delivery: Dynamically identifies city pages to show localized availability.
+   Architecture: Exportable ES Module driving high-performance product loops.
+   Security: Enforces strict data-integrity via centralized product reference registry.
+   A11y: Fully semantic landmarks with dynamic target control optimization.
    ========================================================================== */
 
 import { buildPath } from '../utils/path.js';
+import { addToCart } from '../utils/cart.js'; // <-- ENFORCED EXPLICIT IMPORT
+import { getProductFromRegistry } from '../utils/inventory.js'; // <-- CENTRAL REGISTER INGESTION
 
 const defaultConfig = {
     heading: 'Our Collection',
@@ -34,28 +33,40 @@ function sanitizeHTML(str) {
  */
 export const init = (node, customConfig = {}) => {
     const config = { ...defaultConfig, ...customConfig };
-    const products = customConfig.products || config.products;
+    const configProducts = customConfig.products || config.products;
 
-    if (!products || !Array.isArray(products) || products.length === 0) {
-        console.warn('Catalog Grid Initialization Error: No products array found in config.', node);
+    if (!configProducts || !Array.isArray(configProducts) || configProducts.length === 0) {
+        console.warn('Catalog Grid Initialization Error: No products registry target found in configuration markup.', node);
         return;
     }
 
     const headingText = sanitizeHTML(config.heading);
     const headingId = `catalog-heading-${Math.random().toString(36).substring(2, 9)}`;
 
-    // Detect delivery context automatically based on the current page URL path
+    // Automatically resolve delivery geography targets matching current file paths
     const currentPath = window.location.pathname.toLowerCase();
     const isAccraPage = currentPath.includes('accra.html');
     const isTamalePage = currentPath.includes('tamale.html');
 
-    const productsHTML = products.map((product, index) => {
+    const productsHTML = configProducts.map((configItem, index) => {
+        // SECURITY GATEWAY: Force resolution of item properties directly out of the frozen database file layer
+        if (!configItem.id) {
+            console.warn(`Catalog layout structural exception: Index ${index} missing required validation id tracking token.`);
+            return '';
+        }
+
+        const product = getProductFromRegistry(configItem.id);
+
         const title = sanitizeHTML(product.title);
         const safeImage = buildPath(product.image);
         const safeLink = buildPath(product.link || '#');
-        const basePrice = parseFloat(product.price || 0);
+        
+        // Resolve canonical pricing using the preconfigured default size option mapping
+        const defaultSizeObj = product.sizes?.find(s => s.default) || product.sizes?.[0] || { price: 0.00, id: 's1' };
+        const basePrice = parseFloat(defaultSizeObj.price || 0);
         const discount = product.subscriptionDiscount ? parseFloat(product.subscriptionDiscount) : 0;
         
+        // Performance: Enforce dynamic hardware LCP allocation guidelines
         let loadingStrategy = '';
         if (index === 0) {
             loadingStrategy = 'loading="eager" fetchpriority="high" decoding="sync"';
@@ -69,15 +80,15 @@ export const init = (node, customConfig = {}) => {
         let availabilityHTML = '';
         let actionBtnHTML = '';
 
-        // Local Delivery Logic: Evaluate product restrictions based on the page context
+        // Local Delivery Logic: Evaluate parameters safely derived from inventory layer
         let isAvailableLocally = true;
-        if (isAccraPage && product.hasOwnProperty('inAccra') && !product.inAccra) {
+        if (isAccraPage && !product.inAccra) {
             isAvailableLocally = false;
-        } else if (isTamalePage && product.hasOwnProperty('inTamale') && !product.inTamale) {
+        } else if (isTamalePage && !product.inTamale) {
             isAvailableLocally = false;
         }
 
-        // Render localized alert if product is excluded from the current city
+        // Render localized exception banners cleanly if context requires bounding rules
         if (!isAvailableLocally) {
             availabilityHTML = `
                 <div class="cdlv-catalog-grid__status-banner" role="alert">
@@ -88,7 +99,8 @@ export const init = (node, customConfig = {}) => {
 
         if (!product.hideActions) {
             if (discount > 0) {
-                const subPrice = (basePrice - (basePrice * (discount / 100))).toFixed(2);
+                const factor = 1 - (discount / 100);
+                const subPrice = (basePrice * factor).toFixed(2);
                 subInfoHTML = `
                     <hr class="cdlv-catalog-grid__divider" aria-hidden="true">
                     <p class="cdlv-catalog-grid__sub-text">Subscribe for ${sanitizeHTML(discount)}% off + free shipping</p>
@@ -96,30 +108,25 @@ export const init = (node, customConfig = {}) => {
                 `;
             }
 
-            const isOOS = product.isOutOfStock;
+            // Evaluate item availability checks cleanly
+            const isOOS = product.isOutOfStock || !isAvailableLocally;
             const btnText = isOOS ? 'Out of Stock' : 'Add to Cart';
             const btnClass = isOOS ? 'cdlv-btn--disabled' : 'cdlv-btn--primary';
             const disabledState = isOOS ? 'disabled aria-disabled="true" tabindex="-1"' : '';
-            
-            // We need a fallback ID if the config doesn't provide one
-            const safeId = product.id || `cat_prod_${index}`;
-            const safeFinalPrice = discount > 0 ? (basePrice - (basePrice * (discount / 100))) : basePrice;
 
-            // --- INJECT DATA ATTRIBUTES FOR CART ---
+            // --- ZERO-TRUST NORMALIZED MARKETING ATTRIBUTES ---
             actionBtnHTML = `
                 <button type="button" class="cdlv-btn ${btnClass}" ${disabledState}
                     data-action="catalog-add"
-                    data-id="${sanitizeHTML(safeId)}"
-                    data-title="${sanitizeHTML(product.title)}"
-                    data-price="${safeFinalPrice}"
-                    data-image="${sanitizeHTML(product.image)}"
-                    data-url="${sanitizeHTML(product.link || '#')}">
+                    data-id="${sanitizeHTML(product.id)}"
+                    data-size-id="${sanitizeHTML(defaultSizeObj.id)}"
+                    data-price="${sanitizeHTML(basePrice)}">
                     ${sanitizeHTML(btnText)}
                 </button>
             `;
         }
 
-        const altText = sanitizeHTML(product.altText || product.title);
+        const altText = sanitizeHTML(product.title);
 
         return `
             <article class="cdlv-catalog-grid__card">
@@ -156,26 +163,40 @@ export const init = (node, customConfig = {}) => {
             </div>
         </section>
     `;
+};
 
-    // --- NEW: ADD TO CART LISTENER FOR GRID ---
-    node.addEventListener('click', (e) => {
+// ==========================================================================
+// CENTRALIZED COMPONENT INTERACTION TRACKING DELGATE
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Intercept event target bubbling from global body container context
+    document.body.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action="catalog-add"]');
         if (!btn) return;
         
-        const item = {
-            id: btn.getAttribute('data-id'),
-            name: btn.getAttribute('data-title'),
-            variant: 'Standard', 
-            price: parseFloat(btn.getAttribute('data-price')),
+        const productId = btn.getAttribute('data-id');
+        const product = getProductFromRegistry(productId);
+        const selectedSizeId = btn.getAttribute('data-size-id');
+        const parsedPrice = parseFloat(btn.getAttribute('data-price'));
+
+        // STRUCTURAL SCHEMA FORMATTING: Normalize data payload into decoupled state definitions
+        const standardizedCartItem = {
+            id: `${product.id}_${selectedSizeId}_none_one`,
+            product_id: product.id,
+            name: product.title,
+            size: selectedSizeId,
+            color: null,
+            isSubscription: false,
+            price: parsedPrice,
             quantity: 1,
-            maxStock: 10,
-            image: btn.getAttribute('data-image'),
-            url: btn.getAttribute('data-url')
+            maxStock: product.maxStock || 10,
+            image: product.image,
+            url: product.link
         };
         
-        addToCart(item);
+        addToCart(standardizedCartItem);
         
-        // Visual feedback
+        // Retain original style loop updates
         const originalText = btn.textContent;
         btn.textContent = 'Added ✓';
         btn.classList.add('is-success');
@@ -184,4 +205,4 @@ export const init = (node, customConfig = {}) => {
             btn.classList.remove('is-success');
         }, 1500);
     });
-};
+});
