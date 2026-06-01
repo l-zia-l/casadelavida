@@ -409,8 +409,6 @@ const renderPaymentForm = () => {
                         <span class="cdlv-payment-option__label">Mobile Money</span>
                         <div class="cdlv-payment-option__icons">
                             <img src="${buildPath('assets/icons/mtn.svg')}" alt="MTN" class="cdlv-payment-icon">
-                            <img src="${buildPath('assets/icons/telecel.svg')}" alt="Telecel Cash" class="cdlv-payment-icon">
-                            <img src="${buildPath('assets/icons/at.svg')}" alt="AT Money" class="cdlv-payment-icon">
                         </div>
                     </button>
 
@@ -422,7 +420,6 @@ const renderPaymentForm = () => {
                         <span class="cdlv-payment-option__label">Credit/Debit Card</span>
                         <div class="cdlv-payment-option__icons">
                             <img src="${buildPath('assets/icons/visa.svg')}" alt="Visa" class="cdlv-payment-icon">
-                            <img src="${buildPath('assets/icons/mastercard.svg')}" alt="Mastercard" class="cdlv-payment-icon">
                         </div>
                     </button>
                     <button type="button" 
