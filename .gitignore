@@ -1,0 +1,2 @@
+# Exclude local environment configurations from repository tracking
+utils/env.js
